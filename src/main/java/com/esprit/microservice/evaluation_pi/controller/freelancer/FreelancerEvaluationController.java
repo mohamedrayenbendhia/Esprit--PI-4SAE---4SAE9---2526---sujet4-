@@ -56,7 +56,7 @@ public class FreelancerEvaluationController {
         return ResponseEntity.ok(updated);
     }
 
-    // ✅ NOUVEAU: Évaluer un client (pour le freelancer)
+    //  Évaluer un client (freelancer)
     @PostMapping("/evaluate-client/{clientEmail}")
     public ResponseEntity<?> evaluateClient(
             @PathVariable String clientEmail,
@@ -71,14 +71,14 @@ public class FreelancerEvaluationController {
             return ResponseEntity.badRequest().body("Email invalide");
         }
 
-        evaluation.setEvaluatedId(clientEmail); // Le client est évalué
-        evaluation.setEvaluatorId(freelancerId); // Le freelancer est l'évaluateur
+        evaluation.setEvaluatedId(clientEmail);
+        evaluation.setEvaluatorId(freelancerId);
         evaluation.setProjectId(projectId);
 
         return ResponseEntity.ok(evaluationService.createEvaluation(evaluation));
     }
 
-    // ✅ NOUVEAU: Liste des évaluations données par un freelancer (sur des clients)
+    //  Liste des évaluations données par un freelancer (clients)
     @GetMapping("/freelancer/{freelancerId}/given")
     public ResponseEntity<List<Evaluation>> getMyGivenEvaluations(@PathVariable String freelancerId) {
         return ResponseEntity.ok(evaluationService.getEvaluationsByEvaluatorId(freelancerId));

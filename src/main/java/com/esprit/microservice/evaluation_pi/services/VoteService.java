@@ -17,7 +17,7 @@ public class VoteService implements IVoteService {
 
     @Override
     @Transactional
-    public EvaluationVote addVote(Long evaluationId, String userId, boolean isHelpful) { // ✅ String
+    public EvaluationVote addVote(Long evaluationId, String userId, boolean isHelpful) {
         if (voteRepository.existsByEvaluationIdAndUserId(evaluationId, userId)) {
             throw new RuntimeException("User already voted for this evaluation");
         }
@@ -27,7 +27,7 @@ public class VoteService implements IVoteService {
 
         EvaluationVote vote = new EvaluationVote();
         vote.setEvaluation(evaluation);
-        vote.setUserId(userId); // ✅ String
+        vote.setUserId(userId);
         vote.setIsHelpful(isHelpful);
 
         if (isHelpful) {
@@ -42,7 +42,7 @@ public class VoteService implements IVoteService {
 
     @Override
     @Transactional
-    public void removeVote(Long evaluationId, String userId) { // ✅ String
+    public void removeVote(Long evaluationId, String userId) {
         Evaluation evaluation = evaluationRepository.findById(evaluationId)
                 .orElseThrow(() -> new RuntimeException("Evaluation not found"));
 
@@ -60,7 +60,7 @@ public class VoteService implements IVoteService {
     }
 
     @Override
-    public boolean hasUserVoted(Long evaluationId, String userId) { // ✅ String
+    public boolean hasUserVoted(Long evaluationId, String userId) {
         return voteRepository.existsByEvaluationIdAndUserId(evaluationId, userId);
     }
 

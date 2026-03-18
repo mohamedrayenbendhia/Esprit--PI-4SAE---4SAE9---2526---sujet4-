@@ -70,7 +70,7 @@ public class BadgeService implements IBadgeService {
                 if (!hasBadge) {
                     System.out.println("Attribution du badge: " + badge.getName());
                     UserBadge userBadge = new UserBadge();
-                    userBadge.setUserId(userId); // ✅ String
+                    userBadge.setUserId(userId);
                     userBadge.setBadge(badge);
                     userBadge.setAssignedAt(LocalDateTime.now());
                     userBadgeRepository.save(userBadge);

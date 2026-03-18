@@ -10,9 +10,9 @@ public class Evaluation {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String projectId;    // ✅ String (UUID)
-    private String evaluatorId;  // ✅ String (UUID)
-    private String evaluatedId;  // ✅ String (UUID)
+    private String projectId;
+    private String evaluatorId;
+    private String evaluatedId;
 
     private Double ratingGlobal;
     private Double qualityScore;

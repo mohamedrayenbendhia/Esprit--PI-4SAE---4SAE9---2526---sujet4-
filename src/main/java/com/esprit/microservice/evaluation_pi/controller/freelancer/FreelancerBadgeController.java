@@ -19,13 +19,13 @@ public class FreelancerBadgeController {
     private final BadgeService badgeService;
     private final EvaluationService evaluationService;
 
-    // 1. Tous les badges disponibles
+    //  Tous les badges disponibles
     @GetMapping
     public ResponseEntity<List<Badge>> getAllBadges() {
         return ResponseEntity.ok(badgeService.getAllBadges());
     }
 
-    // 2. ✅ MODIFIÉ: Accepte email ou ID
+    // Accepte email
     @GetMapping("/my-badges/{identifier}")
     public ResponseEntity<List<UserBadge>> getMyBadges(
             @PathVariable String identifier) {

@@ -22,7 +22,7 @@ public class ClientEvaluationController {
     private final VoteService voteService;
     private final BadgeService badgeService;
 
-    // ==================== CRUD ÉVALUATIONS ====================
+    //  CRUD ÉVALUATIONS
 
     @PostMapping("/freelancer/{freelancerEmail}")
     public ResponseEntity<?> evaluateFreelancer(
@@ -75,11 +75,11 @@ public class ClientEvaluationController {
         return ResponseEntity.noContent().build();
     }
 
-    // ==================== CONSULTATION FREELANCERS ====================
+    //  CONSULTATION FREELANCERS
 
     @GetMapping("/freelancer/{freelancerEmail}")
     public ResponseEntity<List<Evaluation>> getFreelancerEvaluations(@PathVariable String freelancerEmail) {
-        // ✅ VÉRIFICATION SUPPRIMÉE
+
         return ResponseEntity.ok(evaluationService.getEvaluationsByEvaluatedId(freelancerEmail));
     }
 
@@ -117,7 +117,7 @@ public class ClientEvaluationController {
 
     @GetMapping("/freelancer/{freelancerEmail}/details")
     public ResponseEntity<Map<String, Object>> getFreelancerDetails(@PathVariable String freelancerEmail) {
-        // ✅ VÉRIFICATION SUPPRIMÉE
+
 
         List<Evaluation> evaluations = evaluationService.getEvaluationsByEvaluatedId(freelancerEmail);
 
@@ -144,7 +144,7 @@ public class ClientEvaluationController {
         return ResponseEntity.ok(result);
     }
 
-    // ==================== INTERACTIONS ====================
+    //  INTERACTIONS
 
     @PostMapping("/evaluation/{evaluationId}/vote")
     public ResponseEntity<?> voteEvaluation(

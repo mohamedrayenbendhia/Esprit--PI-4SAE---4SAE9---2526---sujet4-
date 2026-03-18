@@ -32,10 +32,6 @@ public class EvaluationService implements IEvaluationService {
         this.freelancerController = freelancerController;
     }
 
-    // =========================================================
-    // CRUD
-    // =========================================================
-
     @Override
     public Evaluation createEvaluation(Evaluation evaluation) {
         evaluation.setCreatedAt(LocalDateTime.now());
@@ -53,7 +49,7 @@ public class EvaluationService implements IEvaluationService {
         Evaluation saved = evaluationRepository.save(evaluation);
         checkAndAssignBadgesForUser(saved.getEvaluatedId());
 
-        // ✅ Push SSE asynchrone — évite le conflit d'écriture concurrent sur le thread HTTP
+        // SSE évite le conflit d'écriture concurrent sur le thread HTTP
         pushStatsAsync(saved.getEvaluatedId());
 
         return saved;
@@ -75,7 +71,7 @@ public class EvaluationService implements IEvaluationService {
         Evaluation updated = evaluationRepository.save(evaluation);
         checkAndAssignBadgesForUser(updated.getEvaluatedId());
 
-        // ✅ Push SSE asynchrone
+        // Push SSE asynchrone
         pushStatsAsync(updated.getEvaluatedId());
 
         return updated;
@@ -88,14 +84,9 @@ public class EvaluationService implements IEvaluationService {
         evaluationRepository.deleteById(id);
         checkAndAssignBadgesForUser(evaluatedId);
 
-        // ✅ Push SSE asynchrone
+        // Push SSE asynchrone
         pushStatsAsync(evaluatedId);
     }
-
-    // =========================================================
-    // READ
-    // =========================================================
-
     @Override
     public List<Evaluation> getAllEvaluations() {
         return evaluationRepository.findAll();
@@ -125,9 +116,6 @@ public class EvaluationService implements IEvaluationService {
         return evaluationRepository.existsByProjectIdAndEvaluatorId(projectId, clientId);
     }
 
-    // =========================================================
-    // ACTIONS
-    // =========================================================
 
     @Override
     @Transactional
@@ -186,23 +174,12 @@ public class EvaluationService implements IEvaluationService {
 
         Evaluation saved = evaluationRepository.save(evaluation);
 
-        // ✅ Push SSE asynchrone
+        //  Push SSE asynchrone
         pushStatsAsync(saved.getEvaluatedId());
 
         return saved;
     }
 
-    // =========================================================
-    // PUSH SSE ASYNCHRONE
-    // =========================================================
-
-    /**
-     * Exécuté sur le thread pool "ssePushExecutor" (AsyncConfig).
-     *
-     * Le délai 300ms garantit que la réponse HTTP du POST est
-     * complètement envoyée avant d'écrire dans le flux SSE,
-     * ce qui évite le "concurrent write" → 500 Internal Server Error.
-     */
     @Async("ssePushExecutor")
     public void pushStatsAsync(String freelancerEmail) {
         try {
@@ -211,18 +188,13 @@ public class EvaluationService implements IEvaluationService {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            // Ne pas faire échouer l'opération métier si le push SSE plante
             System.err.println("[SSE] Erreur push stats pour " + freelancerEmail + " : " + e.getMessage());
         }
     }
-
-    // =========================================================
-    // CALCULS
-    // =========================================================
+    //Calcul
 
     @Override
     public Double calculateWeightedScore(Evaluation evaluation) {
-        // Protection nulls — tous les sous-scores doivent être présents
         if (evaluation.getQualityScore() == null
                 || evaluation.getDeadlineScore() == null
                 || evaluation.getCommunicationScore() == null

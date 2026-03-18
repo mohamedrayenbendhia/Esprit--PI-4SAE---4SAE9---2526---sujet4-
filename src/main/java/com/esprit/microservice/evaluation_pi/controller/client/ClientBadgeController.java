@@ -15,7 +15,7 @@ public class ClientBadgeController {
 
     private final BadgeService badgeService;
 
-    // 1. Client peut voir tous les badges disponibles
+    //  Client peut voir tous les badges disponibles
     @GetMapping
     public ResponseEntity<List<Badge>> getAllBadges() {
         List<Badge> badges = badgeService.getAllBadges();

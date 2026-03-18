@@ -7,6 +7,6 @@ import java.util.List;
 public interface IBadgeService {
     Badge createBadge(Badge badge);
     List<Badge> getAllBadges();
-    List<UserBadge> getUserBadges(String userId);                                    // ✅ String
-    void checkAndAssignBadges(String userId, Double averageScore, Long totalProjects); // ✅ String
+    List<UserBadge> getUserBadges(String userId);
+    void checkAndAssignBadges(String userId, Double averageScore, Long totalProjects);
 }

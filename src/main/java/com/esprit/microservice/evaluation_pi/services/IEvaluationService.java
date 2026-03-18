@@ -11,11 +11,11 @@ public interface IEvaluationService {
     void deleteEvaluation(Long id);
     List<Evaluation> getAllEvaluations();
     Evaluation getEvaluationById(Long id);
-    List<Evaluation> getEvaluationsByEvaluatedId(String evaluatedId); // ✅ String
+    List<Evaluation> getEvaluationsByEvaluatedId(String evaluatedId);
 
     Evaluation respondToEvaluation(Long evaluationId, String response);
     Evaluation reportEvaluation(Long evaluationId, ReportReason reason);
     Evaluation moderateReport(Long evaluationId, ReportStatus decision);
-    Evaluation voteEvaluation(Long evaluationId, String userId, boolean isHelpful); // ✅ String
+    Evaluation voteEvaluation(Long evaluationId, String userId, boolean isHelpful);
     Double calculateWeightedScore(Evaluation evaluation);
 }

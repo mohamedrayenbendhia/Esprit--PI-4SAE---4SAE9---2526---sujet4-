@@ -19,16 +19,16 @@ public class AdminEvaluationController {
     private final EvaluationService evaluationService;
     private final BadgeService badgeService;
 
-    // ========== GESTION DES BADGES ==========
+    //  GESTION DES BADGES
 
-    // ✅ AJOUTER CETTE MÉTHODE - Liste tous les badges
+    //  Liste tous les badges
     @GetMapping("/badges")
     public ResponseEntity<List<Badge>> getAllBadges() {
         List<Badge> badges = badgeService.getAllBadges();
         return ResponseEntity.ok(badges);
     }
 
-    // ✅ AJOUTER CETTE MÉTHODE - Détail d'un badge
+    // Détail d'un badge
     @GetMapping("/badges/{badgeId}")
     public ResponseEntity<Badge> getBadgeById(@PathVariable Long badgeId) {
         Badge badge = badgeService.getBadgeById(badgeId);
@@ -54,7 +54,7 @@ public class AdminEvaluationController {
         return ResponseEntity.noContent().build();
     }
 
-    // ========== MODÉRATION DES ÉVALUATIONS ==========
+    //  MODÉRATION DES ÉVALUATIONS
     @GetMapping("/reported")
     public ResponseEntity<List<Evaluation>> getReportedEvaluations() {
         return ResponseEntity.ok(evaluationService.getReportedEvaluations());
@@ -67,7 +67,7 @@ public class AdminEvaluationController {
         return ResponseEntity.ok(evaluationService.moderateReport(evaluationId, decision));
     }
 
-    // ========== GESTION DES ÉVALUATIONS ==========
+    //  GESTION DES ÉVALUATIONS
     @GetMapping("/all")
     public ResponseEntity<List<Evaluation>> getAllEvaluations() {
         return ResponseEntity.ok(evaluationService.getAllEvaluations());
