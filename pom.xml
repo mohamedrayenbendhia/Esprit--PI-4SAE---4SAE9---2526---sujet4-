@@ -2,24 +2,48 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <!-- Spring Boot -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.2</version>  <!-- Garde ta version plus récente -->
+        <version>3.3.2</version> <!-- version stable -->
         <relativePath/>
     </parent>
 
     <groupId>com.esprit.microservice</groupId>
-    <artifactId>Contrat_Backend</artifactId>  <!-- Garde ton nom -->
+    <artifactId>Contrat_Backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Contrat_Backend</name>
     <description>Microservice de gestion des contrats</description>
+    <url>https://github.com/YacoubiiKhalil/Contrat_Backend</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>yacoubi</id>
+            <name>Khalil Yacoubi</name>
+            <email>yacoubi@example.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/YacoubiiKhalil/Contrat_Backend.git</connection>
+        <developerConnection>scm:git:ssh://github.com:YacoubiiKhalil/Contrat_Backend.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/YacoubiiKhalil/Contrat_Backend</url>
+    </scm>
 
     <properties>
-        <java.version>21</java.version>  <!-- Garde ta version Java 21 -->
+        <java.version>21</java.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <lombok.version>1.18.30</lombok.version>
         <maven.compiler.source>21</maven.compiler.source>
@@ -52,7 +76,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- iText PDF Generation (spécifique à ton projet) -->
+        <!-- iText PDF Generation -->
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itext7-core</artifactId>
@@ -60,7 +84,7 @@
             <type>pom</type>
         </dependency>
 
-        <!-- Eureka Client (si nécessaire) -->
+        <!-- Eureka Client -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
@@ -112,6 +136,7 @@
 
     <build>
         <plugins>
+            <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -124,6 +149,8 @@
                     </excludes>
                 </configuration>
             </plugin>
+
+            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

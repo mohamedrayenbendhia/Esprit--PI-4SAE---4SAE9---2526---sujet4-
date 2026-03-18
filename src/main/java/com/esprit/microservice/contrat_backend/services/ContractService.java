@@ -18,7 +18,7 @@ public class ContractService implements IContractService {
     private final ContractRepository contractRepository;
     private final CustomClauseRepository customClauseRepository;
 
-    // ========== CRUD BASIQUE ==========
+    //  CRUD BASIQUE
 
     @Override
     @Transactional
@@ -68,7 +68,7 @@ public class ContractService implements IContractService {
         contractRepository.deleteById(id);
     }
 
-    // ========== RECHERCHE PAR UTILISATEUR ==========
+    // RECHERCHE PAR UTILISATEUR
 
     @Override
     public List<Contract> getByClientId(String clientId) {
@@ -80,8 +80,7 @@ public class ContractService implements IContractService {
         return contractRepository.findByFreelancerIdOrderByCreatedAtDesc(freelancerId);
     }
 
-    // ========== RECHERCHE PAR STATUT ==========
-
+    // RECHERCHE PAR STATUT
     @Override
     public List<Contract> getByClientIdAndStatus(String clientId, ContractStatus status) {
         return contractRepository.findByClientIdAndStatus(clientId, status);
@@ -92,7 +91,7 @@ public class ContractService implements IContractService {
         return contractRepository.findByFreelancerIdAndStatus(freelancerId, status);
     }
 
-    // ========== RECHERCHE PAR TYPE ==========
+    //  RECHERCHE PAR TYPE
 
     @Override
     public List<Contract> getByClientIdAndType(String clientId, ContractType type) {
@@ -104,7 +103,7 @@ public class ContractService implements IContractService {
         return contractRepository.findByFreelancerIdAndContractType(freelancerId, type);
     }
 
-    // ========== RECHERCHE PAR MOT-CLÉ ==========
+    //  RECHERCHE PAR MOT-CLÉ
 
     @Override
     public List<Contract> searchByKeyword(String clientId, String keyword) {
@@ -116,7 +115,7 @@ public class ContractService implements IContractService {
         return contractRepository.searchByFreelancerIdAndKeyword(freelancerId, keyword);
     }
 
-    // ========== WORKFLOW SIGNATURES ==========
+    //  WORKFLOW SIGNATURES
 
     @Override
     @Transactional
@@ -158,7 +157,7 @@ public class ContractService implements IContractService {
         return contractRepository.save(contract);
     }
 
-    // ========== WORKFLOW FREELANCER ==========
+    //  WORKFLOW FREELANCER
 
     @Override
     @Transactional
@@ -194,7 +193,7 @@ public class ContractService implements IContractService {
         return contractRepository.save(contract);
     }
 
-    // ========== GESTION CYCLE DE VIE ==========
+    //  GESTION CYCLE DE VIE
 
     @Override
     @Transactional
@@ -229,7 +228,7 @@ public class ContractService implements IContractService {
         return contractRepository.save(contract);
     }
 
-    // ========== GESTION CLAUSES PERSONNALISÉES ==========
+    //  GESTION CLAUSES PERSONNALISÉES
 
     @Override
     @Transactional
@@ -254,7 +253,7 @@ public class ContractService implements IContractService {
         customClauseRepository.deleteById(clauseId);
     }
 
-    // ========== UTILITAIRES ==========
+    //  UTILITAIRES
 
     @Override
     public String generateContractNumber() {
@@ -263,7 +262,7 @@ public class ContractService implements IContractService {
         return String.format("CTR-%s-%05d", year, count);
     }
 
-    // ========== STATISTIQUES ==========
+    //  STATISTIQUES
 
     @Override
     public Map<String, Object> getClientStatistics(String clientId) {

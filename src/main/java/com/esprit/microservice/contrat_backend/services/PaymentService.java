@@ -19,7 +19,7 @@ public class PaymentService implements IPaymentService {
     private final PaymentScheduleRepository paymentScheduleRepository;
     private final ContractRepository contractRepository;
 
-    // ========== CRUD ==========
+    //  CRUD
 
     @Override
     @Transactional
@@ -68,7 +68,7 @@ public class PaymentService implements IPaymentService {
         paymentScheduleRepository.deleteById(id);
     }
 
-    // ========== RECHERCHE ==========
+    //  RECHERCHE
 
     @Override
     public List<PaymentSchedule> getByContract(Long contractId) {
@@ -85,7 +85,7 @@ public class PaymentService implements IPaymentService {
         return paymentScheduleRepository.findByStatus(status);
     }
 
-    // ========== GESTION STATUT ==========
+    //  GESTION STATUT
 
     @Override
     @Transactional
@@ -118,7 +118,7 @@ public class PaymentService implements IPaymentService {
         return paymentScheduleRepository.save(payment);
     }
 
-    // ========== STATISTIQUES ==========
+    //  STATISTIQUES
 
     @Override
     public Long countPendingPayments(Long contractId) {

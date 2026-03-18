@@ -26,7 +26,7 @@ public class FreelancerContractController {
     private final IMilestoneService milestoneService;
     private final PdfGenerationService pdfGenerationService;
 
-    // ========== CONSULTATION DES CONTRATS ==========
+    //  CONSULTATION DES CONTRATS
 
     @GetMapping("/my-contracts")
     public ResponseEntity<List<Contract>> getMyContracts(@RequestParam String freelancerId) {
@@ -97,7 +97,7 @@ public class FreelancerContractController {
         return ResponseEntity.ok(contractService.getById(id));
     }
 
-    // ========== GÉNÉRATION PDF ==========
+    //  GÉNÉRATION PDF
     @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> generatePdf(@PathVariable Long id) {
         try {
@@ -119,7 +119,7 @@ public class FreelancerContractController {
         }
     }
 
-    // ========== WORKFLOW FREELANCER ==========
+    // WORKFLOW FREELANCER
 
     @PostMapping("/{id}/sign")
     public ResponseEntity<Contract> signContract(
@@ -142,7 +142,7 @@ public class FreelancerContractController {
         return ResponseEntity.ok(contractService.declineContract(id, reason));
     }
 
-    // ========== PAIEMENTS ==========
+    //  PAIEMENTS
 
     @GetMapping("/{contractId}/payments")
     public ResponseEntity<List<PaymentSchedule>> getPayments(@PathVariable Long contractId) {
@@ -159,7 +159,7 @@ public class FreelancerContractController {
         return ResponseEntity.ok(paymentService.getByContractAndStatus(contractId, PaymentStatus.PAID));
     }
 
-    // ========== JALONS ==========
+    //  JALONS
 
     @GetMapping("/{contractId}/milestones")
     public ResponseEntity<List<Milestone>> getMilestones(@PathVariable Long contractId) {
@@ -176,7 +176,7 @@ public class FreelancerContractController {
         return ResponseEntity.ok(milestoneService.getByContractAndStatus(contractId, MilestoneStatus.IN_PROGRESS));
     }
 
-    // ========== CLAUSES ==========
+    // CLAUSES
 
     @GetMapping("/{contractId}/clauses")
     public ResponseEntity<List<CustomClause>> getCustomClauses(@PathVariable Long contractId) {

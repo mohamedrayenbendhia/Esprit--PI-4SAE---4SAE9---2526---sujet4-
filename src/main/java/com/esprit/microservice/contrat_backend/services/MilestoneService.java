@@ -19,7 +19,7 @@ public class MilestoneService implements IMilestoneService {
     private final MilestoneRepository milestoneRepository;
     private final ContractRepository contractRepository;
 
-    // ========== CRUD ==========
+    //  CRUD
 
     @Override
     @Transactional
@@ -68,7 +68,7 @@ public class MilestoneService implements IMilestoneService {
         milestoneRepository.deleteById(id);
     }
 
-    // ========== RECHERCHE ==========
+    //  RECHERCHE
 
     @Override
     public List<Milestone> getByContract(Long contractId) {
@@ -85,7 +85,7 @@ public class MilestoneService implements IMilestoneService {
         return milestoneRepository.findByStatus(status);
     }
 
-    // ========== GESTION STATUT ==========
+    //  GESTION STATUT
 
     @Override
     @Transactional
@@ -130,7 +130,7 @@ public class MilestoneService implements IMilestoneService {
         return milestoneRepository.save(milestone);
     }
 
-    // ========== STATISTIQUES ==========
+    //  STATISTIQUES
 
     @Override
     public Long countPendingMilestones(Long contractId) {

@@ -26,7 +26,7 @@ public class ClientContractController {
     private final IMilestoneService milestoneService;
     private final PdfGenerationService pdfGenerationService;
 
-    // ========== GESTION DES CONTRATS ==========
+    //  GESTION DES CONTRATS
 
     @PostMapping
     public ResponseEntity<Contract> createContract(@RequestBody Contract contract) {
@@ -77,7 +77,7 @@ public class ClientContractController {
         return ResponseEntity.ok(contractService.getById(id));
     }
 
-    // ========== GÉNÉRATION PDF ==========
+    //  GÉNÉRATION PDF
     @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> generatePdf(@PathVariable Long id) {
         try {
@@ -112,7 +112,7 @@ public class ClientContractController {
         return ResponseEntity.noContent().build();
     }
 
-    // ========== WORKFLOW CLIENT ==========
+    //  WORKFLOW CLIENT
 
     @PostMapping("/{id}/sign")
     public ResponseEntity<Contract> signContract(
@@ -141,7 +141,7 @@ public class ClientContractController {
         return ResponseEntity.ok(contractService.cancel(id));
     }
 
-    // ========== GESTION DES PAIEMENTS ==========
+    //  GESTION DES PAIEMENTS
 
     @PostMapping("/{contractId}/payments")
     public ResponseEntity<PaymentSchedule> addPayment(
@@ -175,7 +175,7 @@ public class ClientContractController {
         return ResponseEntity.noContent().build();
     }
 
-    // ========== GESTION DES JALONS ==========
+    //  GESTION DES JALONS
 
     @PostMapping("/{contractId}/milestones")
     public ResponseEntity<Milestone> addMilestone(
@@ -217,7 +217,7 @@ public class ClientContractController {
         return ResponseEntity.noContent().build();
     }
 
-    // ========== GESTION DES CLAUSES ==========
+    //  GESTION DES CLAUSES
 
     @PostMapping("/{contractId}/clauses")
     public ResponseEntity<CustomClause> addCustomClause(

@@ -26,19 +26,19 @@ public class PdfGenerationService {
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
 
-        // Polices
+        // Fonts
         PdfFont font = PdfFontFactory.createFont("Helvetica");
         PdfFont boldFont = PdfFontFactory.createFont("Helvetica-Bold");
 
-        // Titre principal
-        Paragraph title = new Paragraph("CONTRAT DE PRESTATION DE SERVICES")
+        // Main title
+        Paragraph title = new Paragraph("SERVICE AGREEMENT CONTRACT")
                 .setFont(boldFont)
                 .setFontSize(16)
                 .setTextAlignment(TextAlignment.CENTER)
                 .setMarginBottom(5);
         document.add(title);
 
-        Paragraph subTitle = new Paragraph("SERVICE AGREEMENT")
+        Paragraph subTitle = new Paragraph("CONTRAT DE PRESTATION DE SERVICES")
                 .setFont(font)
                 .setFontSize(10)
                 .setTextAlignment(TextAlignment.CENTER)
@@ -46,7 +46,7 @@ public class PdfGenerationService {
                 .setMarginBottom(10);
         document.add(subTitle);
 
-        // Référence du contrat
+        // Contract reference
         Paragraph reference = new Paragraph("N° " + contract.getContractNumber())
                 .setFont(boldFont)
                 .setFontSize(12)
@@ -54,66 +54,66 @@ public class PdfGenerationService {
                 .setMarginBottom(15);
         document.add(reference);
 
-        // Ligne de séparation
+        // Separator line
         document.add(new LineSeparator(new SolidLine()));
         document.add(new Paragraph("\n"));
 
         // Date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        Paragraph date = new Paragraph("Fait le " + contract.getCreatedAt().format(formatter))
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        Paragraph date = new Paragraph("Dated " + contract.getCreatedAt().format(formatter))
                 .setFont(font)
                 .setFontSize(9)
                 .setTextAlignment(TextAlignment.RIGHT)
                 .setMarginBottom(20);
         document.add(date);
 
-        // Préambule
-        Paragraph preamble = new Paragraph("ENTRE LES SOUSSIGNÉS :")
+        // Preamble
+        Paragraph preamble = new Paragraph("BETWEEN THE UNDERSIGNED:")
                 .setFont(boldFont)
                 .setFontSize(12)
                 .setMarginBottom(10);
         document.add(preamble);
 
         // ===== CLIENT =====
-        document.add(new Paragraph("LE CLIENT,").setFont(boldFont).setFontSize(11).setMarginBottom(5));
-        addInfoLine(document, "Nom complet :", contract.getClientName(), font, boldFont);
+        document.add(new Paragraph("THE CLIENT,").setFont(boldFont).setFontSize(11).setMarginBottom(5));
+        addInfoLine(document, "Full Name:", contract.getClientName(), font, boldFont);
         if (contract.getClientCompany() != null && !contract.getClientCompany().isEmpty()) {
-            addInfoLine(document, "Société :", contract.getClientCompany(), font, boldFont);
+            addInfoLine(document, "Company:", contract.getClientCompany(), font, boldFont);
         }
-        addInfoLine(document, "Email :", contract.getClientEmail(), font, boldFont);
+        addInfoLine(document, "Email:", contract.getClientEmail(), font, boldFont);
         if (contract.getClientPhone() != null && !contract.getClientPhone().isEmpty()) {
-            addInfoLine(document, "Téléphone :", contract.getClientPhone(), font, boldFont);
+            addInfoLine(document, "Phone:", contract.getClientPhone(), font, boldFont);
         }
         document.add(new Paragraph("\n"));
 
         // ===== FREELANCER =====
-        document.add(new Paragraph("LE PRESTATAIRE,").setFont(boldFont).setFontSize(11).setMarginBottom(5));
-        addInfoLine(document, "Nom complet :", contract.getFreelancerName(), font, boldFont);
-        addInfoLine(document, "Email :", contract.getFreelancerEmail(), font, boldFont);
+        document.add(new Paragraph("THE SERVICE PROVIDER,").setFont(boldFont).setFontSize(11).setMarginBottom(5));
+        addInfoLine(document, "Full Name:", contract.getFreelancerName(), font, boldFont);
+        addInfoLine(document, "Email:", contract.getFreelancerEmail(), font, boldFont);
         if (contract.getFreelancerPhone() != null && !contract.getFreelancerPhone().isEmpty()) {
-            addInfoLine(document, "Téléphone :", contract.getFreelancerPhone(), font, boldFont);
+            addInfoLine(document, "Phone:", contract.getFreelancerPhone(), font, boldFont);
         }
         if (contract.getFreelancerSpecialty() != null && !contract.getFreelancerSpecialty().isEmpty()) {
-            addInfoLine(document, "Spécialité :", contract.getFreelancerSpecialty(), font, boldFont);
+            addInfoLine(document, "Specialty:", contract.getFreelancerSpecialty(), font, boldFont);
         }
         document.add(new Paragraph("\n"));
 
-        // Ligne de séparation
+        // Separator line
         document.add(new LineSeparator(new SolidLine()));
         document.add(new Paragraph("\n"));
 
-        // ===== ARTICLE 1: OBJET DU CONTRAT =====
-        addArticleTitle(document, "ARTICLE 1 - OBJET DU CONTRAT", boldFont);
+        // ===== ARTICLE 1: PURPOSE =====
+        addArticleTitle(document, "ARTICLE 1 - PURPOSE OF THE CONTRACT", boldFont);
 
-        addInfoLine(document, "Type de contrat :", contract.getContractType().toString(), font, boldFont);
-        addInfoLine(document, "Intitulé de la mission :", contract.getMissionTitle(), font, boldFont);
+        addInfoLine(document, "Contract Type:", contract.getContractType().toString(), font, boldFont);
+        addInfoLine(document, "Mission Title:", contract.getMissionTitle(), font, boldFont);
 
         if (contract.getTechnologies() != null && !contract.getTechnologies().isEmpty()) {
-            addInfoLine(document, "Technologies :", contract.getTechnologies(), font, boldFont);
+            addInfoLine(document, "Technologies:", contract.getTechnologies(), font, boldFont);
         }
 
         if (contract.getMissionDescription() != null && !contract.getMissionDescription().isEmpty()) {
-            document.add(new Paragraph("Description de la mission :").setFont(boldFont).setMarginTop(8).setMarginBottom(2));
+            document.add(new Paragraph("Mission Description:").setFont(boldFont).setMarginTop(8).setMarginBottom(2));
             document.add(new Paragraph(contract.getMissionDescription())
                     .setFont(font)
                     .setMarginLeft(20)
@@ -121,77 +121,77 @@ public class PdfGenerationService {
         }
 
         if (contract.getDeliverables() != null && !contract.getDeliverables().isEmpty()) {
-            document.add(new Paragraph("Livrables :").setFont(boldFont).setMarginTop(5).setMarginBottom(2));
+            document.add(new Paragraph("Deliverables:").setFont(boldFont).setMarginTop(5).setMarginBottom(2));
             document.add(new Paragraph(contract.getDeliverables())
                     .setFont(font)
                     .setMarginLeft(20)
                     .setMarginBottom(10));
         }
 
-        // ===== ARTICLE 2: DURÉE =====
+        // ===== ARTICLE 2: DURATION =====
         if (contract.getStartDate() != null || contract.getEndDate() != null || contract.getDurationMonths() != null) {
-            addArticleTitle(document, "ARTICLE 2 - DURÉE DU CONTRAT", boldFont);
+            addArticleTitle(document, "ARTICLE 2 - CONTRACT DURATION", boldFont);
 
             if (contract.getStartDate() != null) {
-                addInfoLine(document, "Date de début :", contract.getStartDate().format(formatter), font, boldFont);
+                addInfoLine(document, "Start Date:", contract.getStartDate().format(formatter), font, boldFont);
             }
             if (contract.getEndDate() != null) {
-                addInfoLine(document, "Date de fin :", contract.getEndDate().format(formatter), font, boldFont);
+                addInfoLine(document, "End Date:", contract.getEndDate().format(formatter), font, boldFont);
             }
             if (contract.getDurationMonths() != null) {
-                addInfoLine(document, "Durée :", contract.getDurationMonths() + " mois", font, boldFont);
+                addInfoLine(document, "Duration:", contract.getDurationMonths() + " months", font, boldFont);
             }
         }
 
-        // ===== ARTICLE 3: RÉMUNÉRATION =====
-        addArticleTitle(document, "ARTICLE 3 - RÉMUNÉRATION ET MODALITÉS DE PAIEMENT", boldFont);
+        // ===== ARTICLE 3: COMPENSATION =====
+        addArticleTitle(document, "ARTICLE 3 - COMPENSATION AND PAYMENT TERMS", boldFont);
 
-        addInfoLine(document, "Montant total :", String.format("%.2f %s", contract.getTotalAmount(), contract.getCurrency()), font, boldFont);
+        addInfoLine(document, "Total Amount:", String.format("%.2f %s", contract.getTotalAmount(), contract.getCurrency()), font, boldFont);
 
         if (contract.getVatRate() != null) {
-            addInfoLine(document, "TVA :", contract.getVatRate() + "%", font, boldFont);
+            addInfoLine(document, "VAT Rate:", contract.getVatRate() + "%", font, boldFont);
         }
 
         String paymentMethod = switch (contract.getPaymentMethod().toString()) {
-            case "BANK_TRANSFER" -> "Virement bancaire";
-            case "CREDIT_CARD" -> "Carte bancaire";
+            case "BANK_TRANSFER" -> "Bank Transfer";
+            case "CREDIT_CARD" -> "Credit Card";
             case "PAYPAL" -> "PayPal";
-            case "CHECK" -> "Chèque";
-            case "CASH" -> "Espèces";
+            case "CHECK" -> "Check";
+            case "CASH" -> "Cash";
             default -> contract.getPaymentMethod().toString();
         };
-        addInfoLine(document, "Mode de paiement :", paymentMethod, font, boldFont);
+        addInfoLine(document, "Payment Method:", paymentMethod, font, boldFont);
 
         if (contract.getIban() != null && !contract.getIban().isEmpty()) {
-            addInfoLine(document, "IBAN :", contract.getIban(), font, boldFont);
+            addInfoLine(document, "IBAN:", contract.getIban(), font, boldFont);
         }
         if (contract.getBic() != null && !contract.getBic().isEmpty()) {
-            addInfoLine(document, "BIC :", contract.getBic(), font, boldFont);
+            addInfoLine(document, "BIC:", contract.getBic(), font, boldFont);
         }
 
-        // ===== ARTICLE 4: DISPOSITIONS LÉGALES =====
-        addArticleTitle(document, "ARTICLE 4 - DISPOSITIONS LÉGALES", boldFont);
+        // ===== ARTICLE 4: LEGAL PROVISIONS =====
+        addArticleTitle(document, "ARTICLE 4 - LEGAL PROVISIONS", boldFont);
 
         String applicableLaw = switch (contract.getApplicableLaw().toString()) {
-            case "FRENCH" -> "Droit français";
-            case "TUNISIAN" -> "Droit tunisien";
-            case "AMERICAN" -> "Droit américain";
-            case "CANADIAN" -> "Droit canadien";
-            case "UK" -> "Droit britannique";
+            case "FRENCH" -> "French Law";
+            case "TUNISIAN" -> "Tunisian Law";
+            case "AMERICAN" -> "American Law";
+            case "CANADIAN" -> "Canadian Law";
+            case "UK" -> "British Law";
             default -> contract.getApplicableLaw().toString();
         };
-        addInfoLine(document, "Droit applicable :", applicableLaw, font, boldFont);
+        addInfoLine(document, "Applicable Law:", applicableLaw, font, boldFont);
 
         if (contract.getCompetentCourt() != null && !contract.getCompetentCourt().isEmpty()) {
-            addInfoLine(document, "Tribunal compétent :", contract.getCompetentCourt(), font, boldFont);
+            addInfoLine(document, "Competent Court:", contract.getCompetentCourt(), font, boldFont);
         }
 
-        addInfoLine(document, "Confidentialité :", contract.getConfidentialityYears() + " ans", font, boldFont);
-        addInfoLine(document, "Cession des droits IP :", contract.getIpTransferToClient() ? "Oui" : "Non", font, boldFont);
-        addInfoLine(document, "Droit de présentation :", contract.getPortfolioAllowed() ? "Oui" : "Non", font, boldFont);
+        addInfoLine(document, "Confidentiality:", contract.getConfidentialityYears() + " years", font, boldFont);
+        addInfoLine(document, "IP Rights Transfer:", contract.getIpTransferToClient() ? "Yes" : "No", font, boldFont);
+        addInfoLine(document, "Portfolio Rights:", contract.getPortfolioAllowed() ? "Yes" : "No", font, boldFont);
 
         if (contract.getPortfolioAllowed() && contract.getPortfolioDelayMonths() != null) {
-            addInfoLine(document, "Délai avant présentation :", contract.getPortfolioDelayMonths() + " mois", font, boldFont);
+            addInfoLine(document, "Portfolio Delay:", contract.getPortfolioDelayMonths() + " months", font, boldFont);
         }
 
         // ===== SIGNATURES =====
@@ -206,36 +206,38 @@ public class PdfGenerationService {
                 .setMarginBottom(15);
         document.add(signaturesTitle);
 
-        // Signature client
-        document.add(new Paragraph("Le Client,").setFont(boldFont).setMarginBottom(2));
+        // Client signature
+        document.add(new Paragraph("The Client,").setFont(boldFont).setMarginBottom(2));
         document.add(new Paragraph("__________________________").setFont(font).setMarginBottom(2));
         if (contract.getClientSignedAt() != null) {
-            document.add(new Paragraph("Signé le : " + contract.getClientSignedAt().format(formatter))
+            document.add(new Paragraph("Signed on: " + contract.getClientSignedAt().format(formatter))
                     .setFont(font)
                     .setFontSize(9)
                     .setFontColor(com.itextpdf.kernel.colors.ColorConstants.DARK_GRAY));
         } else {
-            document.add(new Paragraph("(Signature)").setFont(font).setFontSize(9).setFontColor(com.itextpdf.kernel.colors.ColorConstants.DARK_GRAY));
+            document.add(new Paragraph("(Signature)").setFont(font).setFontSize(9)
+                    .setFontColor(com.itextpdf.kernel.colors.ColorConstants.DARK_GRAY));
         }
 
         document.add(new Paragraph("\n"));
 
-        // Signature freelancer
-        document.add(new Paragraph("Le Prestataire,").setFont(boldFont).setMarginBottom(2));
+        // Freelancer signature
+        document.add(new Paragraph("The Service Provider,").setFont(boldFont).setMarginBottom(2));
         document.add(new Paragraph("__________________________").setFont(font).setMarginBottom(2));
         if (contract.getFreelancerSignedAt() != null) {
-            document.add(new Paragraph("Signé le : " + contract.getFreelancerSignedAt().format(formatter))
+            document.add(new Paragraph("Signed on: " + contract.getFreelancerSignedAt().format(formatter))
                     .setFont(font)
                     .setFontSize(9)
                     .setFontColor(com.itextpdf.kernel.colors.ColorConstants.DARK_GRAY));
         } else {
-            document.add(new Paragraph("(Signature)").setFont(font).setFontSize(9).setFontColor(com.itextpdf.kernel.colors.ColorConstants.DARK_GRAY));
+            document.add(new Paragraph("(Signature)").setFont(font).setFontSize(9)
+                    .setFontColor(com.itextpdf.kernel.colors.ColorConstants.DARK_GRAY));
         }
 
         document.add(new Paragraph("\n\n"));
 
         // Footer
-        Paragraph footer = new Paragraph("Fait en deux exemplaires originaux")
+        Paragraph footer = new Paragraph("Executed in two original copies")
                 .setFont(font)
                 .setFontSize(8)
                 .setTextAlignment(TextAlignment.CENTER)

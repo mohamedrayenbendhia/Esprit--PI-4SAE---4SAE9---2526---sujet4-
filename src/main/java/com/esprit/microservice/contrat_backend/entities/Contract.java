@@ -95,7 +95,7 @@ public class Contract {
     private LocalDateTime freelancerSignedAt;
     private String freelancerSignatureHash;
 
-    // DEMANDE DE MODIFICATION ← NOUVEAU
+    // DEMANDE DE MODIFICATION
     @Column(columnDefinition = "TEXT")
     private String modificationComment;
     private LocalDateTime modificationRequestedAt;
