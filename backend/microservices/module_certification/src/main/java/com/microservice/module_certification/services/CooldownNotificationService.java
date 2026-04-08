@@ -20,13 +20,13 @@ public class CooldownNotificationService {
     private final JavaMailSender mailSender;
     private final UserClientService userClientService;
 
-    // Vérifie toutes les minutes
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 30000)
     public void checkExpiredCooldowns() {
-        LocalDateTime cooldownLimit = LocalDateTime.now().minusMinutes(2);
+        LocalDateTime cooldownExpiredAfter = LocalDateTime.now().minusMinutes(2);
+        LocalDateTime windowStart = cooldownExpiredAfter.minusSeconds(35);
 
         List<UserTestResult> expiredCooldowns = userTestResultRepository
-                .findExpiredCooldowns(cooldownLimit);
+                .findExpiredCooldowns(cooldownExpiredAfter, windowStart);
 
         for (UserTestResult result : expiredCooldowns) {
             try {

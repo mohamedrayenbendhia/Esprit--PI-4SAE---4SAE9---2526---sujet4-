@@ -16,6 +16,9 @@ public interface UserTestResultRepository extends JpaRepository<UserTestResult, 
     Optional<UserTestResult> findTopByUserIdAndTestIdOrderByLastAttemptAtDesc(String userId, Long testId);
     @Query("SELECT r FROM UserTestResult r JOIN FETCH r.test WHERE r.isPassed = false " +
             "AND r.notificationSent = false " +
-            "AND r.lastAttemptAt <= :cooldownLimit")
-    List<UserTestResult> findExpiredCooldowns(@Param("cooldownLimit") LocalDateTime cooldownLimit);
+            "AND r.lastAttemptAt <= :cooldownLimit " +
+            "AND r.lastAttemptAt >= :windowStart")
+    List<UserTestResult> findExpiredCooldowns(
+            @Param("cooldownLimit") LocalDateTime cooldownLimit,
+            @Param("windowStart") LocalDateTime windowStart);
 }
