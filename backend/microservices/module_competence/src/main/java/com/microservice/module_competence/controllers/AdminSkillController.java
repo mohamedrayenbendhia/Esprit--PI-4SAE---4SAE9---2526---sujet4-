@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/skills")
@@ -17,6 +18,16 @@ public class AdminSkillController {
 
     private final SkillService skillService;
     private final UserSkillService userSkillService;
+
+    @GetMapping("/stats")
+    public ResponseEntity<List<Map<String, Object>>> getSkillStats() {
+        return ResponseEntity.ok(skillService.getSkillStats());
+    }
+
+    @GetMapping("/stats/global")
+    public ResponseEntity<Map<String, Object>> getGlobalStats() {
+        return ResponseEntity.ok(skillService.getGlobalStats());
+    }
 
     // POST /api/admin/skills
     @PostMapping
