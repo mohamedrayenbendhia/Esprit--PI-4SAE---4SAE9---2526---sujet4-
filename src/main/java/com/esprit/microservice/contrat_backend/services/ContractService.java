@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -18,7 +21,25 @@ public class ContractService implements IContractService {
     private final ContractRepository contractRepository;
     private final CustomClauseRepository customClauseRepository;
 
-    //  CRUD BASIQUE
+    // ========== UTILITAIRE HASH ==========
+
+    private String hashSignature(String rawSignature) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(rawSignature.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not available", e);
+        }
+    }
+
+    // ========== CRUD BASIQUE ==========
 
     @Override
     @Transactional
@@ -60,7 +81,6 @@ public class ContractService implements IContractService {
     @Transactional
     public void delete(Long id) {
         Contract contract = getById(id);
-        // Le client peut supprimer uniquement les contrats DRAFT et CANCELLED
         if (contract.getStatus() != ContractStatus.DRAFT &&
                 contract.getStatus() != ContractStatus.CANCELLED) {
             throw new RuntimeException("Cannot delete contract that is not in DRAFT or CANCELLED status");
@@ -68,7 +88,7 @@ public class ContractService implements IContractService {
         contractRepository.deleteById(id);
     }
 
-    // RECHERCHE PAR UTILISATEUR
+    // ========== RECHERCHE PAR UTILISATEUR ==========
 
     @Override
     public List<Contract> getByClientId(String clientId) {
@@ -80,7 +100,8 @@ public class ContractService implements IContractService {
         return contractRepository.findByFreelancerIdOrderByCreatedAtDesc(freelancerId);
     }
 
-    // RECHERCHE PAR STATUT
+    // ========== RECHERCHE PAR STATUT ==========
+
     @Override
     public List<Contract> getByClientIdAndStatus(String clientId, ContractStatus status) {
         return contractRepository.findByClientIdAndStatus(clientId, status);
@@ -91,7 +112,7 @@ public class ContractService implements IContractService {
         return contractRepository.findByFreelancerIdAndStatus(freelancerId, status);
     }
 
-    //  RECHERCHE PAR TYPE
+    // ========== RECHERCHE PAR TYPE ==========
 
     @Override
     public List<Contract> getByClientIdAndType(String clientId, ContractType type) {
@@ -103,7 +124,7 @@ public class ContractService implements IContractService {
         return contractRepository.findByFreelancerIdAndContractType(freelancerId, type);
     }
 
-    //  RECHERCHE PAR MOT-CLÉ
+    // ========== RECHERCHE PAR MOT-CLÉ ==========
 
     @Override
     public List<Contract> searchByKeyword(String clientId, String keyword) {
@@ -115,21 +136,21 @@ public class ContractService implements IContractService {
         return contractRepository.searchByFreelancerIdAndKeyword(freelancerId, keyword);
     }
 
-    //  WORKFLOW SIGNATURES
+    // ========== WORKFLOW SIGNATURES ==========
 
     @Override
     @Transactional
-    public Contract signByClient(Long id, String signatureHash) {
+    public Contract signByClient(Long id, String signatureData) {
         Contract contract = getById(id);
         if (contract.getStatus() != ContractStatus.DRAFT) {
             throw new RuntimeException("Contract must be in DRAFT status to be signed by client");
         }
         contract.setClientSignedAt(LocalDateTime.now());
-        contract.setClientSignatureHash(signatureHash);
-        contract.setStatus(ContractStatus.SIGNED_BY_CLIENT);
-        // Effacer le commentaire de modification une fois re-signé
+        contract.setClientSignatureHash(hashSignature(signatureData));
+        contract.setClientSignatureImage(signatureData);
         contract.setModificationComment(null);
         contract.setModificationRequestedAt(null);
+        contract.setStatus(ContractStatus.PENDING_FREELANCER_SIGNATURE);
         return contractRepository.save(contract);
     }
 
@@ -137,27 +158,27 @@ public class ContractService implements IContractService {
     @Transactional
     public Contract sendToFreelancer(Long id) {
         Contract contract = getById(id);
-        if (contract.getStatus() != ContractStatus.SIGNED_BY_CLIENT) {
+        if (contract.getStatus() != ContractStatus.PENDING_FREELANCER_SIGNATURE) {
             throw new RuntimeException("Contract must be signed by client before sending to freelancer");
         }
-        contract.setStatus(ContractStatus.PENDING_FREELANCER_SIGNATURE);
-        return contractRepository.save(contract);
+        return contract;
     }
 
     @Override
     @Transactional
-    public Contract signByFreelancer(Long id, String signatureHash) {
+    public Contract signByFreelancer(Long id, String signatureData) {
         Contract contract = getById(id);
         if (contract.getStatus() != ContractStatus.PENDING_FREELANCER_SIGNATURE) {
             throw new RuntimeException("Contract must be pending freelancer signature");
         }
         contract.setFreelancerSignedAt(LocalDateTime.now());
-        contract.setFreelancerSignatureHash(signatureHash);
-        contract.setStatus(ContractStatus.FULLY_SIGNED);
+        contract.setFreelancerSignatureHash(hashSignature(signatureData));
+        contract.setFreelancerSignatureImage(signatureData);
+        contract.setStatus(ContractStatus.ACTIVE);
         return contractRepository.save(contract);
     }
 
-    //  WORKFLOW FREELANCER
+    // ========== WORKFLOW FREELANCER ==========
 
     @Override
     @Transactional
@@ -169,16 +190,15 @@ public class ContractService implements IContractService {
         contract.setStatus(ContractStatus.DRAFT);
         contract.setModificationComment(reason);
         contract.setModificationRequestedAt(LocalDateTime.now());
-        // Reset signature client pour forcer une re-signature
         contract.setClientSignedAt(null);
         contract.setClientSignatureHash(null);
+        contract.setClientSignatureImage(null);
         return contractRepository.save(contract);
     }
 
     @Override
     @Transactional
     public Contract acceptContract(Long id) {
-        // SUPPRIMÉ - Le freelancer doit obligatoirement signer via signByFreelancer()
         throw new RuntimeException("Use signByFreelancer() instead. Freelancer must sign the contract.");
     }
 
@@ -193,7 +213,7 @@ public class ContractService implements IContractService {
         return contractRepository.save(contract);
     }
 
-    //  GESTION CYCLE DE VIE
+    // ========== GESTION CYCLE DE VIE ==========
 
     @Override
     @Transactional
@@ -228,7 +248,7 @@ public class ContractService implements IContractService {
         return contractRepository.save(contract);
     }
 
-    //  GESTION CLAUSES PERSONNALISÉES
+    // ========== GESTION CLAUSES PERSONNALISÉES ==========
 
     @Override
     @Transactional
@@ -253,7 +273,7 @@ public class ContractService implements IContractService {
         customClauseRepository.deleteById(clauseId);
     }
 
-    //  UTILITAIRES
+    // ========== UTILITAIRES ==========
 
     @Override
     public String generateContractNumber() {
@@ -262,7 +282,7 @@ public class ContractService implements IContractService {
         return String.format("CTR-%s-%05d", year, count);
     }
 
-    //  STATISTIQUES
+    // ========== STATISTIQUES ==========
 
     @Override
     public Map<String, Object> getClientStatistics(String clientId) {
@@ -287,8 +307,6 @@ public class ContractService implements IContractService {
         return stats;
     }
 
-
-
     @Override
     public Map<String, Object> getFreelancerEarnings(String freelancerId) {
         Map<String, Object> earnings = new HashMap<>();
@@ -303,7 +321,15 @@ public class ContractService implements IContractService {
                 .sum();
         earnings.put("totalEarnings", totalEarnings);
         earnings.put("pendingEarnings", pendingEarnings);
-        earnings.put("completedContracts", contracts.stream().filter(c -> c.getStatus() == ContractStatus.COMPLETED).count());
+        earnings.put("completedContracts", contracts.stream()
+                .filter(c -> c.getStatus() == ContractStatus.COMPLETED).count());
         return earnings;
+    }
+
+    // ========== VÉRIFICATION SIGNATURE (QR CODE) ==========
+
+    @Override
+    public boolean existsByClientSignatureHash(String hash) {
+        return contractRepository.existsByClientSignatureHash(hash);
     }
 }

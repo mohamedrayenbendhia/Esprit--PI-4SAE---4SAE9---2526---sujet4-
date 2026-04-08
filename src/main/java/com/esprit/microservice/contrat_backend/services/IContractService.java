@@ -56,10 +56,11 @@ public interface IContractService {
     // ========== UTILITAIRES ==========
     String generateContractNumber();
 
-
-
     // ========== STATISTIQUES ==========
     Map<String, Object> getClientStatistics(String clientId);
     Map<String, Object> getFreelancerStatistics(String freelancerId);
     Map<String, Object> getFreelancerEarnings(String freelancerId);
+
+    // ========== VÉRIFICATION SIGNATURE (QR CODE) ==========
+    boolean existsByClientSignatureHash(String hash);
 }

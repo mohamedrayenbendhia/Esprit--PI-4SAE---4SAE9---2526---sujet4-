@@ -90,10 +90,20 @@ public class Contract {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ContractStatus status;
+
     private LocalDateTime clientSignedAt;
+    // Hash SHA-256 pour vérification d'intégrité (64 chars, VARCHAR(255) suffit)
     private String clientSignatureHash;
+    // Image base64 pour affichage dans le PDF et l'interface
+    @Column(columnDefinition = "LONGTEXT")
+    private String clientSignatureImage;
+
     private LocalDateTime freelancerSignedAt;
+    // Hash SHA-256 pour vérification d'intégrité (64 chars, VARCHAR(255) suffit)
     private String freelancerSignatureHash;
+    // Image base64 pour affichage dans le PDF et l'interface
+    @Column(columnDefinition = "LONGTEXT")
+    private String freelancerSignatureImage;
 
     // DEMANDE DE MODIFICATION
     @Column(columnDefinition = "TEXT")

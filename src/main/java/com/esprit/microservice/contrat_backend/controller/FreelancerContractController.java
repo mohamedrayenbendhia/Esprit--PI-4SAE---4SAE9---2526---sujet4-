@@ -1,10 +1,8 @@
 package com.esprit.microservice.contrat_backend.controller;
 
+import com.esprit.microservice.contrat_backend.dto.SignatureRequest;
 import com.esprit.microservice.contrat_backend.entities.*;
-import com.esprit.microservice.contrat_backend.services.IContractService;
-import com.esprit.microservice.contrat_backend.services.IPaymentService;
-import com.esprit.microservice.contrat_backend.services.IMilestoneService;
-import com.esprit.microservice.contrat_backend.services.PdfGenerationService;
+import com.esprit.microservice.contrat_backend.services.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ContentDisposition;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/freelancer/contracts")
@@ -25,6 +24,7 @@ public class FreelancerContractController {
     private final IPaymentService paymentService;
     private final IMilestoneService milestoneService;
     private final PdfGenerationService pdfGenerationService;
+    private final CurrencyService currencyService;
 
     //  CONSULTATION DES CONTRATS
 
@@ -98,6 +98,7 @@ public class FreelancerContractController {
     }
 
     //  GÉNÉRATION PDF
+
     @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> generatePdf(@PathVariable Long id) {
         try {
@@ -110,22 +111,20 @@ public class FreelancerContractController {
                     .filename("contract-" + contract.getContractNumber() + ".pdf")
                     .build());
 
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(pdfContent);
+            return ResponseEntity.ok().headers(headers).body(pdfContent);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    // WORKFLOW FREELANCER
+    //  WORKFLOW FREELANCER
 
     @PostMapping("/{id}/sign")
     public ResponseEntity<Contract> signContract(
             @PathVariable Long id,
-            @RequestParam String signatureHash) {
-        return ResponseEntity.ok(contractService.signByFreelancer(id, signatureHash));
+            @RequestBody SignatureRequest signatureRequest) {
+        return ResponseEntity.ok(contractService.signByFreelancer(id, signatureRequest.getSignatureData()));
     }
 
     @PostMapping("/{id}/request-modification")
@@ -176,10 +175,33 @@ public class FreelancerContractController {
         return ResponseEntity.ok(milestoneService.getByContractAndStatus(contractId, MilestoneStatus.IN_PROGRESS));
     }
 
-    // CLAUSES
+    //  CLAUSES
 
     @GetMapping("/{contractId}/clauses")
     public ResponseEntity<List<CustomClause>> getCustomClauses(@PathVariable Long contractId) {
         return ResponseEntity.ok(contractService.getCustomClauses(contractId));
+    }
+
+    //  CONVERSION DE DEVISE
+
+    @GetMapping("/{id}/convert")
+    public ResponseEntity<Map<String, Object>> convertAmount(
+            @PathVariable Long id,
+            @RequestParam String to) {
+        try {
+            Contract contract = contractService.getById(id);
+            double original = contract.getTotalAmount().doubleValue();
+            double converted = currencyService.convert(original, "EUR", to);
+
+            return ResponseEntity.ok(Map.of(
+                    "contractId",       id,
+                    "original",         original,
+                    "originalCurrency", "EUR",
+                    "converted",        converted,
+                    "targetCurrency",   to.toUpperCase()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 }
