@@ -11,6 +11,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,13 +33,25 @@ public class UserTestResultService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No test found for this skill"));
 
-        // 2. Vérifier si déjà passé (seulement si passed=true)
+        // 2. Vérifier si déjà passé
         boolean alreadyPassed = userTestResultRepository
                 .existsByUserIdAndTestIdAndIsPassed(request.getUserId(), test.getId(), true);
         if (alreadyPassed) {
             throw new DuplicateResourceException("You already passed this test");
         }
 
+// 3. Vérifier cooldown 24h SEULEMENT si pas déjà passé
+        Optional<UserTestResult> lastAttempt = userTestResultRepository
+                .findTopByUserIdAndTestIdOrderByLastAttemptAtDesc(request.getUserId(), test.getId());
+
+        if (lastAttempt.isPresent() && !lastAttempt.get().isPassed()) {
+            LocalDateTime lastAttemptTime = lastAttempt.get().getLastAttemptAt();
+            if (lastAttemptTime != null && lastAttemptTime.isAfter(LocalDateTime.now().minusMinutes(2))) {
+                long hoursLeft = 0;
+                long minutesLeft = 2 - java.time.Duration.between(lastAttemptTime, LocalDateTime.now()).toMinutes();
+                throw new RuntimeException("COOLDOWN:" + hoursLeft + "h " + minutesLeft + "m");
+            }
+        }
         // 3. Récupérer les questions
         List<Question> questions = questionRepository.findByTestId(test.getId());
 
@@ -53,6 +67,7 @@ public class UserTestResultService {
                 .test(test)
                 .userSkillId(request.getUserSkillId())
                 .passedAt(LocalDateTime.now())
+                .lastAttemptAt(LocalDateTime.now())
                 .build();
         UserTestResult saved = userTestResultRepository.save(result);
 
@@ -146,5 +161,27 @@ public class UserTestResultService {
                         .isCorrect(a.isCorrect())
                         .build()).toList())
                 .build();
+    }
+    public Map<String, Object> checkCooldown(String userId, Long skillId) {
+        Test test = testRepository.findBySkillId(skillId).orElse(null);
+        if (test == null) return Map.of("onCooldown", false);
+
+        // Vérifier si déjà certifié
+        boolean alreadyCertified = certificationRepository
+                .existsByUserIdAndUserSkillId(userId, skillId);
+        if (alreadyCertified) {
+            return Map.of("onCooldown", true, "certified", true);
+        }
+
+        Optional<UserTestResult> last = userTestResultRepository
+                .findTopByUserIdAndTestIdOrderByLastAttemptAtDesc(userId, test.getId());
+
+        if (last.isPresent() && !last.get().isPassed()) {
+            LocalDateTime lastAttemptTime = last.get().getLastAttemptAt();
+            if (lastAttemptTime != null && lastAttemptTime.isAfter(LocalDateTime.now().minusMinutes(2))) {
+                return Map.of("onCooldown", true, "lastAttemptAt", lastAttemptTime.toString());
+            }
+        }
+        return Map.of("onCooldown", false);
     }
 }

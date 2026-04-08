@@ -8,4 +8,6 @@ import java.util.List;
 @Repository
 public interface CertificationRepository extends JpaRepository<Certification, Long> {
     List<Certification> findByUserId(String userId); // ✅
+    boolean existsByUserIdAndUserSkillId(String userId, Long userSkillId);
+
 }

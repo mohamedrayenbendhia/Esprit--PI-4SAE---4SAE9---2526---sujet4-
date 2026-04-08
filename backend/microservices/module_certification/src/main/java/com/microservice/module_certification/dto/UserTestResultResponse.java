@@ -17,5 +17,7 @@ public class UserTestResultResponse {
     private int passingScore;
     private boolean isPassed;
     private LocalDateTime passedAt;
+    private String cooldownMessage;
+    private boolean onCooldown;
     private List<UserAnswerResponse> answers;
 }

@@ -9,6 +9,7 @@ import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/freelancer")
@@ -38,6 +39,13 @@ public class FreelancerCertificationController {
         request.setUserId(extractUserId(authentication)); // ✅ set par JWT
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(userTestResultService.submitTest(request));
+    }
+    @GetMapping("/tests/cooldown/{skillId}")
+    public ResponseEntity<Map<String, Object>> checkCooldown(
+            @PathVariable Long skillId,
+            Authentication authentication) {
+        String userId = extractUserId(authentication);
+        return ResponseEntity.ok(userTestResultService.checkCooldown(userId, skillId));
     }
 
     @GetMapping("/certifications/me")

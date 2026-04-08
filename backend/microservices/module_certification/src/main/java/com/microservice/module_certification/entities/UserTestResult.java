@@ -30,7 +30,10 @@ public class UserTestResult {
     private int score;
     private boolean isPassed;
     private LocalDateTime passedAt;
-
+    private LocalDateTime lastAttemptAt;
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean notificationSent = false;
     @OneToMany(mappedBy = "userTestResult", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
