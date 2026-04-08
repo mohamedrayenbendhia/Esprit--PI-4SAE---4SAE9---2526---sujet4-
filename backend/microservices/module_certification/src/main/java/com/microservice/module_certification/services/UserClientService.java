@@ -15,11 +15,9 @@ public class UserClientService {
 
     public String getUserEmail(String userId) {
         try {
-            String url = "http://localhost:8084/api/users/" + userId;
-            Map<String, Object> user = restTemplate.getForObject(url, Map.class);
-            if (user != null) {
-                return (String) user.get("email");
-            }
+            String url = "http://localhost:8084/api/users/internal/" + userId;
+            Map<String, String> user = restTemplate.getForObject(url, Map.class);
+            if (user != null) return user.get("email");
         } catch (Exception e) {
             log.error("Error fetching email for userId: {}", userId, e);
         }
@@ -28,11 +26,9 @@ public class UserClientService {
 
     public String getUserFirstName(String userId) {
         try {
-            String url = "http://localhost:8084/api/users/" + userId;
-            Map<String, Object> user = restTemplate.getForObject(url, Map.class);
-            if (user != null) {
-                return (String) user.get("firstName");
-            }
+            String url = "http://localhost:8084/api/users/internal/" + userId;
+            Map<String, String> user = restTemplate.getForObject(url, Map.class);
+            if (user != null) return user.get("firstName");
         } catch (Exception e) {
             log.error("Error fetching firstName for userId: {}", userId, e);
         }

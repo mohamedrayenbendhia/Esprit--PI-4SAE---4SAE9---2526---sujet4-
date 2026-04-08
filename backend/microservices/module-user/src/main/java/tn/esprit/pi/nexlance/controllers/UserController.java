@@ -53,6 +53,16 @@ public class UserController {
         }
     }
 
+    @GetMapping("/internal/{id}")
+    public ResponseEntity<Map<String, String>> getUserInfoInternal(@PathVariable UUID id) {
+        User user = userService.getUserById(id);
+        Map<String, String> info = new HashMap<>();
+        info.put("email", user.getEmail());
+        info.put("firstName", user.getFirstName());
+        info.put("lastName", user.getLastName());
+        return ResponseEntity.ok(info);
+    }
+
     @PostMapping("/me/avatar")
     public ResponseEntity<?> uploadAvatar(
             @RequestParam("avatar") MultipartFile file,
