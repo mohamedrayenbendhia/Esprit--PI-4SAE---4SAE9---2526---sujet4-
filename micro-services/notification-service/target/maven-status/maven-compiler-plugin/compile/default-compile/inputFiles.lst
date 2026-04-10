@@ -1,0 +1,10 @@
+/Users/admin/Desktop/Site web/Backend-Emmanuel /micro-services/notification-service/src/main/java/com/smartfreelance/microservice/notificationservice/NotificationServiceApplication.java
+/Users/admin/Desktop/Site web/Backend-Emmanuel /micro-services/notification-service/src/main/java/com/smartfreelance/microservice/notificationservice/config/SecurityConfig.java
+/Users/admin/Desktop/Site web/Backend-Emmanuel /micro-services/notification-service/src/main/java/com/smartfreelance/microservice/notificationservice/config/WebSocketConfig.java
+/Users/admin/Desktop/Site web/Backend-Emmanuel /micro-services/notification-service/src/main/java/com/smartfreelance/microservice/notificationservice/controller/NotificationController.java
+/Users/admin/Desktop/Site web/Backend-Emmanuel /micro-services/notification-service/src/main/java/com/smartfreelance/microservice/notificationservice/dto/NotificationRequestDTO.java
+/Users/admin/Desktop/Site web/Backend-Emmanuel /micro-services/notification-service/src/main/java/com/smartfreelance/microservice/notificationservice/dto/NotificationResponseDTO.java
+/Users/admin/Desktop/Site web/Backend-Emmanuel /micro-services/notification-service/src/main/java/com/smartfreelance/microservice/notificationservice/entity/Notification.java
+/Users/admin/Desktop/Site web/Backend-Emmanuel /micro-services/notification-service/src/main/java/com/smartfreelance/microservice/notificationservice/repository/NotificationRepository.java
+/Users/admin/Desktop/Site web/Backend-Emmanuel /micro-services/notification-service/src/main/java/com/smartfreelance/microservice/notificationservice/security/HeaderAuthenticationFilter.java
+/Users/admin/Desktop/Site web/Backend-Emmanuel /micro-services/notification-service/src/main/java/com/smartfreelance/microservice/notificationservice/service/NotificationService.java

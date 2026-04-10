@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: complaint-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/smart_freelance_complaints?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+  jpa:
+    hibernate:
+      ddl-auto: validate   # Flyway gère le schéma, Hibernate vérifie seulement la cohérence
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+
+  # ============================================================
+  # EMAIL — Configuration SMTP
+  # ============================================================
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:support.nexlance@gmail.com}
+    password: ${MAIL_PASSWORD:kgpzuvybcxtymhnu}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  # Async executor pour l'envoi d'emails (@Async)
+  task:
+    execution:
+      pool:
+        core-size: 2
+        max-size: 5
+        queue-capacity: 100
+      thread-name-prefix: mail-
+
+server:
+  port: 8092
+
+# ============================================================
+# EUREKA
+# ============================================================
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+complaint:
+  upload-dir: uploads/complaints
+  service-url: http://localhost:8092
+
+user-service:
+  url: http://localhost:8084
+
+frontend:
+  base-url: http://localhost:4200
+
+notifications:
+  service-url: http://localhost:9090/api/notifications
+
+logging:
+  level:
+    com.smartfreelance.complaint: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.springframework.mail: DEBUG
