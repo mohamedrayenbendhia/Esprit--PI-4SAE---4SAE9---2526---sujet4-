@@ -1,33 +1,52 @@
 package com.esprit.microservice.contrat_backend.controller;
 
-import com.esprit.microservice.contrat_backend.dto.SignatureRequest;
 import com.esprit.microservice.contrat_backend.entities.*;
-import com.esprit.microservice.contrat_backend.services.*;
+import com.esprit.microservice.contrat_backend.services.CurrencyConversionService;
+import com.esprit.microservice.contrat_backend.services.IContractService;
+import com.esprit.microservice.contrat_backend.services.IPaymentService;
+import com.esprit.microservice.contrat_backend.services.IMilestoneService;
+import com.esprit.microservice.contrat_backend.services.PdfGenerationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ContentDisposition;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/client/contracts")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(
+        origins = "*",
+        allowedHeaders = "*",
+        exposedHeaders = "Content-Disposition",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+                RequestMethod.DELETE, RequestMethod.OPTIONS}
+)
 public class ClientContractController {
 
-    private final IContractService contractService;
-    private final IPaymentService paymentService;
-    private final IMilestoneService milestoneService;
-    private final PdfGenerationService pdfGenerationService;
-    private final CurrencyService currencyService;
-    private final QRCodeService qrCodeService;
+    private final IContractService          contractService;
+    private final IPaymentService           paymentService;
+    private final IMilestoneService         milestoneService;
+    private final PdfGenerationService      pdfGenerationService;
+    private final CurrencyConversionService currencyConversionService;
 
-    //  GESTION DES CONTRATS
+    @RequestMapping(method = RequestMethod.OPTIONS)
+    public ResponseEntity<Void> handleOptions() {
+        return ResponseEntity.ok()
+                .header("Access-Control-Allow-Origin",  "*")
+                .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                .header("Access-Control-Allow-Headers", "authorization, content-type, x-requested-with")
+                .header("Access-Control-Max-Age",       "3600")
+                .build();
+    }
+
+    // ── CONTRATS ─────────────────────────────────────────────────
 
     @PostMapping
     public ResponseEntity<Contract> createContract(@RequestBody Contract contract) {
@@ -44,27 +63,22 @@ public class ClientContractController {
             @RequestParam String clientId,
             @RequestParam(required = false) ContractStatus status,
             @RequestParam(required = false) String keyword) {
-
-        if (status != null) {
+        if (status != null)
             return ResponseEntity.ok(contractService.getByClientIdAndStatus(clientId, status));
-        }
-        if (keyword != null && !keyword.isEmpty()) {
+        if (keyword != null && !keyword.isEmpty())
             return ResponseEntity.ok(contractService.searchByKeyword(clientId, keyword));
-        }
         return ResponseEntity.ok(contractService.getByClientId(clientId));
     }
 
     @GetMapping("/by-status")
     public ResponseEntity<List<Contract>> getContractsByStatus(
-            @RequestParam String clientId,
-            @RequestParam ContractStatus status) {
+            @RequestParam String clientId, @RequestParam ContractStatus status) {
         return ResponseEntity.ok(contractService.getByClientIdAndStatus(clientId, status));
     }
 
     @GetMapping("/by-type")
     public ResponseEntity<List<Contract>> getContractsByType(
-            @RequestParam String clientId,
-            @RequestParam ContractType type) {
+            @RequestParam String clientId, @RequestParam ContractType type) {
         return ResponseEntity.ok(contractService.getByClientIdAndType(clientId, type));
     }
 
@@ -78,31 +92,9 @@ public class ClientContractController {
         return ResponseEntity.ok(contractService.getById(id));
     }
 
-    //  GÉNÉRATION PDF
-
-    @GetMapping("/{id}/pdf")
-    public ResponseEntity<byte[]> generatePdf(@PathVariable Long id) {
-        try {
-            Contract contract = contractService.getById(id);
-            byte[] pdfContent = pdfGenerationService.generateContractPdf(contract);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(ContentDisposition.builder("attachment")
-                    .filename("contract-" + contract.getContractNumber() + ".pdf")
-                    .build());
-
-            return ResponseEntity.ok().headers(headers).body(pdfContent);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<Contract> updateContract(
-            @PathVariable Long id,
-            @RequestBody Contract contract) {
+            @PathVariable Long id, @RequestBody Contract contract) {
         return ResponseEntity.ok(contractService.update(id, contract));
     }
 
@@ -112,13 +104,86 @@ public class ClientContractController {
         return ResponseEntity.noContent().build();
     }
 
-    //  WORKFLOW CLIENT
+    // ── CONVERSION DEVISE ────────────────────────────────────────
+
+    @GetMapping("/{id}/convert")
+    public ResponseEntity<?> convertAmount(
+            @PathVariable Long id,
+            @RequestParam String to) {
+        try {
+            Contract contract = contractService.getById(id);
+
+            if (contract.getTotalAmount() == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Contract has no total amount defined"));
+            }
+
+            double amount = contract.getTotalAmount().doubleValue();
+            // currency est un enum → .name() retourne le String "EUR", "USD", etc.
+            String from = contract.getCurrency() != null
+                    ? contract.getCurrency().name() : "EUR";
+
+            Map<String, Object> result = currencyConversionService.convert(amount, from, to);
+            return ResponseEntity.ok(result);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Conversion failed: " + e.getMessage()));
+        }
+    }
+
+    // ── PDF ──────────────────────────────────────────────────────
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> generatePdf(@PathVariable Long id) {
+        try {
+            Contract contract   = contractService.getById(id);
+            byte[]  pdfContent  = pdfGenerationService.generateContractPdf(contract);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.builder("attachment")
+                    .filename("contract-" + contract.getContractNumber() + ".pdf")
+                    .build());
+            return ResponseEntity.ok().headers(headers).body(pdfContent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // ── WORKFLOW SIGNATURES ──────────────────────────────────────
 
     @PostMapping("/{id}/sign")
     public ResponseEntity<Contract> signContract(
             @PathVariable Long id,
-            @RequestBody SignatureRequest signatureRequest) {
-        return ResponseEntity.ok(contractService.signByClient(id, signatureRequest.getSignatureData()));
+            @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(contractService.signByClient(id, body.get("signatureHash")));
+    }
+
+    @PostMapping("/{id}/sign-with-code")
+    public ResponseEntity<?> signContractWithCode(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        try {
+            return ResponseEntity.ok(contractService.signByClientWithCode(id, body.get("signatureCode")));
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    @GetMapping("/{id}/my-signature-code")
+    public ResponseEntity<Map<String, String>> getClientSignatureCode(@PathVariable Long id) {
+        Contract contract = contractService.getById(id);
+        Map<String, String> result = new HashMap<>();
+        result.put("code",   contract.getClientSignatureCode() != null
+                ? contract.getClientSignatureCode() : "");
+        result.put("signed", contract.getClientSignedAt() != null ? "true" : "false");
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/{id}/send-to-freelancer")
@@ -141,13 +206,13 @@ public class ClientContractController {
         return ResponseEntity.ok(contractService.cancel(id));
     }
 
-    //  GESTION DES PAIEMENTS
+    // ── PAIEMENTS ────────────────────────────────────────────────
 
     @PostMapping("/{contractId}/payments")
     public ResponseEntity<PaymentSchedule> addPayment(
-            @PathVariable Long contractId,
-            @RequestBody PaymentSchedule payment) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.create(contractId, payment));
+            @PathVariable Long contractId, @RequestBody PaymentSchedule payment) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(paymentService.create(contractId, payment));
     }
 
     @GetMapping("/{contractId}/payments")
@@ -164,8 +229,7 @@ public class ClientContractController {
 
     @PutMapping("/payments/{paymentId}/status")
     public ResponseEntity<PaymentSchedule> updatePaymentStatus(
-            @PathVariable Long paymentId,
-            @RequestParam PaymentStatus status) {
+            @PathVariable Long paymentId, @RequestParam PaymentStatus status) {
         return ResponseEntity.ok(paymentService.updateStatus(paymentId, status));
     }
 
@@ -175,13 +239,13 @@ public class ClientContractController {
         return ResponseEntity.noContent().build();
     }
 
-    //  GESTION DES JALONS
+    // ── JALONS ───────────────────────────────────────────────────
 
     @PostMapping("/{contractId}/milestones")
     public ResponseEntity<Milestone> addMilestone(
-            @PathVariable Long contractId,
-            @RequestBody Milestone milestone) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(milestoneService.create(contractId, milestone));
+            @PathVariable Long contractId, @RequestBody Milestone milestone) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(milestoneService.create(contractId, milestone));
     }
 
     @GetMapping("/{contractId}/milestones")
@@ -199,15 +263,13 @@ public class ClientContractController {
 
     @PutMapping("/milestones/{milestoneId}/reject")
     public ResponseEntity<Milestone> rejectMilestone(
-            @PathVariable Long milestoneId,
-            @RequestParam String reason) {
+            @PathVariable Long milestoneId, @RequestParam String reason) {
         return ResponseEntity.ok(milestoneService.reject(milestoneId, reason));
     }
 
     @PutMapping("/milestones/{milestoneId}/status")
     public ResponseEntity<Milestone> updateMilestoneStatus(
-            @PathVariable Long milestoneId,
-            @RequestParam MilestoneStatus status) {
+            @PathVariable Long milestoneId, @RequestParam MilestoneStatus status) {
         return ResponseEntity.ok(milestoneService.updateStatus(milestoneId, status));
     }
 
@@ -217,13 +279,13 @@ public class ClientContractController {
         return ResponseEntity.noContent().build();
     }
 
-    //  GESTION DES CLAUSES
+    // ── CLAUSES ──────────────────────────────────────────────────
 
     @PostMapping("/{contractId}/clauses")
     public ResponseEntity<CustomClause> addCustomClause(
-            @PathVariable Long contractId,
-            @RequestBody CustomClause clause) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(contractService.addCustomClause(contractId, clause));
+            @PathVariable Long contractId, @RequestBody CustomClause clause) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(contractService.addCustomClause(contractId, clause));
     }
 
     @GetMapping("/{contractId}/clauses")
@@ -235,65 +297,5 @@ public class ClientContractController {
     public ResponseEntity<Void> deleteCustomClause(@PathVariable Long clauseId) {
         contractService.deleteCustomClause(clauseId);
         return ResponseEntity.noContent().build();
-    }
-
-    //  CONVERSION DE DEVISE
-
-    @GetMapping("/{id}/convert")
-    public ResponseEntity<Map<String, Object>> convertAmount(
-            @PathVariable Long id,
-            @RequestParam String to) {
-        try {
-            Contract contract = contractService.getById(id);
-            double original = contract.getTotalAmount().doubleValue();
-            double converted = currencyService.convert(original, "EUR", to);
-
-            return ResponseEntity.ok(Map.of(
-                    "contractId",       id,
-                    "original",         original,
-                    "originalCurrency", "EUR",
-                    "converted",        converted,
-                    "targetCurrency",   to.toUpperCase()
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-    }
-
-    //  QR CODE SIGNATURE
-
-    @GetMapping("/{id}/qrcode")
-    public ResponseEntity<byte[]> getQRCode(@PathVariable Long id) {
-        try {
-            Contract contract = contractService.getById(id);
-            String hash = contract.getClientSignatureHash();
-
-            if (hash == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            }
-
-            byte[] qrImage = qrCodeService.generateQRCode(hash);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.IMAGE_PNG);
-            return ResponseEntity.ok().headers(headers).body(qrImage);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    //  VÉRIFICATION SIGNATURE VIA QR
-
-    @GetMapping("/verify")
-    public ResponseEntity<Map<String, Object>> verifySignature(
-            @RequestParam String hash) {
-        boolean found = contractService.existsByClientSignatureHash(hash);
-        return ResponseEntity.ok(Map.of(
-                "valid",   found,
-                "hash",    hash,
-                "message", found ? "Signature valide et authentique" : "Signature introuvable"
-        ));
     }
 }

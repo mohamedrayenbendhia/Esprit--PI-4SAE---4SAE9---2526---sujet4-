@@ -33,6 +33,7 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     List<Contract> findByStatus(ContractStatus status);
     List<Contract> findByContractType(ContractType contractType);
 
+
     // ========== RECHERCHE PAR MOT-CLÉ CLIENT ==========
     @Query("SELECT c FROM Contract c WHERE c.clientId = :clientId AND " +
             "(LOWER(c.missionTitle) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
@@ -57,7 +58,4 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     Long countByStatus(ContractStatus status);
     Long countByClientIdAndStatus(String clientId, ContractStatus status);
     Long countByFreelancerIdAndStatus(String freelancerId, ContractStatus status);
-
-    // ========== VÉRIFICATION SIGNATURE (QR CODE) ==========
-    boolean existsByClientSignatureHash(String clientSignatureHash);
 }

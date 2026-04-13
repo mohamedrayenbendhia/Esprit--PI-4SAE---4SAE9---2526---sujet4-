@@ -92,18 +92,20 @@ public class Contract {
     private ContractStatus status;
 
     private LocalDateTime clientSignedAt;
-    // Hash SHA-256 pour vérification d'intégrité (64 chars, VARCHAR(255) suffit)
-    private String clientSignatureHash;
-    // Image base64 pour affichage dans le PDF et l'interface
+
     @Column(columnDefinition = "LONGTEXT")
-    private String clientSignatureImage;
+    private String clientSignatureImage;   // image base64 dessinée
+
+    @Column(length = 64)
+    private String clientSignatureCode;    // code alphanumérique privé
 
     private LocalDateTime freelancerSignedAt;
-    // Hash SHA-256 pour vérification d'intégrité (64 chars, VARCHAR(255) suffit)
-    private String freelancerSignatureHash;
-    // Image base64 pour affichage dans le PDF et l'interface
+
     @Column(columnDefinition = "LONGTEXT")
     private String freelancerSignatureImage;
+
+    @Column(length = 64)
+    private String freelancerSignatureCode;
 
     // DEMANDE DE MODIFICATION
     @Column(columnDefinition = "TEXT")
@@ -140,3 +142,4 @@ public class Contract {
         updatedAt = LocalDateTime.now();
     }
 }
+
