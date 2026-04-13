@@ -22,8 +22,8 @@ public class FreelancerEvaluationController {
 
     // --- CONSULTATION ---
 
-    @GetMapping("/my-evaluations/{email}")
-    public ResponseEntity<List<Evaluation>> getMyEvaluations(@PathVariable String email) {
+    @GetMapping("/my-evaluations")
+    public ResponseEntity<List<Evaluation>> getMyEvaluations(@RequestParam String email) {
         return ResponseEntity.ok(evaluationService.getEvaluationsByEvaluatedId(email.toLowerCase()));
     }
 
