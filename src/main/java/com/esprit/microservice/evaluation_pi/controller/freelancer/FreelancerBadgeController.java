@@ -19,28 +19,24 @@ public class FreelancerBadgeController {
     private final BadgeService badgeService;
     private final EvaluationService evaluationService;
 
-    //  Tous les badges disponibles
+    // Tous les badges disponibles
     @GetMapping
     public ResponseEntity<List<Badge>> getAllBadges() {
         return ResponseEntity.ok(badgeService.getAllBadges());
     }
 
-    // Accepte email
+    // Badges d'un freelancer par email
     @GetMapping("/my-badges/{identifier}")
-    public ResponseEntity<List<UserBadge>> getMyBadges(
-            @PathVariable String identifier) {
-
-        System.out.println(" Recherche badges pour: " + identifier);
+    public ResponseEntity<List<UserBadge>> getMyBadges(@PathVariable String identifier) {
+        System.out.println("Recherche badges pour: " + identifier);
         List<UserBadge> myBadges = badgeService.getUserBadges(identifier);
-        System.out.println(" Badges trouvés: " + myBadges.size());
-
+        System.out.println("Badges trouvés: " + myBadges.size());
         return ResponseEntity.ok(myBadges);
     }
 
-    // 3. Critères d'un badge
+    // Critères d'un badge
     @GetMapping("/badge/{badgeId}/criteria")
-    public ResponseEntity<Map<String, Object>> getBadgeCriteria(
-            @PathVariable Long badgeId) {
+    public ResponseEntity<Map<String, Object>> getBadgeCriteria(@PathVariable Long badgeId) {
         Badge badge = badgeService.getBadgeById(badgeId);
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("badgeId", badge.getId());
@@ -53,7 +49,7 @@ public class FreelancerBadgeController {
         return ResponseEntity.ok(criteria);
     }
 
-    //   Accepte email
+    // Progression d'un badge pour un freelancer
     @GetMapping("/badge/{badgeId}/progress/{identifier}")
     public ResponseEntity<Map<String, Object>> getBadgeProgress(
             @PathVariable Long badgeId,
@@ -88,7 +84,7 @@ public class FreelancerBadgeController {
         return ResponseEntity.ok(progress);
     }
 
-    //  Accepte email
+    // Tous les badges avec progression
     @GetMapping("/all-with-progress/{identifier}")
     public ResponseEntity<List<Map<String, Object>>> getAllBadgesWithProgress(
             @PathVariable String identifier) {
@@ -120,5 +116,31 @@ public class FreelancerBadgeController {
         }).toList();
 
         return ResponseEntity.ok(badgesWithProgress);
+    }
+
+    // ✅ NOUVEAU — Vérifier et attribuer les badges automatiquement
+    @PostMapping("/check-and-assign")
+    public ResponseEntity<Map<String, Object>> checkAndAssignBadges(
+            @RequestBody Map<String, Object> request) {
+
+        String userId = (String) request.get("userId");
+        Double averageScore = Double.valueOf(request.get("averageScore").toString());
+        Long totalProjects = Long.valueOf(request.get("totalProjects").toString());
+
+        System.out.println("=== Check and assign pour: " + userId);
+        System.out.println("Score: " + averageScore + ", Projets: " + totalProjects);
+
+        // Attribution automatique des badges éligibles
+        badgeService.checkAndAssignBadges(userId, averageScore, totalProjects);
+
+        // Retourner les badges mis à jour
+        List<UserBadge> updatedBadges = badgeService.getUserBadges(userId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("badges", updatedBadges);
+        response.put("totalBadges", updatedBadges.size());
+
+        return ResponseEntity.ok(response);
     }
 }

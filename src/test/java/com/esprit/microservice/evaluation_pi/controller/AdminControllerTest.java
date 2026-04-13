@@ -65,7 +65,7 @@ class AdminControllerTest {
         // When & Then
         mockMvc.perform(post("/api/admin/evaluations/badges")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(badgeJson)) // Envoie le JSON dans le corps
+                        .content(badgeJson)) // Envoie le JSON dans l
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Expert"));
     }
