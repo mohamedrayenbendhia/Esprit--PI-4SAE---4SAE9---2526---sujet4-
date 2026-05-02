@@ -62,36 +62,17 @@ pipeline {
                         i=0
                         while [ $i -lt 30 ]; do
                             i=$((i+1))
-                            STATUS=$(curl -s -u admin:admin123 http://host.docker.internal:9001/api/system/status 2>/dev/null)
+                            STATUS=$(curl -s http://host.docker.internal:9001/api/system/status 2>/dev/null)
                             echo "Attempt $i: $STATUS"
                             if echo "$STATUS" | grep -q '"status":"UP"'; then
-                                echo "SonarQube is UP - starting analysis"
+                                echo "SonarQube is UP"
                                 break
                             fi
                             sleep 10
                         done
                     '''
-                    script {
-                        // On fresh SonarQube the password is 'admin' — change it to admin123
-                        sh '''
-                            curl -s -u admin:admin -X POST "http://host.docker.internal:9001/api/users/change_password" \
-                              -d "login=admin&previousPassword=admin&password=admin123" 2>/dev/null || true
-                        '''
-                        def sonarToken = sh(
-                            script: '''
-                                curl -s -u admin:admin123 -X POST "http://host.docker.internal:9001/api/user_tokens/revoke" \
-                                  -d "name=jenkins-ci" 2>/dev/null || true
-                                curl -s -u admin:admin123 -X POST "http://host.docker.internal:9001/api/user_tokens/generate" \
-                                  -d "name=jenkins-ci" | grep -o '"token":"[^"]*"' | cut -d'"' -f4
-                            ''',
-                            returnStdout: true
-                        ).trim()
-                        echo "SonarQube token generated: ${sonarToken ? 'OK' : 'EMPTY - auth failed'}"
-                        if (sonarToken) {
-                            dir('backend') {
-                                sh "mvn sonar:sonar -Dsonar.host.url=http://host.docker.internal:9001 -Dsonar.token=${sonarToken} -Dmaven.test.skip=true"
-                            }
-                        }
+                    dir('backend') {
+                        sh 'mvn sonar:sonar -Dsonar.host.url=http://host.docker.internal:9001 -Dmaven.test.skip=true'
                     }
                 }
             }
