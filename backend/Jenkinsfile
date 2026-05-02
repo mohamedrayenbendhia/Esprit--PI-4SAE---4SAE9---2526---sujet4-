@@ -23,7 +23,9 @@ pipeline {
 
         stage('Step 3: SonarQube Analysis') {
             steps {
-                echo 'SonarQube analysis skipped - start SonarQube container first'
+                dir('backend') {
+                    sh 'mvn sonar:sonar -Dsonar.host.url=http://127.0.0.1:9001 -Dsonar.login=admin -Dsonar.password=admin -Dmaven.test.skip=true'
+                }
             }
         }
 
