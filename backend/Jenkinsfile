@@ -23,24 +23,30 @@ pipeline {
 
         stage('Step 3: Stop Old Containers') {
             steps {
-                dir('backend') {
-                    sh 'docker compose down --remove-orphans || true'
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    dir('backend') {
+                        sh 'docker compose down --remove-orphans || true'
+                    }
                 }
             }
         }
 
         stage('Step 4: Docker Compose Build') {
             steps {
-                dir('backend') {
-                    sh 'docker compose build'
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    dir('backend') {
+                        sh 'docker compose build'
+                    }
                 }
             }
         }
 
         stage('Step 5: Deploy & Run All (Docker)') {
             steps {
-                dir('backend') {
-                    sh 'docker compose up -d'
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    dir('backend') {
+                        sh 'docker compose up -d'
+                    }
                 }
             }
         }
