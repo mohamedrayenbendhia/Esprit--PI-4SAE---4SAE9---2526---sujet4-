@@ -28,6 +28,10 @@ pipeline {
                         sh 'docker-compose down --remove-orphans || true'
                     }
                 }
+                sh 'docker ps -q --filter publish=9001 | xargs -r docker stop || true'
+                sh 'docker ps -q --filter publish=9001 | xargs -r docker rm -f || true'
+                sh 'docker ps -q --filter publish=4200 | xargs -r docker stop || true'
+                sh 'docker ps -q --filter publish=4200 | xargs -r docker rm -f || true'
             }
         }
 
