@@ -193,11 +193,10 @@ services:
 
   # --- MONITORING ---
   prometheus:
-    image: prom/prometheus:latest
+    build: ./prometheus
+    image: img-prometheus
     ports:
       - "9093:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - nexlance-net
 

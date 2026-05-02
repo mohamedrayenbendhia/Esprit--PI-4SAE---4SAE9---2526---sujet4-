@@ -1,0 +1,80 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+
+  - job_name: 'eureka-server'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['eureka-server:8761']
+
+  - job_name: 'config-server'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['config-server:8888']
+
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-gateway:8080']
+
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user-service:8084']
+
+  - job_name: 'complaint-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['complaint-service:8092']
+
+  - job_name: 'contrat-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['contrat-service:8086']
+
+  - job_name: 'evaluation-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['evaluation-service:8085']
+
+  - job_name: 'joboffer-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['joboffer-service:8087']
+
+  - job_name: 'certification-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['certification-service:8083']
+
+  - job_name: 'portfolio-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['portfolio-service:8082']
+
+  - job_name: 'competence-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['competence-service:8081']
+
+  - job_name: 'notification-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['notification-service:9090']
+
+  - job_name: 'organization-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['organization-service:9095']
+
+  - job_name: 'projects-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['projects-service:9091']
+
+  - job_name: 'recommendation-ai'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['recommendation-ai:9000']
