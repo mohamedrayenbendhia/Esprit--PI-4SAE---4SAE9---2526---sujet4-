@@ -1,0 +1,358 @@
+@use '../../../styles/nexlance-theme.scss' as *;
+
+.queue-container {
+  padding: $space-8 $space-6;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: $space-6;
+
+  h1 { font-size: $text-3xl; font-weight: $font-bold; color: $nexlance-gray-900; font-family: $font-family-heading; }
+  .subtitle { font-size: $text-sm; color: $nexlance-gray-500; margin-top: $space-1; }
+
+  .btn-refresh {
+    display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: white; border: 1.5px solid $nexlance-gray-200;
+    cursor: pointer; color: $nexlance-gray-500; transition: all $transition-fast;
+    &:hover { border-color: $nexlance-primary; color: $nexlance-primary; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+    mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  }
+}
+
+// ── Bandeau info workflow ─────────────────────────────────────
+
+.workflow-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-3;
+  padding: $space-4 $space-5;
+  background: linear-gradient(135deg, rgba($nexlance-primary-lighter, .8), rgba($nexlance-primary-lighter, .4));
+  border: 1px solid rgba($nexlance-primary, .2);
+  border-left: 4px solid $nexlance-primary;
+  border-radius: $radius-lg;
+  margin-bottom: $space-5;
+  animation: slideDown .25s ease;
+
+  mat-icon {
+    font-size: 20px; width: 20px; height: 20px;
+    color: $nexlance-primary;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  span {
+    font-size: $text-sm;
+    color: $nexlance-primary-dark;
+    line-height: 1.6;
+    font-weight: $font-medium;
+  }
+}
+
+// ── Jump-to-ticket ────────────────────────────────────────────
+
+.jump-ticket-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: white;
+  border: 1.5px solid $nexlance-gray-200;
+  border-radius: $radius-xl;
+  padding: $space-2 $space-2 $space-2 $space-4;
+  margin-bottom: $space-6;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+
+  &:focus-within {
+    border-color: $nexlance-primary;
+    box-shadow: 0 0 0 3px rgba($nexlance-primary, .1), 0 2px 8px rgba(0,0,0,.06);
+  }
+
+  .jump-icon {
+    font-size: 20px; width: 20px; height: 20px;
+    color: $nexlance-gray-400; flex-shrink: 0;
+    margin-right: $space-3; transition: color 150ms ease;
+  }
+
+  &:focus-within .jump-icon { color: $nexlance-primary; }
+
+  .jump-ticket-input {
+    flex: 1; border: none; outline: none;
+    background: transparent;
+    font-size: $text-sm; color: $nexlance-gray-800;
+    font-family: $font-family-base; min-width: 0;
+    letter-spacing: .01em;
+
+    &::placeholder { color: $nexlance-gray-400; font-size: $text-sm; }
+    &:disabled { opacity: .5; cursor: not-allowed; }
+  }
+
+  .btn-jump {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px;
+    border-radius: $radius-lg;
+    background: linear-gradient(135deg, $nexlance-primary, $nexlance-primary-dark);
+    color: white; border: none; cursor: pointer; flex-shrink: 0;
+    transition: all 150ms ease;
+    box-shadow: 0 2px 6px rgba($nexlance-primary, .3);
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba($nexlance-primary, .4);
+    }
+
+    &:disabled {
+      background: $nexlance-gray-200; color: $nexlance-gray-400;
+      cursor: not-allowed; box-shadow: none; transform: none;
+    }
+  }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ── Tabs ─────────────────────────────────────────────────────
+
+.tabs-row {
+  display: flex;
+  gap: $space-2;
+  margin-bottom: $space-6;
+  border-bottom: 2px solid $nexlance-gray-100;
+  padding-bottom: 0;
+
+  .tab-btn {
+    display: flex; align-items: center; gap: $space-2;
+    padding: $space-3 $space-5;
+    background: none; border: none; border-bottom: 3px solid transparent;
+    margin-bottom: -2px; cursor: pointer;
+    color: $nexlance-gray-500; font-size: $text-sm; font-weight: $font-medium;
+    transition: all $transition-fast;
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+    .count-badge {
+      background: $nexlance-gray-100; color: $nexlance-gray-600;
+      padding: 2px 8px; border-radius: 100px; font-size: $text-xs; font-weight: $font-semibold;
+      &.mine { background: rgba($nexlance-primary, 0.1); color: $nexlance-primary; }
+    }
+
+    &.active {
+      color: $nexlance-primary;
+      border-bottom-color: $nexlance-primary;
+      .count-badge { background: rgba($nexlance-primary, 0.1); color: $nexlance-primary; }
+    }
+
+    &:hover:not(.active) { color: $nexlance-gray-700; }
+  }
+}
+
+// ── States ──────────────────────────────────────────────────
+
+.state-box {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: $space-16; text-align: center;
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid $nexlance-gray-200; border-top-color: $nexlance-primary;
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: $space-4;
+  }
+
+  .empty-icon { font-size: 52px; width: 52px; height: 52px; color: $nexlance-gray-300; margin-bottom: $space-4; }
+  h2 { font-size: $text-xl; color: $nexlance-gray-700; margin-bottom: $space-2; }
+  p  { font-size: $text-sm; color: $nexlance-gray-400; }
+}
+
+// ── Table ────────────────────────────────────────────────────
+
+.table-card {
+  background: white;
+  border-radius: $radius-xl;
+  border: 1px solid $nexlance-gray-100;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.complaints-table {
+  width: 100%; border-collapse: collapse;
+
+  thead tr {
+    background: $nexlance-gray-50;
+    th {
+      padding: $space-3 $space-4; text-align: left;
+      font-size: $text-xs; font-weight: $font-semibold;
+      color: $nexlance-gray-500; text-transform: uppercase; letter-spacing: .05em;
+      border-bottom: 1px solid $nexlance-gray-100;
+    }
+  }
+
+  .table-row {
+    cursor: pointer; transition: background $transition-fast;
+    border-bottom: 1px solid $nexlance-gray-50;
+
+    td { padding: $space-4; vertical-align: middle; }
+    &:hover { background: $nexlance-gray-50; }
+    &:last-child { border-bottom: none; }
+  }
+}
+
+.ticket-num {
+  font-family: 'Courier New', Courier, monospace; font-size: $text-xs; color: $nexlance-gray-400; font-weight: $font-medium;
+}
+
+.subject-text {
+  font-size: $text-sm; color: $nexlance-gray-800; font-weight: $font-medium;
+}
+
+.category-tag {
+  font-size: $text-xs; color: $nexlance-gray-600;
+  background: $nexlance-gray-100; padding: 3px 8px; border-radius: 4px;
+}
+
+.priority-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: $space-2; vertical-align: middle;
+}
+
+.priority-text { font-size: $text-xs; font-weight: $font-semibold; vertical-align: middle; }
+
+.status-badge {
+  padding: 3px 10px; border-radius: 100px; font-size: $text-xs; font-weight: $font-semibold;
+}
+
+.date-text { font-size: $text-xs; color: $nexlance-gray-400; }
+
+// ── Boutons actions ──────────────────────────────────────────
+
+.btn-take {
+  display: inline-flex; align-items: center; gap: $space-1;
+  padding: $space-2 $space-3; border-radius: $radius-md;
+  background: $nexlance-primary;
+  color: white; border: none; cursor: pointer;
+  font-size: $text-xs; font-weight: $font-semibold; transition: all $transition-fast;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  &:hover:not(:disabled) { background: $nexlance-primary-dark; box-shadow: 0 2px 8px rgba($nexlance-primary,.35); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.btn-process {
+  display: inline-flex; align-items: center; gap: $space-1;
+  padding: $space-2 $space-3; border-radius: $radius-md;
+  background: $nexlance-gray-100; color: $nexlance-gray-700;
+  border: none; cursor: pointer;
+  font-size: $text-xs; font-weight: $font-semibold; transition: all $transition-fast;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  &:hover { background: $nexlance-gray-200; }
+}
+
+// ── Jump-to-ticket search bar ────────────────────────────────
+.jump-ticket-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: white;
+  border: 1.5px solid $nexlance-gray-200;
+  border-radius: $radius-xl;
+  padding: $space-2 $space-2 $space-2 $space-4;
+  margin-bottom: $space-6;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.03);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+
+  &:focus-within {
+    border-color: $nexlance-primary;
+    box-shadow: 0 0 0 3px rgba($nexlance-primary, .12), 0 1px 3px rgba(0,0,0,.06);
+  }
+
+  .jump-icon {
+    font-size: 20px; width: 20px; height: 20px;
+    color: $nexlance-gray-400;
+    flex-shrink: 0;
+    margin-right: $space-3;
+    transition: color 150ms ease;
+  }
+
+  &:focus-within .jump-icon {
+    color: $nexlance-primary;
+  }
+
+  .jump-ticket-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: $text-sm;
+    color: $nexlance-gray-800;
+    font-family: $font-family-base;
+    min-width: 0;
+
+    &::placeholder {
+      color: $nexlance-gray-400;
+      font-size: $text-sm;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-jump {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-lg;
+    background: $nexlance-primary;
+    color: white;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 150ms ease, box-shadow 150ms ease;
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+    &:hover:not(:disabled) {
+      background: $nexlance-primary-dark;
+      box-shadow: 0 2px 8px rgba($nexlance-primary, .35);
+    }
+
+    &:disabled {
+      background: $nexlance-gray-200;
+      color: $nexlance-gray-400;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+}
+
+// ── Responsive ─────────────────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .agent-queue-container {
+    padding: 24px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .queue-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .queue-table {
+    min-width: 600px;
+  }
+  .queue-tabs {
+    overflow-x: auto;
+  }
+}

@@ -1,0 +1,193 @@
+<div class="ai-recommendations-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="ai-icon">psychology</mat-icon>
+        <div>
+          <h1>IA Recommandation - Freelancers</h1>
+          <p class="subtitle">Trouvez les meilleurs freelancers pour vos offres grâce à l'intelligence artificielle (TF-IDF Cosine Similarity)</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="service-status" [class.online]="isServiceOnline" [class.offline]="!isServiceOnline && !serviceChecking">
+          @if (serviceChecking) {
+            <mat-spinner diameter="16"></mat-spinner>
+            <span>Vérification...</span>
+          } @else if (isServiceOnline) {
+            <mat-icon>cloud_done</mat-icon>
+            <span>Service IA actif</span>
+          } @else {
+            <mat-icon>cloud_off</mat-icon>
+            <span>Service IA hors ligne</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Job Offer Selection -->
+  <div class="job-selection-section">
+    <mat-card>
+      <mat-card-content>
+        <h3><mat-icon>work</mat-icon> Sélectionnez une offre d'emploi</h3>
+        <p class="selection-hint">Choisissez l'offre pour laquelle vous souhaitez trouver les meilleurs freelancers</p>
+
+        @if (isLoadingJobs) {
+          <div class="loading-inline">
+            <mat-spinner diameter="24"></mat-spinner>
+            <span>Chargement de vos offres...</span>
+          </div>
+        } @else if (myJobOffers.length === 0) {
+          <div class="no-jobs-message">
+            <mat-icon>info</mat-icon>
+            <span>Vous n'avez pas encore d'offres d'emploi. <a routerLink="/frontoffice/client/create-job">Créer une offre</a></span>
+          </div>
+        } @else {
+          <div class="selection-row">
+            <mat-select [(ngModel)]="selectedJobOfferId" placeholder="Choisir une offre..." class="job-select">
+              @for (job of myJobOffers; track job.id) {
+                <mat-option [value]="job.id">
+                  {{ job.title }} - {{ job.budget }} DT
+                </mat-option>
+              }
+            </mat-select>
+            <button mat-raised-button color="primary" (click)="searchFreelancers()" [disabled]="!selectedJobOfferId || isLoading || !isServiceOnline">
+              <mat-icon>psychology</mat-icon>
+              Lancer la recherche IA
+            </button>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-section">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Analyse IA en cours... Le moteur recherche les freelancers les plus compatibles avec votre offre.</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (errorMessage && !isLoading) {
+    <div class="error-section">
+      <mat-icon>info</mat-icon>
+      <p>{{ errorMessage }}</p>
+    </div>
+  }
+
+  <!-- Recommendations Grid -->
+  @if (!isLoading && recommendations.length > 0) {
+    <h2 class="results-title">
+      <mat-icon>groups</mat-icon>
+      {{ recommendations.length }} freelancers recommandés
+    </h2>
+    <div class="recommendations-grid">
+      @for (rec of recommendations; track rec.freelancer_id) {
+        <mat-card class="recommendation-card">
+          <!-- Score Badge -->
+          <div class="score-badge" [style.background-color]="getScoreColor(rec.score)">
+            <span class="score-value">{{ getScorePercent(rec.score) }}%</span>
+            <span class="score-label">{{ getScoreLabel(rec.score) }}</span>
+          </div>
+
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="freelancer-icon">person</mat-icon>
+            <mat-card-title>Freelancer #{{ rec.freelancer_id }}</mat-card-title>
+            <mat-card-subtitle>Score de compatibilité IA</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Score Bar -->
+            <div class="score-bar-section">
+              <div class="score-bar-label">
+                <span>Score global</span>
+                <span class="score-percent" [style.color]="getScoreColor(rec.score)">{{ getScorePercent(rec.score) }}%</span>
+              </div>
+              <mat-progress-bar
+                mode="determinate"
+                [value]="getScorePercent(rec.score)"
+                [color]="rec.score >= 0.6 ? 'primary' : 'warn'"
+              ></mat-progress-bar>
+            </div>
+
+            <!-- Match Details -->
+            @if (rec.match_details) {
+              <div class="match-details">
+                <h4>Détails du matching IA</h4>
+                <div class="detail-row">
+                  <div class="detail-item">
+                    <mat-icon matTooltip="Similarité des compétences (TF-IDF)">code</mat-icon>
+                    <span class="detail-label">Compétences</span>
+                    <span class="detail-value">{{ getScorePercent(rec.match_details.skill_similarity) }}%</span>
+                  </div>
+                  <div class="detail-item">
+                    <mat-icon matTooltip="Score d'expérience">trending_up</mat-icon>
+                    <span class="detail-label">Expérience</span>
+                    <span class="detail-value">{{ getScorePercent(rec.match_details.experience_score) }}%</span>
+                  </div>
+                  <div class="detail-item">
+                    <mat-icon matTooltip="Correspondance budget">attach_money</mat-icon>
+                    <span class="detail-label">Budget</span>
+                    <span class="detail-value">{{ getScorePercent(rec.match_details.budget_match) }}%</span>
+                  </div>
+                  @if (rec.match_details.rating_score !== undefined) {
+                    <div class="detail-item">
+                      <mat-icon matTooltip="Score de notation">star</mat-icon>
+                      <span class="detail-label">Rating</span>
+                      <span class="detail-value">{{ getScorePercent(rec.match_details.rating_score!) }}%</span>
+                    </div>
+                  }
+                  @if (rec.match_details.projects_score !== undefined) {
+                    <div class="detail-item">
+                      <mat-icon matTooltip="Projets complétés">folder_open</mat-icon>
+                      <span class="detail-label">Projets</span>
+                      <span class="detail-value">{{ getScorePercent(rec.match_details.projects_score!) }}%</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-button color="primary" routerLink="/frontoffice/client/freelancers/{{ rec.freelancer_id }}">
+              <mat-icon>person</mat-icon>
+              Voir le profil
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+
+  <!-- How It Works Section -->
+  <div class="how-it-works">
+    <h3><mat-icon>lightbulb</mat-icon> Comment fonctionne la recommandation IA ?</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Sélectionnez votre offre</h4>
+          <p>Choisissez l'offre d'emploi pour laquelle vous cherchez des freelancers.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Analyse TF-IDF</h4>
+          <p>L'algorithme compare les compétences requises avec les profils des freelancers.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Score multi-critères</h4>
+          <p>Compétences (40%), expérience (20%), budget (15%), notation (15%), projets (10%).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/ConfigServer/pom.xml" />
+        <option value="$PROJECT_DIR$/eureka-server/pom.xml" />
+        <option value="$PROJECT_DIR$/module_certification/pom.xml" />
+        <option value="$PROJECT_DIR$/module_competence/pom.xml" />
+        <option value="$PROJECT_DIR$/module_portfolio/pom.xml" />
+        <option value="$PROJECT_DIR$/contrat/Esprit--PI-4SAE---4SAE9---2526---sujet4--contrat/pom.xml" />
+        <option value="$PROJECT_DIR$/api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/evaluation/Esprit--PI-4SAE---4SAE9---2526---sujet4--evaluation/pom.xml" />
+        <option value="$PROJECT_DIR$/joboffer/service_joboffer/NexLance/pom.xml" />
+        <option value="$PROJECT_DIR$/service_projects/pom.xml" />
+        <option value="$PROJECT_DIR$/service_user/pom.xml" />
+        <option value="$PROJECT_DIR$/complaint-service/pom.xml" />
+        <option value="$PROJECT_DIR$/organization-service/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/complaint-service/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/contrat/Esprit--PI-4SAE---4SAE9---2526---sujet4--contrat/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/evaluation/Esprit--PI-4SAE---4SAE9---2526---sujet4--evaluation/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/joboffer/service_joboffer/NexLance/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/module_certification/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/module_competence/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/module_portfolio/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/organization-service/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/service_projects/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/service_user/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/notification-service/pom.xml" />
+        <option value="$PROJECT_DIR$/microservices/complaint-service/complaint-service/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_22" project-jdk-name="temurin-21" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>

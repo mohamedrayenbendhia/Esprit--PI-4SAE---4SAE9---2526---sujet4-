@@ -1,0 +1,528 @@
+<div class="page-wrapper">
+
+  <!-- ── Page header ──────────────────────────────────────────── -->
+  <div class="page-header">
+    <button class="btn-back" type="button" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to complaints
+    </button>
+    <div class="header-title-row">
+      <div>
+        <h1>New complaint</h1>
+        <p class="subtitle">Describe your issue — the AI handles the rest.</p>
+      </div>
+      <div class="step-indicator">
+        <span class="step active">1</span>
+        <span class="step-line"></span>
+        <span class="step" [class.active]="descLength >= 20">2</span>
+        <span class="step-line"></span>
+        <span class="step" [class.active]="!!selectedCategory">3</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Layout 2 colonnes ────────────────────────────────────── -->
+  <div class="page-body">
+
+    <!-- ── Colonne principale ──────────────────────────────────── -->
+    <div class="main-col">
+
+      <!-- Bandeau erreur global -->
+      <div class="error-banner" *ngIf="formSubmitted() && form.invalid">
+        <mat-icon>error_outline</mat-icon>
+        <span>Some fields are invalid. Please correct them before submitting.</span>
+      </div>
+
+      <!-- Card 1 : Sujet + Description (EN PREMIER) -->
+      <div class="card section-card" [formGroup]="form">
+        <div class="card-header">
+          <div class="section-num">01</div>
+          <div>
+            <h3>Describe your issue</h3>
+            <p class="card-subtitle">The AI will analyze your text and automatically suggest the category and priority</p>
+          </div>
+          <div class="ai-header-badge"
+               [class.ai-badge-checking]="aiChecking()"
+               [class.ai-badge-off]="!aiChecking() && !aiEnabled()">
+            @if (aiChecking()) {
+              <span class="ai-badge-dot"></span>
+              <span>AI checking…</span>
+            } @else if (aiEnabled()) {
+              <span class="ai-badge-live-dot"></span>
+              <mat-icon>auto_awesome</mat-icon>
+              <span>AI available</span>
+            } @else {
+              <mat-icon>auto_awesome_off</mat-icon>
+              <span>AI unavailable</span>
+            }
+          </div>
+        </div>
+        <div class="card-body">
+
+          <!-- Sujet -->
+          <div class="field-group">
+            <label class="field-label required" for="subject">Subject</label>
+            <div class="input-wrap" [class.has-error]="showError('subject')">
+              <input
+                id="subject"
+                type="text"
+                class="form-input"
+                placeholder="E.g. Payment not received for project #..."
+                formControlName="subject"
+                maxlength="255">
+            </div>
+            <div class="field-footer">
+              <div class="field-error inline" *ngIf="showError('subject')">
+                <mat-icon>error</mat-icon>{{ errorMsg('subject') }}
+              </div>
+              <span class="char-count" [class.near]="subjectLength > 230" [class.max]="subjectLength >= 255">
+                {{ subjectLength }}/255
+              </span>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="field-group">
+            <label class="field-label required" for="description">Detailed description</label>
+            <div class="input-wrap" [class.has-error]="showError('description')">
+              <textarea
+                id="description"
+                class="form-textarea"
+                placeholder="When did it happen? What is the impact? What steps have you already taken?"
+                formControlName="description"
+                maxlength="5000"
+                rows="6">
+              </textarea>
+            </div>
+            <div class="field-footer">
+              <div class="field-error inline" *ngIf="showError('description')">
+                <mat-icon>error</mat-icon>{{ errorMsg('description') }}
+              </div>
+              <div class="desc-progress">
+                <div class="progress-track">
+                  <div class="progress-fill"
+                    [style.width.%]="descProgressPct"
+                    [class.valid]="descLength >= 20"
+                    [class.near]="descLength > 4500">
+                  </div>
+                </div>
+                <span class="char-count" [class.near]="descLength > 4500" [class.max]="descLength >= 5000">
+                  {{ descLength }}/5000<span *ngIf="descLength < 20" class="min-hint"> · min 20</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Hint inline IA — visible uniquement si IA activée -->
+            <ng-container *ngIf="aiEnabled()">
+              <!-- Pas assez de texte -->
+              <div class="ai-inline-hint" *ngIf="descLength > 0 && descLength < 20 && !aiLoading() && !aiSuggestion()">
+                <mat-icon>auto_awesome</mat-icon>
+                <span>Keep describing… the AI will automatically suggest the category and priority</span>
+              </div>
+              <!-- Seuil atteint, en attente du debounce -->
+              <div class="ai-inline-hint" *ngIf="descLength >= 20 && !aiLoading() && !aiSuggestion() && !aiDismissed()">
+                <div class="ai-dot-pulse"><span></span><span></span><span></span></div>
+                <span>AI is ready to analyze — keep typing or pause to get a suggestion</span>
+              </div>
+              <!-- Analyse en cours -->
+              <div class="ai-inline-hint analyzing" *ngIf="aiLoading()">
+                <div class="ai-dot-pulse">
+                  <span></span><span></span><span></span>
+                </div>
+                <span>Analyzing your complaint…</span>
+              </div>
+              <!-- Suggestion prête -->
+              <div class="ai-inline-hint done" *ngIf="aiSuggestion() && !aiDismissed() && !aiLoading()">
+                <mat-icon>check_circle</mat-icon>
+                <span>Suggestion ready — see below</span>
+              </div>
+            </ng-container>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Bandeau suggestion IA — juste avant la classification ── -->
+
+      <!-- Suggestion disponible -->
+      <div class="ai-banner ai-ready" *ngIf="aiSuggestion() && !aiDismissed()">
+        <div class="ai-icon">
+          <mat-icon>auto_awesome</mat-icon>
+        </div>
+        <div class="ai-body">
+          <p class="ai-title">The AI has analyzed your description</p>
+          <div class="ai-chips">
+            <span class="ai-chip category">
+              <mat-icon>category</mat-icon>
+              {{ aiSuggestion()!.categoryLabel }}
+            </span>
+            <span class="ai-chip priority">
+              <mat-icon>flag</mat-icon>
+              Priority {{ aiSuggestion()!.priorityLabel }}
+            </span>
+            <span class="ai-confidence">
+              {{ (aiSuggestion()!.confidence * 100).toFixed(0) }}% confidence
+            </span>
+          </div>
+        </div>
+        <div class="ai-actions">
+          <button type="button" class="btn-ai accept" (click)="acceptAiSuggestion()">
+            <mat-icon>check</mat-icon> Apply
+          </button>
+          <button type="button" class="btn-ai dismiss" (click)="dismissAiSuggestion()">
+            Dismiss
+          </button>
+        </div>
+      </div>
+
+      <!-- Card 2 : Catégorie + Priorité (EN SECOND — remplie par l'IA) -->
+      <div class="card section-card" [formGroup]="form">
+        <div class="card-header">
+          <div class="section-num">02</div>
+          <div>
+            <h3>Classification</h3>
+            <p class="card-subtitle">
+              <ng-container *ngIf="aiFilledFields(); else manualSubtitle">
+                Automatically filled by the AI — you can modify
+              </ng-container>
+              <ng-template #manualSubtitle>Category and urgency level of your issue</ng-template>
+            </p>
+          </div>
+          <mat-icon class="ai-filled-check" *ngIf="aiFilledFields()">auto_awesome</mat-icon>
+        </div>
+        <div class="card-body">
+
+          <!-- Catégorie -->
+          <div class="field-group">
+            <label class="field-label required">Category</label>
+            <div class="category-grid">
+              <button
+                type="button"
+                *ngFor="let cat of categories"
+                class="cat-tile"
+                [class.selected]="selectedCategory === cat.value"
+                [class.error]="showError('category')"
+                [class.ai-filled]="aiFilledFields() && selectedCategory === cat.value"
+                (click)="form.get('category')!.setValue(cat.value); form.get('category')!.markAsTouched()">
+                <mat-icon class="cat-icon">{{ cat.icon }}</mat-icon>
+                <span class="cat-label">{{ cat.label }}</span>
+                <span class="ai-tile-badge" *ngIf="aiFilledFields() && selectedCategory === cat.value">
+                  <mat-icon>auto_awesome</mat-icon>AI
+                </span>
+              </button>
+            </div>
+            <input type="hidden" formControlName="category">
+            <div class="field-error" *ngIf="showError('category')">
+              <mat-icon>error</mat-icon>{{ errorMsg('category') }}
+            </div>
+          </div>
+
+          <!-- Priorité -->
+          <div class="field-group">
+            <label class="field-label required">Priority</label>
+            <div class="priority-row">
+              <button
+                type="button"
+                *ngFor="let p of priorities"
+                class="priority-btn"
+                [class.selected]="selectedPriority === p.value"
+                [class.ai-filled]="aiFilledFields() && selectedPriority === p.value"
+                [attr.data-priority]="p.value"
+                (click)="form.get('priority')!.setValue(p.value)">
+                <span class="p-dot" [attr.data-priority]="p.value"></span>
+                {{ p.label }}
+                <mat-icon class="priority-ai-icon" *ngIf="aiFilledFields() && selectedPriority === p.value">auto_awesome</mat-icon>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Card 3 : Champs optionnels + PJ -->
+      <div class="card section-card" [formGroup]="form">
+        <div class="card-header">
+          <div class="section-num">03</div>
+          <div>
+            <h3>Additional information</h3>
+            <p class="card-subtitle">Optional — help us investigate</p>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <div class="two-col-fields">
+            <!-- Concerned user -->
+            <div class="field-group">
+              <label class="field-label" for="reportedUser">
+                Concerned user
+                <span class="optional-tag">optional</span>
+              </label>
+              <div class="input-wrap"
+                   [class.has-error]="showError('reportedUserEmail') || emailNotFound()"
+                   [class.has-success]="emailResolved()">
+                <input
+                  id="reportedUser"
+                  type="email"
+                  class="form-input"
+                  placeholder="User's email address"
+                  formControlName="reportedUserEmail"
+                  maxlength="255">
+                <div class="input-suffix" *ngIf="emailChecking()">
+                  <div class="email-spinner"></div>
+                </div>
+                <div class="input-suffix" *ngIf="emailResolved() && !emailChecking()">
+                  <mat-icon class="icon-success">check_circle</mat-icon>
+                </div>
+                <div class="input-suffix" *ngIf="emailNotFound() && !emailChecking()">
+                  <mat-icon class="icon-error">cancel</mat-icon>
+                </div>
+              </div>
+
+              <div class="email-status found" *ngIf="emailResolved()">
+                <mat-icon>person</mat-icon>
+                <span>{{ emailResolved()!.firstName }} {{ emailResolved()!.lastName }} <span class="email-user-type">({{ emailResolved()!.type }})</span></span>
+              </div>
+              <div class="email-status not-found" *ngIf="emailNotFound() && !emailChecking()">
+                <mat-icon>error_outline</mat-icon>
+                <span>No account found for this email.</span>
+              </div>
+              <div class="email-status checking" *ngIf="emailChecking()">
+                <span>Verifying...</span>
+              </div>
+              <div class="field-error" *ngIf="showError('reportedUserEmail')">
+                <mat-icon>error</mat-icon>{{ errorMsg('reportedUserEmail') }}
+              </div>
+              <div class="field-warning" *ngIf="ctrl('reportedUserEmail').value?.length > 5 && !emailNotFound() && !showError('reportedUserEmail')">
+                <mat-icon>warning_amber</mat-icon>
+                <span>Any abusive complaint may result in consequences.</span>
+              </div>
+            </div>
+
+            <!-- Projet concerné -->
+            <div class="field-group">
+              <label class="field-label" for="project">
+                Related project
+                <span class="optional-tag">optional</span>
+              </label>
+              <div class="input-wrap" [class.has-error]="showError('projectName')">
+                <input
+                  id="project"
+                  type="text"
+                  class="form-input"
+                  placeholder="Name of the related project"
+                  formControlName="projectName"
+                  maxlength="255">
+              </div>
+              <div class="field-error" *ngIf="showError('projectName')">
+                <mat-icon>error</mat-icon>{{ errorMsg('projectName') }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Pièces jointes -->
+          <div class="field-group">
+            <label class="field-label">
+              Attachments
+              <span class="optional-tag">max {{ maxFiles }} files · {{ maxFileSizeMb }} MB</span>
+            </label>
+            <app-attachment-manager></app-attachment-manager>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="cancel()" [disabled]="isSubmitting()">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="submit()"
+          [disabled]="isSubmitting() || isSubmitBlocked"
+          [class.btn-invalid]="formSubmitted() && (form.invalid || isSubmitBlocked)">
+          <div *ngIf="isSubmitting()" class="btn-spinner"></div>
+          <mat-icon *ngIf="!isSubmitting()">send</mat-icon>
+          {{ isUploading() ? uploadProgress() : (isSubmitting() ? 'Submitting...' : 'Submit complaint') }}
+        </button>
+      </div>
+
+    </div><!-- /main-col -->
+
+    <!-- ── Sidebar droite ──────────────────────────────────────── -->
+    <aside class="side-col">
+
+      <!-- Widget IA — état dynamique -->
+      <div class="card widget-card ai-widget-card" [class.ai-widget-disabled]="!aiChecking() && !aiEnabled()">
+        <div class="widget-title">
+          <mat-icon>{{ (!aiChecking() && !aiEnabled()) ? 'auto_awesome_off' : 'auto_awesome' }}</mat-icon>
+          AI Assistant
+        </div>
+
+        <!-- IA en cours de vérification -->
+        <div class="ai-widget-idle" *ngIf="aiChecking()">
+          <p style="color:#94a3b8;font-size:12px;margin:0">Checking AI availability…</p>
+        </div>
+
+        <!-- IA désactivée -->
+        <div class="ai-widget-off" *ngIf="!aiChecking() && !aiEnabled()">
+          <mat-icon>info_outline</mat-icon>
+          <p>AI suggestions are currently unavailable. Please classify your complaint manually.</p>
+        </div>
+
+        <!-- IA activée — tracker de progression persistant -->
+        <ng-container *ngIf="!aiChecking() && aiEnabled()">
+
+          <!-- Étapes toujours visibles -->
+          <div class="ai-progress-steps">
+
+            <!-- Étape 1 : description -->
+            <div class="ai-progress-step"
+                 [class.step-done]="descLength >= 20"
+                 [class.step-active]="descLength > 0 && descLength < 20">
+              <div class="step-indicator">
+                <div class="step-icon">
+                  <mat-icon *ngIf="descLength >= 20">check</mat-icon>
+                  <span *ngIf="descLength < 20">1</span>
+                </div>
+                <div class="step-line" *ngIf="true"></div>
+              </div>
+              <div class="step-content">
+                <span class="step-label">Describe the issue</span>
+                <span class="step-sub" *ngIf="descLength === 0">Start typing your complaint…</span>
+                <span class="step-sub" *ngIf="descLength > 0 && descLength < 20">{{ 20 - descLength }} more chars needed</span>
+                <span class="step-sub done-text" *ngIf="descLength >= 20">Ready for analysis</span>
+              </div>
+            </div>
+
+            <!-- Étape 2 : analyse IA -->
+            <div class="ai-progress-step"
+                 [class.step-done]="!!aiSuggestion() || aiFilledFields()"
+                 [class.step-active]="aiLoading()"
+                 [class.step-pending]="descLength >= 20 && !aiLoading() && !aiSuggestion() && !aiFilledFields()">
+              <div class="step-indicator">
+                <div class="step-icon">
+                  <mat-icon *ngIf="!!aiSuggestion() || aiFilledFields()">check</mat-icon>
+                  <div class="step-spinner" *ngIf="aiLoading()"></div>
+                  <span *ngIf="!aiLoading() && !aiSuggestion() && !aiFilledFields()">2</span>
+                </div>
+                <div class="step-line"></div>
+              </div>
+              <div class="step-content">
+                <span class="step-label">AI analyzing</span>
+                <span class="step-sub" *ngIf="!aiLoading() && !aiSuggestion() && !aiFilledFields() && descLength < 20">Waiting for description</span>
+                <span class="step-sub" *ngIf="!aiLoading() && !aiSuggestion() && !aiFilledFields() && descLength >= 20">Processing soon…</span>
+                <span class="step-sub active-text" *ngIf="aiLoading()">Classifying your complaint…</span>
+                <span class="step-sub done-text" *ngIf="!!aiSuggestion() || aiFilledFields()">Analysis complete</span>
+              </div>
+            </div>
+
+            <!-- Étape 3 : suggestion -->
+            <div class="ai-progress-step"
+                 [class.step-done]="aiFilledFields()"
+                 [class.step-active]="!!aiSuggestion() && !aiDismissed() && !aiFilledFields()">
+              <div class="step-indicator">
+                <div class="step-icon">
+                  <mat-icon *ngIf="aiFilledFields()">check</mat-icon>
+                  <span *ngIf="!aiFilledFields()">3</span>
+                </div>
+              </div>
+              <div class="step-content">
+                <span class="step-label">Suggestion ready</span>
+                <span class="step-sub" *ngIf="!aiSuggestion() && !aiFilledFields()">Awaiting analysis</span>
+                <span class="step-sub active-text" *ngIf="!!aiSuggestion() && !aiDismissed() && !aiFilledFields()">Review the suggestion below ↑</span>
+                <span class="step-sub done-text" *ngIf="aiFilledFields()">Applied ✓</span>
+              </div>
+            </div>
+
+          </div><!-- /ai-progress-steps -->
+
+          <!-- Banner inline dans le widget si suggestion disponible -->
+          <div class="ai-widget-suggestion-hint" *ngIf="aiSuggestion() && !aiDismissed() && !aiFilledFields()">
+            <mat-icon>north</mat-icon>
+            <span>See suggestion banner above</span>
+          </div>
+
+          <!-- Succès après application -->
+          <div class="ai-applied-banner" *ngIf="aiFilledFields()">
+            <mat-icon>auto_awesome</mat-icon>
+            <span>Category & priority filled by AI</span>
+          </div>
+
+        </ng-container>
+      </div>
+
+      <!-- Widget : checklist progression -->
+      <div class="card widget-card">
+        <div class="widget-title">
+          <mat-icon>task_alt</mat-icon>
+          Progress
+        </div>
+        <ul class="checklist">
+          <li class="check-item" [class.done]="subjectLength >= 5">
+            <span class="check-icon">
+              <mat-icon>{{ subjectLength >= 5 ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </span>
+            <span>Subject filled</span>
+          </li>
+          <li class="check-item" [class.done]="descLength >= 20">
+            <span class="check-icon">
+              <mat-icon>{{ descLength >= 20 ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </span>
+            <span>Description (min 20 chars)</span>
+          </li>
+          <li class="check-item" [class.done]="selectedCategory">
+            <span class="check-icon">
+              <mat-icon>{{ selectedCategory ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </span>
+            <span>Category selected</span>
+          </li>
+          <li class="check-item" [class.done]="selectedPriority">
+            <span class="check-icon">
+              <mat-icon>{{ selectedPriority ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </span>
+            <span>Priority set</span>
+          </li>
+        </ul>
+        <div class="checklist-bar">
+          <div class="checklist-fill" [style.width.%]="checklistPct"></div>
+        </div>
+        <span class="checklist-pct">{{ checklistPct }}% complete</span>
+      </div>
+
+      <!-- Widget : délais SLA -->
+      <div class="card widget-card">
+        <div class="widget-title">
+          <mat-icon>schedule</mat-icon>
+          Response times
+        </div>
+        <ul class="sla-list">
+          <li class="sla-item">
+            <span class="sla-dot critical"></span>
+            <span class="sla-label">Critical</span>
+            <span class="sla-val">4h</span>
+          </li>
+          <li class="sla-item">
+            <span class="sla-dot high"></span>
+            <span class="sla-label">High</span>
+            <span class="sla-val">12h</span>
+          </li>
+          <li class="sla-item">
+            <span class="sla-dot medium"></span>
+            <span class="sla-label">Medium</span>
+            <span class="sla-val">48h</span>
+          </li>
+          <li class="sla-item">
+            <span class="sla-dot low"></span>
+            <span class="sla-label">Low</span>
+            <span class="sla-val">5 days</span>
+          </li>
+        </ul>
+      </div>
+
+    </aside>
+
+  </div><!-- /page-body -->
+
+</div><!-- /page-wrapper -->

@@ -1,0 +1,272 @@
+<div class="freelancer-portfolio">
+
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <mat-icon>work</mat-icon>
+          My Portfolio
+        </h1>
+        <p class="hero-description">Showcase your projects and professional experience to attract clients.</p>
+        <div class="hero-actions">
+          <button mat-raised-button class="cta-button" (click)="openEditPortfolio()" *ngIf="portfolio()">
+            <mat-icon>edit</mat-icon> Edit Portfolio
+          </button>
+          <button mat-raised-button class="cta-button" (click)="openCreatePortfolio()" *ngIf="!portfolio() && !loading()">
+            <mat-icon>add</mat-icon> Create Portfolio
+          </button>
+        </div>
+      </div>
+      <div class="hero-stats" *ngIf="portfolio()">
+        <div class="stat-box">
+          <div class="stat-value">{{ projects().length }}</div>
+          <div class="stat-label">Projects</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">{{ portfolio()!.viewsCount }}</div>
+          <div class="stat-label">Views</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading()">
+    <mat-icon>autorenew</mat-icon>
+    <p>Loading portfolio...</p>
+  </div>
+
+  <!-- No Portfolio -->
+  <div class="empty-portfolio" *ngIf="!loading() && !portfolio() && !showPortfolioForm()">
+    <mat-icon>work_off</mat-icon>
+    <h3>No portfolio yet</h3>
+    <p>Create your portfolio to showcase your work!</p>
+    <button mat-raised-button class="cta-button" (click)="openCreatePortfolio()">
+      <mat-icon>add</mat-icon> Create My Portfolio
+    </button>
+  </div>
+
+  <div class="content-area" *ngIf="!loading()">
+
+    <!-- Portfolio Form -->
+    <div class="form-section" *ngIf="showPortfolioForm()">
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>{{ portfolio() ? 'edit' : 'add_circle' }}</mat-icon>
+            {{ portfolio() ? 'Edit Portfolio' : 'Create Portfolio' }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="portfolioForm" class="portfolio-form">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Headline</mat-label>
+              <input matInput formControlName="headline" placeholder="e.g. Full Stack Developer">
+              <mat-icon matSuffix>title</mat-icon>
+              <mat-error *ngIf="portfolioForm.get('headline')?.hasError('required')">Headline is required</mat-error>
+              <mat-error *ngIf="portfolioForm.get('headline')?.hasError('minlength')">Minimum 3 characters</mat-error>
+              <mat-error *ngIf="portfolioForm.get('headline')?.hasError('maxlength')">Maximum 100 characters</mat-error>
+            </mat-form-field>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Location</mat-label>
+                <input matInput formControlName="location" placeholder="e.g. Tunis, Tunisia">
+                <mat-icon matSuffix>location_on</mat-icon>
+                <mat-error *ngIf="portfolioForm.get('location')?.hasError('maxlength')">Maximum 100 characters</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>GitHub URL</mat-label>
+                <input matInput formControlName="githubUrl" placeholder="https://github.com/...">
+                <mat-icon matSuffix>code</mat-icon>
+                <mat-error *ngIf="portfolioForm.get('githubUrl')?.hasError('pattern')">Invalid URL format</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>LinkedIn URL</mat-label>
+                <input matInput formControlName="linkedinUrl" placeholder="https://linkedin.com/in/...">
+                <mat-icon matSuffix>link</mat-icon>
+                <mat-error *ngIf="portfolioForm.get('linkedinUrl')?.hasError('pattern')">Invalid URL format</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-actions">
+              <button mat-button (click)="closePortfolioForm()">Cancel</button>
+              <button mat-raised-button class="save-btn" (click)="savePortfolio()" [disabled]="portfolioForm.invalid">
+                <mat-icon>save</mat-icon> {{ portfolio() ? 'Update' : 'Create' }}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Portfolio Info -->
+    <div class="portfolio-info" *ngIf="portfolio() && !showPortfolioForm()">
+      <mat-card class="info-card">
+        <mat-card-content>
+          <div class="info-header">
+            <div class="info-avatar">{{ userFullName().substring(0,2).toUpperCase() }}</div>
+            <div class="info-details">
+              <h2>{{ userFullName() }} — {{ portfolio()!.headline }}</h2>
+              <div class="info-links">
+                <span *ngIf="portfolio()!.location" class="info-chip">
+                  <mat-icon>location_on</mat-icon> {{ portfolio()!.location }}
+                </span>
+                <a *ngIf="portfolio()!.githubUrl" [href]="portfolio()!.githubUrl" target="_blank" class="info-chip link">
+                  <mat-icon>code</mat-icon> GitHub
+                </a>
+                <a *ngIf="portfolio()!.linkedinUrl" [href]="portfolio()!.linkedinUrl" target="_blank" class="info-chip link">
+                  <mat-icon>link</mat-icon> LinkedIn
+                </a>
+              </div>
+              <div class="visibility-toggle">
+                <mat-icon>{{ portfolio()!.isPublic ? 'visibility' : 'visibility_off' }}</mat-icon>
+                <span>{{ portfolio()!.isPublic ? 'Public' : 'Private' }}</span>
+                <button mat-stroked-button (click)="toggleVisibility()"
+                        [style.color]="portfolio()!.isPublic ? '#e53935' : '#2ecc71'">
+                  {{ portfolio()!.isPublic ? 'Make Private' : 'Make Public' }}
+                </button>
+              </div>
+              <div class="views-counter">
+                <mat-icon>visibility</mat-icon>
+                <span>{{ portfolio()!.viewsCount }} views</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Projects Section -->
+    <div class="projects-section" *ngIf="portfolio()">
+      <div class="section-header">
+        <h2>Projects ({{ projects().length }})</h2>
+        <button mat-raised-button class="add-btn" (click)="openAddProject()" *ngIf="!showProjectForm()">
+          <mat-icon>add</mat-icon> Add Project
+        </button>
+      </div>
+
+      <!-- Project Form -->
+      <mat-card class="form-card" *ngIf="showProjectForm()">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>{{ editingProject() ? 'edit' : 'add_circle' }}</mat-icon>
+            {{ editingProject() ? 'Edit Project' : 'Add New Project' }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="projectForm" class="project-form">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Project Title</mat-label>
+                <input matInput formControlName="title" placeholder="e.g. E-commerce App">
+                <mat-icon matSuffix>title</mat-icon>
+                <mat-error *ngIf="projectForm.get('title')?.hasError('required')">Title is required</mat-error>
+                <mat-error *ngIf="projectForm.get('title')?.hasError('minlength')">Minimum 3 characters</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Tech Stack</mat-label>
+                <input matInput formControlName="techStack" placeholder="e.g. Angular, Spring Boot">
+                <mat-icon matSuffix>build</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="3"></textarea>
+              <mat-error *ngIf="projectForm.get('description')?.hasError('maxlength')">Maximum 500 characters</mat-error>
+            </mat-form-field>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Start Date</mat-label>
+                <input matInput type="date" formControlName="startDate">
+                <mat-icon matSuffix>calendar_today</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>End Date</mat-label>
+                <input matInput type="date" formControlName="endDate">
+                <mat-icon matSuffix>event</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>GitHub URL</mat-label>
+                <input matInput formControlName="githubUrl">
+                <mat-icon matSuffix>code</mat-icon>
+                <mat-error *ngIf="projectForm.get('githubUrl')?.hasError('pattern')">Invalid URL format</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Demo URL</mat-label>
+                <input matInput formControlName="demoUrl">
+                <mat-icon matSuffix>open_in_new</mat-icon>
+                <mat-error *ngIf="projectForm.get('demoUrl')?.hasError('pattern')">Invalid URL format</mat-error>
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Images URL</mat-label>
+              <input matInput formControlName="images" placeholder="https://...">
+              <mat-icon matSuffix>image</mat-icon>
+              <mat-error *ngIf="projectForm.get('images')?.hasError('pattern')">Invalid URL format</mat-error>
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button mat-button (click)="closeProjectForm()">Cancel</button>
+              <button mat-raised-button class="save-btn" (click)="saveProject()" [disabled]="projectForm.invalid">
+                <mat-icon>save</mat-icon> {{ editingProject() ? 'Update' : 'Add' }}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Projects Grid -->
+      <div class="projects-grid" *ngIf="projects().length > 0">
+        <mat-card class="project-card" *ngFor="let proj of projects()">
+          <mat-card-content>
+            <div class="project-header">
+              <div class="project-icon">
+                <mat-icon>folder</mat-icon>
+              </div>
+              <div class="project-actions">
+                <button mat-icon-button (click)="openEditProject(proj)" matTooltip="Edit">
+                  <mat-icon class="edit-icon">edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="deleteProject(proj.id)" matTooltip="Delete">
+                  <mat-icon class="delete-icon">delete</mat-icon>
+                </button>
+              </div>
+            </div>
+            <h3 class="project-title">{{ proj.title }}</h3>
+            <p class="project-desc" *ngIf="proj.description">{{ proj.description }}</p>
+            <div class="tech-badge" *ngIf="proj.techStack">
+              <mat-icon>build</mat-icon> {{ proj.techStack }}
+            </div>
+            <div class="project-links">
+              <a *ngIf="proj.githubUrl" [href]="proj.githubUrl" target="_blank" class="proj-link">
+                <mat-icon>code</mat-icon> GitHub
+              </a>
+              <a *ngIf="proj.demoUrl" [href]="proj.demoUrl" target="_blank" class="proj-link">
+                <mat-icon>open_in_new</mat-icon> Demo
+              </a>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="empty-projects" *ngIf="projects().length === 0 && !showProjectForm()">
+        <mat-icon>folder_open</mat-icon>
+        <p>No projects yet — add your first project!</p>
+      </div>
+    </div>
+
+  </div>
+</div>

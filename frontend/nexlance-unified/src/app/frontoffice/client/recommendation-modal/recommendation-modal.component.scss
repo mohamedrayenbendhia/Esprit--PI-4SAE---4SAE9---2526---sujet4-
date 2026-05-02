@@ -1,0 +1,315 @@
+.recommendation-modal {
+  background: white;
+  border-radius: 20px;
+  max-width: 650px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem;
+    background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+    color: white;
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      &::before {
+        content: '🎯';
+        font-size: 1.75rem;
+      }
+    }
+
+    .close-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+
+      mat-icon {
+        color: white;
+        font-size: 24px;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 2rem;
+    max-height: calc(90vh - 100px);
+    overflow-y: auto;
+
+    .freelancer-info-card {
+      margin-bottom: 2rem;
+
+      .label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #475569;
+        margin: 0 0 1rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .freelancer-card {
+        display: flex;
+        gap: 1.25rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #F0F9FF, #E0F2FE);
+        border-radius: 16px;
+        border: 2px solid #BAE6FD;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+        .avatar {
+          width: 70px;
+          height: 70px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #0EA5E9, #0284C7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 2.25rem;
+          flex-shrink: 0;
+          box-shadow: 0 4px 6px rgba(14, 165, 233, 0.4);
+        }
+
+        .info {
+          flex: 1;
+
+          h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 0.5rem 0;
+          }
+
+          p {
+            margin: 0.25rem 0;
+            font-size: 0.875rem;
+            color: #475569;
+
+            &.title {
+              font-weight: 600;
+            }
+
+            &.details {
+              color: #64748b;
+            }
+          }
+        }
+      }
+    }
+
+    form {
+      .form-group {
+        margin-bottom: 1.5rem;
+
+        label {
+          display: block;
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 0.5rem;
+          font-size: 0.875rem;
+        }
+
+        .full-width {
+          width: 100%;
+        }
+
+        ::ng-deep {
+          .mat-mdc-form-field {
+            width: 100%;
+
+            .mat-mdc-text-field-wrapper {
+              border-radius: 8px;
+            }
+
+            .mdc-text-field--outlined {
+              .mdc-notched-outline {
+                .mdc-notched-outline__leading,
+                .mdc-notched-outline__notch,
+                .mdc-notched-outline__trailing {
+                  border-color: #D1D5DB;
+                }
+              }
+
+              &:hover .mdc-notched-outline {
+                .mdc-notched-outline__leading,
+                .mdc-notched-outline__notch,
+                .mdc-notched-outline__trailing {
+                  border-color: #4299e1;
+                }
+              }
+
+              &.mdc-text-field--focused .mdc-notched-outline {
+                .mdc-notched-outline__leading,
+                .mdc-notched-outline__notch,
+                .mdc-notched-outline__trailing {
+                  border-color: #4299e1;
+                  border-width: 2px;
+                }
+              }
+            }
+
+            .mat-mdc-select-value,
+            .mat-mdc-input-element {
+              color: #111827;
+              font-size: 0.875rem;
+            }
+
+            textarea.mat-mdc-input-element {
+              min-height: 120px;
+            }
+          }
+
+          .mat-mdc-option {
+            font-size: 0.875rem;
+
+            &:hover {
+              background: #EFF6FF;
+            }
+
+            &.mat-mdc-option-active {
+              background: #DBEAFE;
+            }
+          }
+        }
+
+        .character-count {
+          text-align: right;
+          font-size: 0.75rem;
+          color: #6B7280;
+          margin-top: 0.25rem;
+        }
+      }
+
+      .info-box {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #EFF6FF;
+        border: 1px solid #BFDBFE;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+
+        mat-icon {
+          color: #4299e1;
+          flex-shrink: 0;
+        }
+
+        p {
+          margin: 0;
+          font-size: 0.875rem;
+          color: #3182ce;
+        }
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+
+        .btn {
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-size: 0.875rem;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          border: none;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+
+          &.btn-secondary {
+            background: #F3F4F6;
+            color: #4B5563;
+
+            &:hover {
+              background: #E5E7EB;
+            }
+          }
+
+          &.btn-primary {
+            background: #4299e1;
+            color: white;
+
+            &:hover {
+              background: #3182ce;
+            }
+
+            &:disabled {
+              background: #D1D5DB;
+              cursor: not-allowed;
+              opacity: 0.6;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .recommendation-modal {
+    max-width: 95vw;
+    max-height: 95vh;
+
+    .modal-header {
+      padding: 1rem;
+
+      h2 {
+        font-size: 1rem;
+      }
+    }
+
+    .modal-body {
+      padding: 1rem;
+
+      .freelancer-info-card .freelancer-card {
+        flex-direction: column;
+        text-align: center;
+
+        .avatar {
+          margin: 0 auto;
+        }
+      }
+
+      form .modal-actions {
+        flex-direction: column;
+
+        .btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    }
+  }
+}

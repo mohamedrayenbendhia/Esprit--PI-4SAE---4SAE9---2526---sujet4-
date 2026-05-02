@@ -1,0 +1,137 @@
+<div class="page-wrapper">
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-text">
+      <h1>My Organizations</h1>
+      <p>Manage your professional spaces and track their activity</p>
+    </div>
+    <button class="btn-create" (click)="create()">
+      <mat-icon>add</mat-icon>
+      Create Organization
+    </button>
+  </div>
+
+  <!-- ── Stats bar ────────────────────────────────────────────── -->
+  @if (!isLoading() && orgs().length > 0) {
+    <div class="stats-bar">
+      <span class="stat-chip total">
+        <mat-icon>domain</mat-icon>
+        {{ orgs().length }} organization{{ orgs().length > 1 ? 's' : '' }}
+      </span>
+      @if (activeCount() > 0) {
+        <span class="stat-chip active">
+          <mat-icon>check_circle</mat-icon>
+          {{ activeCount() }} active{{ activeCount() > 1 ? 's' : '' }}
+        </span>
+      }
+      @if (pendingCount() > 0) {
+        <span class="stat-chip pending">
+          <mat-icon>hourglass_empty</mat-icon>
+          {{ pendingCount() }} under review
+        </span>
+      }
+    </div>
+  }
+
+  <!-- ── Loading ──────────────────────────────────────────────── -->
+  @if (isLoading()) {
+    <div class="loading-center">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
+
+  <!-- ── Error ────────────────────────────────────────────────── -->
+  @if (error()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- ── Empty state ──────────────────────────────────────────── -->
+  @if (!isLoading() && orgs().length === 0 && !error()) {
+    <div class="empty-state">
+      <div class="empty-icon-wrap">
+        <mat-icon>domain_add</mat-icon>
+      </div>
+      <h3>No organizations yet</h3>
+      <p>Create your first professional space and invite collaborators.</p>
+      <button class="btn-empty-create" (click)="create()">
+        <mat-icon>add</mat-icon>
+        Create your first organization
+      </button>
+    </div>
+  }
+
+  <!-- ── Grid ─────────────────────────────────────────────────── -->
+  <div class="org-grid">
+    @for (org of orgs(); track org.id) {
+      <div class="org-card">
+
+        <!-- Accent bar -->
+        <div class="card-accent accent-{{ statusClass(org.status) }}"></div>
+
+        <!-- Logo -->
+        <div class="card-logo-zone">
+          @if (org.logoUrl) {
+            <img [src]="org.logoUrl" [alt]="org.name" class="org-logo">
+          } @else {
+            <div class="org-logo-placeholder"><mat-icon>domain</mat-icon></div>
+          }
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+
+          <div class="card-name-row">
+            <h3>{{ org.name }}</h3>
+            <span class="status-badge status-{{ statusClass(org.status) }}">
+              {{ statusLabel(org.status) }}
+            </span>
+          </div>
+
+          <div class="tags-row">
+            <span class="tag tag-type">{{ typeLabel(org.type) }}</span>
+            <span class="tag tag-size">{{ sizeLabel(org.size) }}</span>
+          </div>
+
+          @if (org.location) {
+            <div class="card-location">
+              <mat-icon>place</mat-icon>
+              {{ org.location }}
+            </div>
+          }
+
+          <div class="card-meta">
+            <div class="meta-item">
+              <mat-icon>star</mat-icon>
+              <strong>{{ org.averageRating | number:'1.1-1' }}</strong>
+            </div>
+            <div class="meta-item">
+              <mat-icon>check_circle</mat-icon>
+              <strong>{{ org.completedProjectsCount }}</strong>&nbsp;projects
+            </div>
+            <div class="meta-item">
+              <mat-icon>reviews</mat-icon>
+              <strong>{{ org.reviewCount }}</strong>&nbsp;reviews
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="card-actions">
+          <button class="card-btn" (click)="view(org.id)">
+            <mat-icon>visibility</mat-icon> View
+          </button>
+          <button class="card-btn primary-btn" (click)="settings(org.id)">
+            <mat-icon>settings</mat-icon> Manage
+          </button>
+        </div>
+
+      </div>
+    }
+  </div>
+
+</div>

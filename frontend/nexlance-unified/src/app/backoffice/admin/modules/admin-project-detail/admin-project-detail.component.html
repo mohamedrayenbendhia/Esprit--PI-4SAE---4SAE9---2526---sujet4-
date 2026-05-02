@@ -1,0 +1,358 @@
+<div class="admin-project-detail-container">
+  @if (loading) {
+    <div class="loading-container">
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      <p>{{ 'admin.projects.loading' | translate }}</p>
+    </div>
+  } @else if (project) {
+    <!-- Page Header -->
+    <div class="page-header">
+      <button mat-icon-button routerLink="/backoffice/admin/projects">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-content">
+        <h1>{{ project.title || ('admin.projects.detail.title' | translate) }}</h1>
+        <mat-chip [highlighted]="true" [ngClass]="getProjectStatusClass(project.status)">
+          <mat-icon>{{ getProjectStatusIcon(project.status) }}</mat-icon>
+          {{ project.status }}
+        </mat-chip>
+      </div>
+      <button mat-icon-button (click)="loadProject(project.id!)" matTooltip="Refresh">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-row">
+      <mat-card class="stat-card">
+        <div class="stat-info">
+          <span class="stat-value">{{ getMilestoneCountByStatus('PENDING') }}</span>
+          <span class="stat-label">Pending</span>
+        </div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-info">
+          <span class="stat-value">{{ getMilestoneCountByStatus('IN_PROGRESS') }}</span>
+          <span class="stat-label">In Progress</span>
+        </div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-info">
+          <span class="stat-value">{{ getPendingValidationCount() }}</span>
+          <span class="stat-label">Awaiting Review</span>
+        </div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-info">
+          <span class="stat-value">{{ getApprovedCount() }}</span>
+          <span class="stat-label">Approved</span>
+        </div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-info">
+          <span class="stat-value">{{ getMilestoneCountByStatus('REJECTED') }}</span>
+          <span class="stat-label">Rejected</span>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="content-grid">
+      <!-- Project Info Card -->
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>info</mat-icon>
+            {{ 'admin.projects.detail.projectInfo' | translate }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-row">
+            <span class="label">{{ 'admin.projects.detail.projectId' | translate }}</span>
+            <span class="value mono">{{ project.id }}</span>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="info-row">
+            <span class="label">{{ 'admin.projects.detail.client' | translate }}</span>
+            <div class="value user-info">
+              @if (client) {
+                <div class="user-avatar">{{ client.firstName.charAt(0) }}{{ client.lastName.charAt(0) }}</div>
+                <div>
+                  <span class="user-name">{{ client.firstName }} {{ client.lastName }}</span>
+                  <span class="user-email">{{ client.email }}</span>
+                </div>
+              } @else {
+                <span class="mono">{{ project.clientId }}</span>
+              }
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="info-row">
+            <span class="label">{{ 'admin.projects.detail.freelancer' | translate }}</span>
+            <div class="value user-info">
+              @if (freelancer) {
+                <div class="user-avatar freelancer">{{ freelancer.firstName.charAt(0) }}{{ freelancer.lastName.charAt(0) }}</div>
+                <div>
+                  <span class="user-name">{{ freelancer.firstName }} {{ freelancer.lastName }}</span>
+                  <span class="user-email">{{ freelancer.email }}</span>
+                </div>
+              } @else {
+                <span class="mono">{{ project.freelanceId }}</span>
+              }
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="info-row">
+            <span class="label">{{ 'admin.projects.detail.startDate' | translate }}</span>
+            <span class="value">{{ formatDate(project.startDate) }}</span>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="info-row">
+            <span class="label">{{ 'admin.projects.detail.endDate' | translate }}</span>
+            <span class="value">{{ formatDate(project.endDate) }}</span>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="info-row">
+            <span class="label">Created</span>
+            <span class="value">{{ formatDate(project.createdAt) }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Progress & Timeline Card -->
+      <mat-card class="progress-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>trending_up</mat-icon>
+            Progress & Timeline
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="progress-section">
+            <div class="progress-header">
+              <span class="progress-label">Overall Progress</span>
+              <span class="progress-value" [class.complete]="(project.progress || 0) === 100">{{ project.progress || 0 }}%</span>
+            </div>
+            <mat-progress-bar mode="determinate" [value]="project.progress || 0" class="main-progress"></mat-progress-bar>
+            <div class="progress-detail">
+              {{ getApprovedCount() }} / {{ project.milestones?.length || 0 }} milestones completed
+            </div>
+          </div>
+
+          <div class="progress-section">
+            <div class="progress-header">
+              <span class="progress-label">Timeline</span>
+              <span class="progress-value" [class.overdue]="getRemainingDays() === 0 && project.status !== 'COMPLETED'">{{ getTimelinePercentage() }}%</span>
+            </div>
+            <mat-progress-bar mode="determinate" [value]="getTimelinePercentage()" color="accent" class="timeline-progress"></mat-progress-bar>
+            <div class="timeline-info">
+              <span>{{ getElapsedDays() }} days elapsed</span>
+              <span>{{ getRemainingDays() }} days remaining</span>
+            </div>
+          </div>
+
+          <div class="duration-info">
+            <div class="duration-item">
+              <mat-icon>timer</mat-icon>
+              <span>Total Duration: <strong>{{ getProjectDuration() }} days</strong></span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Requirements & Deliverables -->
+    @if (project.requirements || project.deliverables) {
+      <div class="details-grid">
+        @if (project.requirements) {
+          <mat-card class="detail-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>checklist</mat-icon>
+                Requirements
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="detail-text">{{ project.requirements }}</p>
+            </mat-card-content>
+          </mat-card>
+        }
+        @if (project.deliverables) {
+          <mat-card class="detail-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>inventory_2</mat-icon>
+                Deliverables
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="detail-text">{{ project.deliverables }}</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    }
+
+    <!-- Alert for pending validation -->
+    @if (getPendingValidationCount() > 0) {
+      <mat-card class="alert-card warning">
+        <mat-icon>warning</mat-icon>
+        <div class="alert-content">
+          <strong>{{ getPendingValidationCount() }} milestone(s) awaiting review</strong>
+          <p>These milestones have been submitted by the freelancer and require validation.</p>
+        </div>
+      </mat-card>
+    }
+
+    <!-- Milestones Table -->
+    <mat-card class="milestones-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>flag</mat-icon>
+          {{ 'admin.projects.detail.milestones' | translate }}
+          <span class="milestone-count">({{ project.milestones?.length || 0 }})</span>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (project.milestones && project.milestones.length > 0) {
+          <table mat-table [dataSource]="project.milestones" class="milestones-table">
+            <ng-container matColumnDef="order">
+              <th mat-header-cell *matHeaderCellDef>#</th>
+              <td mat-cell *matCellDef="let milestone">{{ milestone.orderIndex }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="title">
+              <th mat-header-cell *matHeaderCellDef>{{ 'admin.projects.detail.milestoneTitle' | translate }}</th>
+              <td mat-cell *matCellDef="let milestone">
+                <div class="milestone-title-cell">
+                  <span class="milestone-name">{{ milestone.title }}</span>
+                  @if (milestone.description) {
+                    <span class="milestone-desc">{{ milestone.description }}</span>
+                  }
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>{{ 'admin.projects.detail.milestoneStatus' | translate }}</th>
+              <td mat-cell *matCellDef="let milestone">
+                <mat-chip [highlighted]="true" [ngClass]="'chip-' + milestone.status.toLowerCase()">
+                  <mat-icon class="chip-icon">{{ getMilestoneStatusIcon(milestone.status) }}</mat-icon>
+                  {{ milestone.status }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="dueDate">
+              <th mat-header-cell *matHeaderCellDef>{{ 'admin.projects.detail.dueDate' | translate }}</th>
+              <td mat-cell *matCellDef="let milestone">
+                <span [class.overdue-text]="isOverdue(milestone)">
+                  {{ formatDate(milestone.dueDate) }}
+                  @if (isOverdue(milestone)) {
+                    <mat-icon class="overdue-icon" matTooltip="Overdue">warning</mat-icon>
+                  }
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="submittedAt">
+              <th mat-header-cell *matHeaderCellDef>{{ 'admin.projects.detail.submittedOn' | translate }}</th>
+              <td mat-cell *matCellDef="let milestone">
+                @if (getDaysSinceSubmission(milestone) !== null) {
+                  <span [class.alert]="getDaysSinceSubmission(milestone)! > 7">
+                    {{ getDaysSinceSubmission(milestone) }} days ago
+                  </span>
+                } @else {
+                  <span class="not-submitted">—</span>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="revisions">
+              <th mat-header-cell *matHeaderCellDef>{{ 'admin.projects.detail.revisions' | translate }}</th>
+              <td mat-cell *matCellDef="let milestone">
+                <span [class.has-revisions]="getMilestoneRevisionCount(milestone) > 0">
+                  {{ getMilestoneRevisionCount(milestone) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>{{ 'admin.projects.detail.actions' | translate }}</th>
+              <td mat-cell *matCellDef="let milestone">
+                <button mat-icon-button 
+                        [routerLink]="['/backoffice/admin/projects', project.id, 'milestones', milestone.id, 'mediate']"
+                        [matTooltip]="'admin.projects.detail.mediate' | translate"
+                        color="primary">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                [class.submitted-row]="row.status === 'SUBMITTED'"
+                [class.overdue-row]="isOverdue(row)"></tr>
+          </table>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>playlist_add</mat-icon>
+            <p>{{ 'admin.projects.detail.noMilestones' | translate }}</p>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Admin Actions -->
+    <mat-card class="actions-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>admin_panel_settings</mat-icon>
+          Admin Actions
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="admin-actions">
+          <button mat-raised-button color="primary" 
+                  (click)="updateProjectStatus(ProjectStatus.ACTIVE)"
+                  [disabled]="project.status === ProjectStatus.ACTIVE"
+                  matTooltip="Set project as active">
+            <mat-icon>play_circle</mat-icon>
+            Activate
+          </button>
+          <button mat-raised-button color="accent" 
+                  (click)="updateProjectStatus(ProjectStatus.ON_HOLD)"
+                  [disabled]="project.status === ProjectStatus.ON_HOLD"
+                  matTooltip="Put project on hold">
+            <mat-icon>pause_circle</mat-icon>
+            Put on Hold
+          </button>
+          <button mat-raised-button 
+                  style="background-color: #4caf50; color: white;"
+                  (click)="updateProjectStatus(ProjectStatus.COMPLETED)"
+                  [disabled]="project.status === ProjectStatus.COMPLETED"
+                  matTooltip="Mark project as completed">
+            <mat-icon>check_circle</mat-icon>
+            Complete
+          </button>
+          <button mat-raised-button color="warn" 
+                  (click)="updateProjectStatus(ProjectStatus.CANCELLED)"
+                  [disabled]="project.status === ProjectStatus.CANCELLED"
+                  matTooltip="Cancel this project">
+            <mat-icon>cancel</mat-icon>
+            Cancel
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  } @else {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <h3>Project not found</h3>
+      <button mat-raised-button color="primary" routerLink="/backoffice/admin/projects">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Projects
+      </button>
+    </div>
+  }
+</div>

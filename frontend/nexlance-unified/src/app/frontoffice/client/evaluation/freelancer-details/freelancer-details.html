@@ -1,0 +1,129 @@
+<div class="details-container">
+  <div class="header">
+    <button class="btn-back" (click)="goBack()">← Back</button>
+    <h2>Freelancer Details</h2>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">Loading...</div>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+  <div *ngIf="details && !isLoading" class="details-content">
+    
+    <!-- Header with email and badges -->
+    <div class="freelancer-header">
+      <h3>{{ details.freelancerEmail }}</h3>
+      <div class="badges-container">
+        <span *ngFor="let badge of details.badges" class="badge-tag" 
+              [attr.title]="badge.badge.description">
+          {{ badge.badge.icon }} {{ badge.badge.name }}
+        </span>
+        <span *ngIf="!details.badges?.length" class="no-badge">
+          No badges
+        </span>
+      </div>
+    </div>
+
+    <!-- Global statistics -->
+    <div class="stats-card">
+      <h4>Global Statistics</h4>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">{{ details.totalEvaluations }}</div>
+          <div class="stat-label">Evaluations</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ details.averageRating }}/5</div>
+          <div class="stat-label">Average Rating</div>
+        </div>
+      </div>
+      <div class="rating-bar-container">
+        <div class="rating-bar" [style.width.%]="getRatingPercent(details.averageRating)"></div>
+      </div>
+    </div>
+
+    <!-- CHARTS SECTION -->
+    <div class="charts-grid">
+      <!-- Radar Chart -->
+      <div class="chart-card">
+        <h4>Skills</h4>
+        <div class="chart-container">
+          <canvas #radarChart></canvas>
+        </div>
+      </div>
+
+      <!-- Doughnut Chart -->
+      <div class="chart-card">
+        <h4>Rating Distribution</h4>
+        <div class="chart-container">
+          <canvas #doughnutChart></canvas>
+        </div>
+      </div>
+
+      <!-- Line Chart -->
+      <div class="chart-card full-width" *ngIf="details.evaluations?.length >= 2">
+        <h4>Rating Evolution</h4>
+        <div class="chart-container">
+          <canvas #lineChart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rating distribution with percentages -->
+    <div class="distribution-card">
+      <h4>Rating Distribution</h4>
+      <div class="distribution-item" *ngFor="let star of [5,4,3,2,1]">
+        <span class="stars-label">{{star}} stars</span>
+        <div class="distribution-bar">
+          <div class="distribution-fill" [class]="'star-'+star"
+               [style.width.%]="(details.distribution?.[star+'stars'] / details.totalEvaluations) * 100">
+          </div>
+        </div>
+        <span class="distribution-value">
+          {{ ((details.distribution?.[star+'stars'] / details.totalEvaluations) * 100 || 0).toFixed(1) }}%
+        </span>
+      </div>
+    </div>
+
+    <!-- Evaluations list with Show more button -->
+    <div class="evaluations-card">
+      <div class="evaluations-header">
+        <h4>All Evaluations ({{ details.evaluations?.length }})</h4>
+        <button *ngIf="details.evaluations?.length > 5" class="btn-show-more" (click)="toggleEvaluations()">
+          {{ showAllEvaluations ? 'Show less' : 'Show more' }}
+        </button>
+      </div>
+      
+      <div class="evaluations-list">
+        <div *ngFor="let eval of displayedEvaluations" class="evaluation-item">
+          <div class="eval-header">
+            <span class="eval-date">{{ eval.createdAt | date:'dd/MM/yyyy' }}</span>
+          
+          </div>
+          
+          <div class="eval-rating">
+            <div class="stars">
+              <span *ngFor="let star of getStars(eval.ratingGlobal)" class="star filled">★</span>
+              <span *ngFor="let star of getStars(5 - eval.ratingGlobal)" class="star">☆</span>
+            </div>
+            <span class="rating-value">{{ eval.ratingGlobal }}/5</span>
+          </div>
+
+          <div class="eval-scores">
+            <span>Quality: {{ eval.qualityScore }}/5</span>
+            <span>Deadline: {{ eval.deadlineScore }}/5</span>
+            <span>Comm: {{ eval.communicationScore }}/5</span>
+            <span>Pro: {{ eval.professionalismScore }}/5</span>
+          </div>
+
+          <div *ngIf="eval.comment" class="eval-comment">
+            "{{ eval.comment }}"
+          </div>
+
+          <div *ngIf="eval.responseText" class="eval-response">
+            <strong>Response:</strong> {{ eval.responseText }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>  
+</div>

@@ -1,0 +1,67 @@
+<!-- Loading state -->
+@if (isLoading()) {
+  <div class="map-loading">
+    <mat-spinner diameter="32" />
+    <span>Loading map…</span>
+  </div>
+}
+
+<!-- Error state -->
+@if (error() && !isLoading()) {
+  <div class="map-error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+<!-- Map rendered when geocoded -->
+@if (!isLoading() && geo()?.geocoded) {
+  <div class="map-wrapper">
+    <div #mapContainer class="map-canvas"></div>
+
+    <div class="map-footer">
+      <mat-icon class="map-pin-icon">location_on</mat-icon>
+      <span class="map-address">{{ geo()?.address }}</span>
+      <a class="map-osm-link"
+         [href]="'https://www.openstreetmap.org/?mlat=' + geo()?.latitude + '&mlon=' + geo()?.longitude"
+         target="_blank"
+         rel="noopener noreferrer"
+         matTooltip="Open in OpenStreetMap">
+        <mat-icon>open_in_new</mat-icon>
+      </a>
+    </div>
+  </div>
+}
+
+<!-- Not geocoded state -->
+@if (!isLoading() && !geo()?.geocoded && !error()) {
+  <div class="map-empty">
+    <mat-icon>location_off</mat-icon>
+    <p class="map-empty-title">Location not yet geocoded</p>
+
+    @if (geo()?.address) {
+      <p class="map-empty-address">
+        Registered address: <strong>{{ geo()?.address }}</strong>
+      </p>
+    } @else {
+      <p class="map-empty-address">No address registered on this profile.</p>
+    }
+
+    @if (canGeocode && geo()?.address) {
+      <button mat-raised-button color="primary"
+              [disabled]="isGeocoding()"
+              (click)="triggerGeocode()">
+        @if (isGeocoding()) {
+          <mat-spinner diameter="16" class="btn-spinner"></mat-spinner>
+          Geocoding…
+        } @else {
+          <mat-icon>my_location</mat-icon>
+          Place on map
+        }
+      </button>
+      <p class="map-empty-hint">
+        Will use the registered address to find GPS coordinates.
+      </p>
+    }
+  </div>
+}

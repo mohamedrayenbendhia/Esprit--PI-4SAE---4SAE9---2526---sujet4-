@@ -1,0 +1,266 @@
+<div class="sidebar" [class.collapsed]="isCollapsed()">
+  <!-- Header avec logo -->
+  <div class="sidebar-header">
+    <img src="assets/images/nexlance-logo.svg" alt="NexLance" class="logo-full" *ngIf="!isCollapsed()">
+    <img src="assets/images/nexlance-icon.svg" alt="NexLance" class="logo-icon" *ngIf="isCollapsed()">
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Profil utilisateur -->
+  <div class="user-profile" *ngIf="currentUser()">
+    <div class="user-avatar">
+      {{ userInitials }}
+    </div>
+    <div class="user-info" *ngIf="!isCollapsed()">
+      <div class="user-name">{{ userFullName }}</div>
+      <div class="user-role">{{ userRoleLabelKey | translate }}</div>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Navigation Menu -->
+  <nav class="sidebar-nav">
+    <mat-nav-list>
+      <!-- Dashboard -->
+      <a mat-list-item 
+         routerLink="/backoffice/admin/dashboard" 
+         routerLinkActive="active"
+         [matTooltip]="isCollapsed() ? ('nav.dashboard' | translate) : ''"
+         matTooltipPosition="right">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle *ngIf="!isCollapsed()">{{ 'nav.dashboard' | translate }}</span>
+      </a>
+
+      <!-- Users Module Group -->
+      <div class="nav-group" [class.expanded]="isGroupExpanded('users')" *ngIf="isAdmin()">
+        <a mat-list-item class="group-trigger" (click)="toggleGroup('users')"
+           [matTooltip]="isCollapsed() ? ('nav.usersModule' | translate) : ''"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>people</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed()">{{ 'nav.usersModule' | translate }}</span>
+          <mat-icon class="expand-icon" *ngIf="!isCollapsed()">{{ isGroupExpanded('users') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </a>
+        <div class="group-items" *ngIf="isGroupExpanded('users') && !isCollapsed()">
+          <a mat-list-item routerLink="/backoffice/admin/users" routerLinkActive="active">
+            <mat-icon matListItemIcon>manage_accounts</mat-icon>
+            <span matListItemTitle>{{ 'nav.users' | translate }}</span>
+          </a>
+          <a mat-list-item routerLink="/backoffice/admin/kyc" routerLinkActive="active">
+            <mat-icon matListItemIcon>verified_user</mat-icon>
+            <span matListItemTitle>{{ 'nav.kycVerifications' | translate }}</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Job Offers Module Group -->
+      <div class="nav-group" [class.expanded]="isGroupExpanded('jobs')" *ngIf="isAdmin()">
+        <a mat-list-item class="group-trigger" (click)="toggleGroup('jobs')"
+           [matTooltip]="isCollapsed() ? ('nav.jobOffers' | translate) : ''"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>work</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed()">{{ 'nav.jobOffers' | translate }}</span>
+          <mat-icon class="expand-icon" *ngIf="!isCollapsed()">{{ isGroupExpanded('jobs') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </a>
+        <div class="group-items" *ngIf="isGroupExpanded('jobs') && !isCollapsed()">
+          <a mat-list-item routerLink="/backoffice/admin/jobs" routerLinkActive="active">
+            <mat-icon matListItemIcon>list_alt</mat-icon>
+            <span matListItemTitle>{{ 'nav.manageJobs' | translate }}</span>
+          </a>
+          <a mat-list-item routerLink="/backoffice/admin/analytics/jobs" routerLinkActive="active">
+            <mat-icon matListItemIcon>analytics</mat-icon>
+            <span matListItemTitle>{{ 'nav.jobAnalytics' | translate }}</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Projects Module Group -->
+      <div class="nav-group" [class.expanded]="isGroupExpanded('projects')" *ngIf="isAdmin()">
+        <a mat-list-item class="group-trigger" (click)="toggleGroup('projects')"
+           [matTooltip]="isCollapsed() ? ('nav.projects' | translate) : ''"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>folder_open</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed()">{{ 'nav.projects' | translate }}</span>
+          <mat-icon class="expand-icon" *ngIf="!isCollapsed()">{{ isGroupExpanded('projects') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </a>
+        <div class="group-items" *ngIf="isGroupExpanded('projects') && !isCollapsed()">
+          <a mat-list-item routerLink="/backoffice/admin/projects" routerLinkActive="active">
+            <mat-icon matListItemIcon>view_list</mat-icon>
+            <span matListItemTitle>{{ 'nav.manageProjects' | translate }}</span>
+          </a>
+          <a mat-list-item routerLink="/backoffice/admin/analytics/milestones" routerLinkActive="active">
+            <mat-icon matListItemIcon>timeline</mat-icon>
+            <span matListItemTitle>{{ 'nav.milestoneAnalytics' | translate }}</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Recommendations Module Group -->
+      <div class="nav-group" [class.expanded]="isGroupExpanded('recommendations')" *ngIf="isAdmin()">
+        <a mat-list-item class="group-trigger" (click)="toggleGroup('recommendations')"
+           [matTooltip]="isCollapsed() ? ('nav.recommendations' | translate) : ''"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>recommend</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed()">{{ 'nav.recommendations' | translate }}</span>
+          <mat-icon class="expand-icon" *ngIf="!isCollapsed()">{{ isGroupExpanded('recommendations') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </a>
+        <div class="group-items" *ngIf="isGroupExpanded('recommendations') && !isCollapsed()">
+          <a mat-list-item routerLink="/backoffice/admin/recommendations" routerLinkActive="active">
+            <mat-icon matListItemIcon>thumb_up</mat-icon>
+            <span matListItemTitle>{{ 'nav.manageRecommendations' | translate }}</span>
+          </a>
+          <a mat-list-item routerLink="/backoffice/admin/analytics/recommendations" routerLinkActive="active">
+            <mat-icon matListItemIcon>insights</mat-icon>
+            <span matListItemTitle>{{ 'nav.recommendationAnalytics' | translate }}</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- About Me Module Group -->
+      <div class="nav-group" [class.expanded]="isGroupExpanded('aboutme')">
+        <a mat-list-item class="group-trigger" (click)="toggleGroup('aboutme')"
+           [matTooltip]="isCollapsed() ? ('nav.aboutMe' | translate) : ''"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>person_outline</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed()">{{ 'nav.aboutMe' | translate }}</span>
+          <mat-icon class="expand-icon" *ngIf="!isCollapsed()">{{ isGroupExpanded('aboutme') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </a>
+        <div class="group-items" *ngIf="isGroupExpanded('aboutme') && !isCollapsed()">
+          <a mat-list-item routerLink="/backoffice/admin/skills" routerLinkActive="active">
+            <mat-icon matListItemIcon>psychology</mat-icon>
+            <span matListItemTitle>{{ 'nav.skills' | translate }}</span>
+          </a>
+          <a mat-list-item routerLink="/backoffice/admin/portfolios" routerLinkActive="active">
+            <mat-icon matListItemIcon>work_outline</mat-icon>
+            <span matListItemTitle>{{ 'nav.portfolios' | translate }}</span>
+          </a>
+          <a mat-list-item routerLink="/backoffice/admin/certifications" routerLinkActive="active">
+            <mat-icon matListItemIcon>verified</mat-icon>
+            <span matListItemTitle>{{ 'nav.certifications' | translate }}</span>
+          </a>
+          <a mat-list-item routerLink="/backoffice/admin/tests" routerLinkActive="active">
+            <mat-icon matListItemIcon>quiz</mat-icon>
+            <span matListItemTitle>{{ 'nav.tests' | translate }}</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Organisations Module Group — admin only -->
+      <div class="nav-group" [class.expanded]="isGroupExpanded('organizations')" *ngIf="isAdmin()">
+        <a mat-list-item class="group-trigger" (click)="toggleGroup('organizations')"
+           [matTooltip]="isCollapsed() ? 'Organizations' : ''"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>business</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed()">Organizations</span>
+          <mat-icon class="expand-icon" *ngIf="!isCollapsed()">{{ isGroupExpanded('organizations') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </a>
+        <div class="group-items" *ngIf="isGroupExpanded('organizations') && !isCollapsed()">
+          <a mat-list-item routerLink="/backoffice/admin/organizations" routerLinkActive="active">
+            <mat-icon matListItemIcon>domain</mat-icon>
+            <span matListItemTitle>{{ 'nav.manageOrgs' | translate }}</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Complaints Module Group — admin + agent -->
+      <div class="nav-group" [class.expanded]="isGroupExpanded('complaints')">
+        <a mat-list-item class="group-trigger" (click)="toggleGroup('complaints')"
+           [matTooltip]="isCollapsed() ? ('nav.complaintsModule' | translate) : ''"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>gavel</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed()">{{ 'nav.complaintsModule' | translate }}</span>
+          <mat-icon class="expand-icon" *ngIf="!isCollapsed()">{{ isGroupExpanded('complaints') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </a>
+        <div class="group-items" *ngIf="isGroupExpanded('complaints') && !isCollapsed()">
+          <a mat-list-item *ngIf="isAgent()"
+             routerLink="/backoffice/agent/queue" routerLinkActive="active">
+            <mat-icon matListItemIcon>inbox</mat-icon>
+            <span matListItemTitle>{{ 'nav.myQueue' | translate }}</span>
+          </a>
+          <a mat-list-item routerLink="/backoffice/admin/complaints" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <mat-icon matListItemIcon>list_alt</mat-icon>
+            <span matListItemTitle>{{ 'nav.manageComplaints' | translate }}</span>
+          </a>
+          <ng-container *ngIf="isAdmin()">
+            <a mat-list-item routerLink="/backoffice/admin/complaints/stats" routerLinkActive="active">
+              <mat-icon matListItemIcon>bar_chart</mat-icon>
+              <span matListItemTitle>{{ 'nav.complaintStats' | translate }}</span>
+            </a>
+            <a mat-list-item routerLink="/backoffice/admin/complaints/sla-rules" routerLinkActive="active">
+              <mat-icon matListItemIcon>timer</mat-icon>
+              <span matListItemTitle>{{ 'nav.slaRules' | translate }}</span>
+            </a>
+            <a mat-list-item routerLink="/backoffice/admin/complaints/risk" routerLinkActive="active">
+              <mat-icon matListItemIcon>shield</mat-icon>
+              <span matListItemTitle>{{ 'nav.riskDashboard' | translate }}</span>
+            </a>
+            <a mat-list-item routerLink="/backoffice/admin/complaints/nps" routerLinkActive="active">
+              <mat-icon matListItemIcon>star_rate</mat-icon>
+              <span matListItemTitle>{{ 'nav.npsStats' | translate }}</span>
+            </a>
+            <a mat-list-item routerLink="/backoffice/admin/complaints/templates" routerLinkActive="active">
+              <mat-icon matListItemIcon>article</mat-icon>
+              <span matListItemTitle>{{ 'nav.responseTemplates' | translate }}</span>
+            </a>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Audit Log — admin only -->
+      <a mat-list-item *ngIf="isAdmin()"
+         routerLink="/backoffice/admin/audit-log"
+         routerLinkActive="active"
+         [matTooltip]="isCollapsed() ? ('nav.auditLog' | translate) : ''"
+         matTooltipPosition="right">
+        <mat-icon matListItemIcon>history</mat-icon>
+        <span matListItemTitle *ngIf="!isCollapsed()">{{ 'nav.auditLog' | translate }}</span>
+      </a>
+
+      <!-- Divider before Profile -->
+
+      <mat-divider></mat-divider>
+
+      <a mat-list-item 
+         routerLink="/backoffice/admin/profile" 
+         routerLinkActive="active"
+         [matTooltip]="isCollapsed() ? ('nav.profile' | translate) : ''"
+         matTooltipPosition="right">
+        <mat-icon matListItemIcon>person</mat-icon>
+        <span matListItemTitle *ngIf="!isCollapsed()">{{ 'nav.profile' | translate }}</span>
+      </a>
+
+      <a mat-list-item 
+         routerLink="/backoffice/admin/security" 
+         routerLinkActive="active"
+         [matTooltip]="isCollapsed() ? ('nav.security' | translate) : ''"
+         matTooltipPosition="right">
+        <mat-icon matListItemIcon>security</mat-icon>
+        <span matListItemTitle *ngIf="!isCollapsed()">{{ 'nav.security' | translate }}</span>
+      </a>
+
+      <mat-divider></mat-divider>
+
+      <!-- Language Switcher -->
+      <div class="language-switcher-container" [class.collapsed]="isCollapsed()">
+        <app-language-switcher></app-language-switcher>
+      </div>
+
+      <mat-divider *ngIf="!isCollapsed()"></mat-divider>
+
+      <a mat-list-item 
+         (click)="logout()"
+         class="logout-item"
+         [matTooltip]="isCollapsed() ? ('nav.logout' | translate) : ''"
+         matTooltipPosition="right">
+        <mat-icon matListItemIcon>logout</mat-icon>
+        <span matListItemTitle *ngIf="!isCollapsed()">{{ 'nav.logout' | translate }}</span>
+      </a>
+    </mat-nav-list>
+  </nav>
+
+  <!-- Toggle button -->
+  <button mat-icon-button class="toggle-btn" (click)="toggleSidebar()">
+    <mat-icon>{{ isCollapsed() ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+  </button>
+</div>

@@ -1,0 +1,193 @@
+<div class="freelancer-certifications">
+
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <mat-icon>workspace_premium</mat-icon>
+          My Certifications
+        </h1>
+        <p class="hero-description">Validate your skills and earn certifications to stand out.</p>
+        <button mat-raised-button class="cta-button" (click)="openTestPanel()" *ngIf="!showTestPanel()">
+          <mat-icon>play_arrow</mat-icon>
+          Take a Test
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-box">
+          <div class="stat-value">{{ certifications().length }}</div>
+          <div class="stat-label">Certifications</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- Test Panel -->
+    <div class="test-panel" *ngIf="showTestPanel()">
+      <mat-card class="test-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>quiz</mat-icon>
+            {{ submitted() ? 'Test Result' : (currentTest() ? currentTest()!.title : 'Choose a Skill') }}
+          </mat-card-title>
+          <button mat-icon-button (click)="closeTestPanel()" class="close-btn">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+
+          <!-- Result -->
+          <div class="result-panel" *ngIf="submitted() && testResult()">
+            <div class="result-circle" [style.border-color]="getScoreColor(testResult()!.score)">
+              <span class="result-score" [style.color]="getScoreColor(testResult()!.score)">{{ testResult()!.score }}%</span>
+              <span class="result-label">Score</span>
+            </div>
+            <div class="result-info">
+              <h3 *ngIf="passed(testResult()!.score, currentTest()!.passingScore)" class="passed">
+                <mat-icon>check_circle</mat-icon> Congratulations! You passed!
+              </h3>
+              <h3 *ngIf="!passed(testResult()!.score, currentTest()!.passingScore)" class="failed">
+                <mat-icon>cancel</mat-icon> Not passed. Keep practicing!
+              </h3>
+              <p>Passing score: {{ currentTest()!.passingScore }}%</p>
+            </div>
+            <button mat-raised-button class="retry-btn" (click)="openTestPanel()">
+              <mat-icon>refresh</mat-icon> Take Another Test
+            </button>
+            <div class="cooldown-warning" *ngIf="!passed(testResult()!.score, currentTest()!.passingScore)">
+              <mat-icon>timer</mat-icon>
+              <span>You must wait <strong>2 minutes</strong> before retrying.</span>
+              <div *ngIf="selectedSkill() && getRemainingTime(selectedSkill()!.skill.id)">
+                ⏳ <strong>{{ getRemainingTime(selectedSkill()!.skill.id) }}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 1: Choose Skill -->
+          <div class="step-panel" *ngIf="!submitted() && !currentTest()">
+            <p class="step-label">Select a skill to get tested on:</p>
+            <div class="skills-list" *ngIf="mySkills().length > 0">
+              <div class="skill-option"
+                   *ngFor="let skill of mySkills()"
+                   (click)="onSkillClick(skill)"
+                   [class.loading]="loadingTest()"
+                   [class.certified]="isCertified(skill)"
+                   [class.cooldown]="isCooldown(skill)">
+                <mat-icon>{{ isCertified(skill) ? 'verified' : isCooldown(skill) ? 'timer' : 'psychology' }}</mat-icon>
+                <span>{{ skill.skill.name }}</span>
+                <span class="level-tag">{{ skill.level }}</span>
+                <span class="certified-tag" *ngIf="isCertified(skill)">Certified ✓</span>
+                <span class="cooldown-tag" *ngIf="isCooldown(skill)">
+                  ⏳ Try again in {{ getRemainingTime(skill.skill.id) }}
+                </span>
+                <mat-icon class="arrow" *ngIf="!isCertified(skill) && !isCooldown(skill)">chevron_right</mat-icon>
+              </div>
+            </div>
+            <div class="empty-skills" *ngIf="mySkills().length === 0">
+              <mat-icon>psychology_alt</mat-icon>
+              <p>Add skills first before taking tests!</p>
+            </div>
+            <div class="loading-state" *ngIf="loadingTest()">
+              <mat-icon>autorenew</mat-icon>
+              <p>Loading test...</p>
+            </div>
+          </div>
+
+          <!-- Step 2: Answer Questions -->
+          <div class="questions-panel" *ngIf="!submitted() && currentTest()">
+            <div class="test-info">
+              <span class="info-chip"><mat-icon>help_outline</mat-icon> {{ currentTest()!.questions.length }} Questions</span>
+              <span class="info-chip"><mat-icon>percent</mat-icon> {{ currentTest()!.passingScore }}% to pass</span>
+            </div>
+
+            <div class="question-item" *ngFor="let q of currentTest()!.questions; let i = index">
+              <div class="question-number">Q{{ i + 1 }}</div>
+              <div class="question-content">
+                <p class="question-text">{{ q.questionText }}</p>
+                <mat-form-field appearance="outline" class="answer-field">
+                  <mat-label>Your Answer</mat-label>
+                  <input matInput
+                         [value]="answers()[i]"
+                         (input)="setAnswer(i, $any($event.target).value)"
+                         placeholder="Type your answer..."
+                         [class.error]="answers()[i] === '' && submitted()">
+                  <mat-hint>Required — cannot be empty</mat-hint>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="submit-section">
+              <button mat-button (click)="selectedSkill.set(null); currentTest.set(null)">
+                <mat-icon>arrow_back</mat-icon> Back
+              </button>
+              <button mat-raised-button class="submit-btn" (click)="submitTest()" [disabled]="!canSubmit()">
+                <mat-icon>send</mat-icon> Submit Test
+              </button>
+            </div>
+          </div>
+
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Certifications List -->
+    <div class="certifications-section">
+      <h2>My Certifications ({{ certifications().length }})</h2>
+
+      <div class="loading-state" *ngIf="loading()">
+        <mat-icon>autorenew</mat-icon>
+        <p>Loading certifications...</p>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading() && certifications().length === 0">
+        <mat-icon>workspace_premium</mat-icon>
+        <h3>No certifications yet</h3>
+        <p>Pass a test to earn your first certification!</p>
+        <button mat-raised-button class="cta-button" (click)="openTestPanel()">
+          <mat-icon>play_arrow</mat-icon> Take a Test
+        </button>
+      </div>
+
+      <div class="certifications-grid" *ngIf="!loading() && certifications().length > 0">
+        <mat-card class="cert-card" *ngFor="let cert of certifications()"
+                  [class.expired-card]="cert.isExpired">
+          <mat-card-content>
+            <div class="cert-header">
+              <div class="cert-icon">
+                <mat-icon>workspace_premium</mat-icon>
+              </div>
+              <div class="cert-score" [style.color]="getScoreColor(cert.score)">
+                {{ cert.score }}%
+              </div>
+            </div>
+
+            <!-- Badge Expired -->
+            <div class="expired-badge" *ngIf="cert.isExpired">
+              <mat-icon>warning</mat-icon>
+              EXPIRED — Retake Required
+            </div>
+
+            <h3 class="cert-title">{{ cert.testTitle }}</h3>
+            <div class="cert-date">
+              <mat-icon>calendar_today</mat-icon>
+              {{ cert.date | date:'dd/MM/yyyy' }}
+            </div>
+            <div class="cert-expiry" *ngIf="cert.expiresAt && !cert.isExpired">
+              <mat-icon>event</mat-icon>
+              Expires: {{ cert.expiresAt | date:'dd/MM/yyyy' }}
+            </div>
+            <button mat-stroked-button class="cert-link" (click)="viewCertificate(cert)"
+                    [disabled]="cert.isExpired">
+              <mat-icon>picture_as_pdf</mat-icon>
+              {{ cert.isExpired ? 'Certificate Expired' : 'View Certificate' }}
+            </button>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+  </div>
+</div>

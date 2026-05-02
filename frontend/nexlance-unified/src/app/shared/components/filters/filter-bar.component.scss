@@ -1,0 +1,265 @@
+@use 'sass:color';
+
+// claude-design.md tokens (hardcoded to keep component self-contained)
+$primary:       #0EA5E9;
+$primary-dark:  #0284C7;
+$primary-soft:  #E0F2FE;
+$primary-tint:  #F0F9FF;
+
+$gray-50:  #F9FAFB;
+$gray-100: #F3F4F6;
+$gray-200: #E5E7EB;
+$gray-300: #D1D5DB;
+$gray-400: #9CA3AF;
+$gray-500: #6B7280;
+$gray-600: #4B5563;
+$gray-700: #374151;
+$gray-900: #111827;
+
+$radius-md:  8px;
+$radius-lg:  12px;
+$radius-xl:  16px;
+$radius-pill: 9999px;
+
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px;
+  background: #FFFFFF;
+  border: 1px solid $gray-200;
+  border-radius: $radius-xl;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.fb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Row 1: search + sort ───────────────────────────────── */
+.fb-row--search {
+  gap: 12px;
+}
+
+.fb-search {
+  position: relative;
+  flex: 1 1 320px;
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 12px 0 40px;
+  border-radius: $radius-lg;
+  border: 1px solid $gray-200;
+  background: $gray-50;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+
+  &:hover { border-color: $gray-300; }
+
+  &:focus-within {
+    background: #FFFFFF;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.18);
+  }
+
+  &--filled { background: #FFFFFF; }
+}
+
+.fb-search__icon {
+  position: absolute;
+  left: 12px;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: $gray-500;
+}
+
+.fb-search__input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  color: $gray-900;
+
+  &::placeholder { color: $gray-400; }
+}
+
+.fb-search__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-left: 6px;
+  border: none;
+  border-radius: 9999px;
+  background: $gray-100;
+  color: $gray-600;
+  cursor: pointer;
+  transition: background .12s ease;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  &:hover { background: $gray-200; color: $gray-900; }
+}
+
+.fb-row__right {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.fb-count {
+  font-size: 13px;
+  color: $gray-600;
+  white-space: nowrap;
+
+  strong { color: $gray-900; font-weight: 700; }
+}
+
+/* ── Row 2: category pills ─────────────────────────────── */
+.fb-row--pills {
+  gap: 8px;
+  padding-top: 4px;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar { height: 4px; }
+  &::-webkit-scrollbar-thumb { background: $gray-200; border-radius: 9999px; }
+}
+
+/* ── Row 3: dropdowns ──────────────────────────────────── */
+.fb-row--dropdowns {
+  gap: 8px;
+  padding-top: 2px;
+  border-top: 1px dashed $gray-200;
+  padding-top: 12px;
+}
+
+.fb-clear-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: $radius-pill;
+  background: transparent;
+  color: $gray-600;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  &:hover { background: $gray-100; color: $gray-900; }
+}
+
+/* ── Row 4: active chips ───────────────────────────────── */
+.fb-row--active {
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid $gray-100;
+  padding-top: 12px;
+}
+
+.fb-active-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: $gray-500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 4px;
+}
+
+/* ── Range template (inside dropdown) ──────────────────── */
+.fb-range {
+  min-width: 240px;
+
+  &__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: $gray-500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+
+  &__inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__sep {
+    color: $gray-400;
+    font-size: 14px;
+  }
+
+  &__presets {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+}
+
+.fb-input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  background: #FFFFFF;
+  font-family: inherit;
+  font-size: 13px;
+  color: $gray-900;
+  transition: border-color .15s ease, box-shadow .15s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.18);
+  }
+}
+
+.fb-preset {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid $gray-200;
+  border-radius: $radius-pill;
+  background: $gray-50;
+  color: $gray-700;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .12s ease;
+
+  &:hover {
+    background: $primary-soft;
+    border-color: $primary;
+    color: $primary-dark;
+  }
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .filter-bar { padding: 12px; border-radius: $radius-lg; }
+  .fb-search { flex: 1 1 100%; }
+  .fb-row__right { margin-left: 0; }
+  .fb-row--dropdowns { padding-top: 10px; }
+}

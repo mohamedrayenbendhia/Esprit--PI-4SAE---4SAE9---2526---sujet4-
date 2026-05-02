@@ -1,0 +1,362 @@
+@use '../../../../../styles/nexlance-theme.scss' as *;
+
+.admin-detail-container { padding: $space-8 $space-6; max-width: 1200px; margin: 0 auto; }
+
+.state-box { display: flex; justify-content: center; padding: $space-16;
+  .spinner { width: 40px; height: 40px; border: 3px solid $nexlance-gray-200; border-top-color: $nexlance-primary; border-radius: 50%; animation: spin 0.8s linear infinite; }
+}
+
+.page-header {
+  margin-bottom: $space-8;
+  .btn-back { display: flex; align-items: center; gap: $space-1; background: none; border: none; color: $nexlance-gray-500; font-size: $text-sm; cursor: pointer; padding: 0; margin-bottom: $space-4; transition: color $transition-fast; mat-icon { font-size: 18px; width: 18px; height: 18px; } &:hover { color: $nexlance-primary; } }
+  .header-main { margin-bottom: $space-4;
+    .ticket-row { display: flex; align-items: center; gap: $space-3; margin-bottom: $space-2;
+      .ticket { font-family: 'Courier New', Courier, monospace; font-size: $text-sm; color: $nexlance-gray-400; }
+      .status-badge { padding: 3px 12px; border-radius: 100px; font-size: $text-xs; font-weight: $font-semibold; }
+    }
+    h1 { font-size: $text-2xl; font-weight: $font-bold; color: $nexlance-gray-900; font-family: $font-family-heading; }
+  }
+  .header-admin-actions { display: flex; gap: $space-2; flex-wrap: wrap; }
+}
+
+.btn-admin {
+  display: flex; align-items: center; gap: $space-2;
+  padding: $space-2 $space-4; border-radius: $radius-lg;
+  font-size: $text-sm; font-weight: $font-medium; cursor: pointer;
+  transition: all $transition-fast; border: 1.5px solid transparent;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  &.close-btn  { background: #eff6ff; border-color: #93c5fd; color: #1d4ed8; &:hover { background: #1d4ed8; color: white; border-color: #1d4ed8; box-shadow: 0 3px 10px rgba(#1d4ed8,.3); } }
+  &.assign-btn { background: #fefce8; border-color: #fde047; color: #854d0e; &:hover { background: #fde047; color: #854d0e; box-shadow: 0 3px 10px rgba(#fde047,.4); } }
+  &.delete-btn { background: #fef2f2; border-color: #fca5a5; color: #dc2626; &:hover { background: #dc2626; color: white; border-color: #dc2626; box-shadow: 0 3px 10px rgba(#dc2626,.3); } }
+
+  // ── Export PDF — rouge professionnel ──
+  &.export-btn {
+    background: linear-gradient(135deg, #e53e3e, #c53030);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 2px 8px rgba(#e53e3e, .3);
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #c53030, #9b2c2c);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(#e53e3e, .4);
+    }
+    &:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; }
+  }
+}
+
+// Spinner inline dans les boutons
+.btn-spinner-sm {
+  width: 15px; height: 15px;
+  border: 2px solid rgba(white, .35);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
+}
+
+.layout { display: grid; grid-template-columns: 1fr 280px; gap: $space-6; align-items: start; @media (max-width: 900px) { grid-template-columns: 1fr; } }
+
+.card {
+  background: white; border-radius: $radius-xl; border: 1px solid $nexlance-gray-100;
+  padding: $space-6; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: $space-5;
+
+  .card-title { display: flex; align-items: center; gap: $space-2; font-size: $text-base; font-weight: $font-semibold; color: $nexlance-gray-800; margin-bottom: $space-4; mat-icon { font-size: 18px; width: 18px; height: 18px; color: $nexlance-primary; } }
+}
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: $space-4; margin-bottom: $space-4;
+  .info-item { display: flex; flex-direction: column; gap: 2px; }
+  .lbl { font-size: $text-xs; color: $nexlance-gray-400; font-weight: $font-medium; text-transform: uppercase; letter-spacing: .03em; }
+  .val { font-size: $text-sm; color: $nexlance-gray-800; font-weight: $font-medium; &.mono { font-family: 'Courier New', Courier, monospace; font-size: $text-xs; word-break: break-all; } &.muted { color: $nexlance-gray-400; font-style: italic; } }
+  .val-sub { font-size: $text-xs; color: $nexlance-gray-400; }
+}
+
+.desc-block { .lbl { display: block; font-size: $text-xs; color: $nexlance-gray-400; margin-bottom: $space-2; } p { font-size: $text-sm; color: $nexlance-gray-700; line-height: 1.7; } }
+
+.resolution-block { display: flex; gap: $space-3; margin-top: $space-4; padding: $space-4; background: #f0fdf4; border-radius: $radius-lg; border-left: 3px solid #22c55e; mat-icon { color: #22c55e; flex-shrink: 0; } strong { display: block; color: #15803d; font-size: $text-sm; margin-bottom: 3px; } p { font-size: $text-sm; color: #166534; } }
+
+// ─────────────────────────────────────────────────────────────
+// CARD MODIFIER — Statut / Priorité / Clôture
+// ─────────────────────────────────────────────────────────────
+
+.actions-card {
+  background: white;
+  border: 1px solid $nexlance-gray-100;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  margin-bottom: $space-5;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+
+  // Override card padding — géré manuellement ci-dessous
+  padding: 0 !important;
+
+  .card-title {
+    display: flex; align-items: center; gap: $space-2;
+    font-size: $text-sm; font-weight: $font-semibold;
+    color: $nexlance-gray-700;
+    padding: $space-4 $space-5;
+    background: $nexlance-gray-50;
+    border-bottom: 1px solid $nexlance-gray-100;
+    margin-bottom: 0 !important;
+    mat-icon { font-size: 17px; width: 17px; height: 17px; color: $nexlance-primary; }
+  }
+
+  .actions-row {
+    display: flex;
+    gap: $space-3;
+    padding: $space-4 $space-5;
+    flex-wrap: wrap;
+  }
+}
+
+.action-group { position: relative; }
+
+.action-btn {
+  display: flex; align-items: center; gap: $space-2;
+  padding: $space-2 $space-5;
+  background: white;
+  border: 1.5px solid $nexlance-gray-200;
+  border-radius: $radius-full;
+  font-size: $text-sm; font-weight: $font-medium;
+  color: $nexlance-gray-600; cursor: pointer;
+  transition: all $transition-fast;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; transition: color $transition-fast; }
+
+  &:hover {
+    border-color: $nexlance-primary;
+    color: $nexlance-primary;
+    background: rgba($nexlance-primary, .04);
+    box-shadow: 0 2px 8px rgba($nexlance-primary, .15);
+    transform: translateY(-1px);
+    mat-icon { color: $nexlance-primary; }
+  }
+}
+
+.dropdown {
+  position: absolute; top: calc(100% + 8px); left: 0;
+  z-index: 20; background: white;
+  border: 1px solid $nexlance-gray-200;
+  border-radius: $radius-xl;
+  box-shadow: 0 12px 32px rgba(0,0,0,.14);
+  min-width: 195px; overflow: hidden;
+  animation: fadeScaleIn .15s ease;
+
+  .dropdown-item {
+    display: flex; align-items: center; gap: $space-3;
+    padding: $space-3 $space-4;
+    font-size: $text-sm; color: $nexlance-gray-700;
+    cursor: pointer; background: none; border: none;
+    width: 100%; text-align: left;
+    transition: background $transition-fast;
+
+    .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .check { margin-left: auto; font-size: 16px; width: 16px; height: 16px; color: $nexlance-primary; }
+
+    &:hover { background: $nexlance-gray-50; }
+    &.current {
+      background: rgba($nexlance-primary, .06);
+      color: $nexlance-primary; font-weight: $font-semibold;
+    }
+    &:not(:last-child) { border-bottom: 1px solid $nexlance-gray-50; }
+  }
+}
+
+@keyframes fadeScaleIn {
+  from { opacity: 0; transform: translateY(-4px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+// ── Zone clôture (dans la card Modifier) ──
+.close-action-row {
+  padding: $space-3 $space-5 $space-4;
+  border-top: 1px solid $nexlance-gray-100;
+}
+
+.btn-action.close {
+  display: inline-flex; align-items: center; gap: $space-2;
+  padding: $space-2 $space-5;
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  color: white; border: none; border-radius: $radius-full;
+  font-size: $text-sm; font-weight: $font-semibold; cursor: pointer;
+  transition: all $transition-fast;
+  box-shadow: 0 2px 8px rgba(#1d4ed8, .3);
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  &:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(#1d4ed8, .4); }
+}
+
+.close-hint {
+  display: flex; align-items: center; gap: $space-2;
+  padding: $space-3 $space-4;
+  background: rgba($nexlance-warning, .07);
+  border: 1px solid rgba($nexlance-warning, .2);
+  border-left: 3px solid $nexlance-warning;
+  border-radius: $radius-lg;
+  font-size: $text-xs; font-weight: $font-medium; color: #92400e;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; color: $nexlance-warning; flex-shrink: 0; }
+}
+
+.messages-list { max-height: 380px; overflow-y: auto; margin-bottom: $space-4; padding: $space-2; .no-msgs { display: flex; flex-direction: column; align-items: center; padding: $space-8; color: $nexlance-gray-400; mat-icon { font-size: 36px; width: 36px; height: 36px; margin-bottom: $space-2; } p { font-size: $text-sm; } } }
+
+.bubble-wrap { display: flex; margin-bottom: $space-3;
+  &.internal .bubble { background: #fef9c3; border: 1px solid #fde68a; border-radius: 4px $radius-xl $radius-xl $radius-xl; }
+  .bubble { max-width: 80%; padding: $space-3 $space-4; background: $nexlance-gray-100; border-radius: 4px $radius-xl $radius-xl $radius-xl; }
+  .bubble-meta { display: flex; align-items: center; gap: $space-3; margin-bottom: $space-1; .sender { font-size: $text-xs; font-weight: $font-semibold; color: $nexlance-gray-600; } .note-badge { font-size: 10px; padding: 1px 6px; background: #fde68a; color: #92400e; border-radius: 4px; font-weight: $font-semibold; } .time { font-size: $text-xs; color: $nexlance-gray-400; } }
+  p { font-size: $text-sm; line-height: 1.5; color: $nexlance-gray-800; }
+}
+
+.input-area { display: flex; gap: $space-3; align-items: flex-end; padding-top: $space-4; border-top: 1px solid $nexlance-gray-100;
+  .msg-input { flex: 1; padding: $space-3; border: 1.5px solid $nexlance-gray-200; border-radius: $radius-lg; font-size: $text-sm; font-family: $font-family-base; resize: none; &:focus { outline: none; border-color: $nexlance-primary; } }
+  .btn-send { width: 44px; height: 44px; border-radius: 50%; background: $nexlance-primary; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all $transition-fast; mat-icon { font-size: 20px; width: 20px; height: 20px; } &:hover:not(:disabled) { background: $nexlance-primary-dark; } &:disabled { background: $nexlance-gray-200; cursor: not-allowed; } }
+}
+
+.info-side {
+  .side-item {
+    display: flex; flex-direction: column; gap: 3px; margin-bottom: $space-3;
+    .lbl { font-size: $text-xs; color: $nexlance-gray-400; font-weight: $font-medium; }
+    span:last-child { font-size: $text-sm; color: $nexlance-gray-800; }
+  }
+  .status-badge.sm {
+    display: inline-block; padding: 2px 10px;
+    border-radius: 100px; font-size: $text-xs; font-weight: $font-semibold;
+  }
+
+  // ── Bloc export PDF dans la sidebar ──
+  .export-block {
+    margin-top: $space-4;
+    padding-top: $space-4;
+    border-top: 1px solid $nexlance-gray-100;
+  }
+
+  .btn-export-sidebar {
+    width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: $space-2;
+    padding: $space-3;
+    background: linear-gradient(135deg, #e53e3e, #c53030);
+    color: white; border: none; border-radius: $radius-lg;
+    font-size: $text-sm; font-weight: $font-semibold; cursor: pointer;
+    transition: all $transition-fast;
+    box-shadow: 0 2px 8px rgba(#e53e3e, .25);
+    mat-icon { font-size: 17px; width: 17px; height: 17px; }
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #c53030, #9b2c2c);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(#e53e3e, .35);
+    }
+    &:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+  }
+
+  .close-block {
+    margin-top: $space-4;
+    padding-top: $space-4;
+    border-top: 1px solid $nexlance-gray-100;
+
+    .close-hint {
+      font-size: $text-xs; color: #15803d; font-weight: $font-medium;
+      background: #f0fdf4; border: 1px solid #86efac;
+      border-radius: $radius-md; padding: $space-2 $space-3;
+      margin-bottom: $space-3;
+    }
+  }
+
+  .btn-close-full {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: $space-2;
+    padding: $space-3;
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    border: none; border-radius: $radius-lg;
+    color: white; font-size: $text-sm; font-weight: $font-semibold; cursor: pointer;
+    transition: all $transition-fast;
+    box-shadow: 0 2px 8px rgba(#1d4ed8, .25);
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(#1d4ed8, .35);
+    }
+  }
+
+  // ── Hint "clôture après résolution" (sidebar) ──
+  .close-hint-info {
+    display: flex; align-items: flex-start; gap: $space-2;
+    margin-top: $space-4; padding: $space-3;
+    background: rgba($nexlance-warning, .07);
+    border: 1px solid rgba($nexlance-warning, .2);
+    border-left: 3px solid $nexlance-warning;
+    border-radius: $radius-lg;
+    font-size: $text-xs; color: #92400e; line-height: 1.5;
+    mat-icon { font-size: 15px; width: 15px; height: 15px; color: $nexlance-warning; flex-shrink: 0; margin-top: 1px; }
+  }
+}
+
+// ── Modals ───────────────────────────────────────────────────
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+
+.modal {
+  background: white; border-radius: $radius-2xl; width: 480px; max-width: 95vw;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+
+  &.confirm { padding: $space-8; text-align: center; .confirm-icon { font-size: 48px; width: 48px; height: 48px; margin-bottom: $space-4; } .close-icon { color: #1d4ed8; } .delete-icon { color: #dc2626; } h2 { font-size: $text-xl; font-weight: $font-semibold; color: $nexlance-gray-900; margin-bottom: $space-3; } p { font-size: $text-sm; color: $nexlance-gray-500; margin-bottom: $space-6; } }
+
+  .confirm-actions { display: flex; justify-content: center; gap: $space-3; }
+  .btn-cancel { padding: $space-2 $space-6; background: white; border: 1.5px solid $nexlance-gray-200; border-radius: $radius-lg; font-size: $text-sm; cursor: pointer; &:hover { border-color: $nexlance-gray-400; } }
+  .btn-confirm { display: flex; align-items: center; gap: $space-2; padding: $space-2 $space-6; border: none; border-radius: $radius-lg; font-size: $text-sm; font-weight: $font-semibold; cursor: pointer; transition: all $transition-fast; mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    &.close  { background: #1d4ed8; color: white; &:hover { background: #1e40af; } }
+    &.delete { background: #dc2626; color: white; &:hover:not(:disabled) { background: #b91c1c; } &:disabled { opacity: 0.5; cursor: not-allowed; } }
+  }
+
+  &.assign { .modal-header { display: flex; align-items: center; justify-content: space-between; padding: $space-5 $space-6; border-bottom: 1px solid $nexlance-gray-100; h2 { display: flex; align-items: center; gap: $space-2; font-size: $text-lg; font-weight: $font-semibold; mat-icon { color: $nexlance-primary; } } .modal-close { background: none; border: none; cursor: pointer; color: $nexlance-gray-400; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; &:hover { background: $nexlance-gray-100; } } }
+    .modal-body { padding: $space-5; max-height: 400px; overflow-y: auto; }
+  }
+
+  .agents-list { display: flex; flex-direction: column; gap: $space-2;
+    .agent-item { display: flex; align-items: center; gap: $space-3; padding: $space-3; border-radius: $radius-lg; border: 1.5px solid $nexlance-gray-100; cursor: pointer; transition: all $transition-fast; &:hover { border-color: $nexlance-primary; background: rgba($nexlance-primary,.04); } &.current { border-color: #22c55e; background: #f0fdf4; } .agent-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba($nexlance-primary,.1); color: $nexlance-primary; display: flex; align-items: center; justify-content: center; font-size: $text-sm; font-weight: $font-bold; flex-shrink: 0; } .agent-info { flex: 1; } .agent-name { font-size: $text-sm; font-weight: $font-medium; color: $nexlance-gray-800; display: block; } .agent-specs { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; } .spec-chip { font-size: 10px; padding: 1px 6px; background: rgba($nexlance-primary,.1); color: $nexlance-primary; border-radius: 4px; } .check-icon { color: #22c55e; font-size: 20px; width: 20px; height: 20px; } }
+    .no-agents { text-align: center; padding: $space-6; color: $nexlance-gray-400; font-size: $text-sm; }
+  }
+}
+
+
+// ── ML Prediction Card ────────────────────────────────────────────────────────
+.ml-prediction-card {
+  .prediction-loading {
+    display: flex; align-items: center; gap: 8px;
+    color: #6b7280; font-size: 13px; padding: 8px 0;
+    .spinner {
+      width: 16px; height: 16px; border: 2px solid #e5e7eb;
+      border-top-color: #6366f1; border-radius: 50%;
+      animation: spin 0.8s linear infinite; display: inline-block;
+    }
+  }
+
+  .prediction-result {
+    border-left: 4px solid #e5e7eb; padding-left: 12px;
+    display: flex; flex-direction: column; gap: 12px;
+
+    .prediction-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 700; width: fit-content;
+      mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    }
+
+    .prediction-details {
+      display: flex; flex-direction: column; gap: 6px;
+      .pred-item {
+        display: flex; justify-content: space-between; align-items: center;
+        .pred-lbl { font-size: 12px; color: #6b7280; }
+        .pred-val { font-size: 13px; font-weight: 600; color: #111827; }
+      }
+    }
+
+    .prob-bar-container {
+      height: 6px; background: #f3f4f6; border-radius: 4px; overflow: hidden;
+      .prob-bar {
+        height: 100%; border-radius: 4px;
+        transition: width 0.6s ease;
+      }
+    }
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

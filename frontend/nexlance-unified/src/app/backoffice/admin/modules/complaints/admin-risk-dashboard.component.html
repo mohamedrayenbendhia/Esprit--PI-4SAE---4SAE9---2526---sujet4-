@@ -1,0 +1,291 @@
+<div class="page-wrapper">
+
+  <!-- ── En-tête ─────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Risk &amp; Sanctions</h1>
+      <p>Monitor high-risk users and apply manual sanctions.</p>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- ── Onglets custom ─────────────────────────────────────────────────── -->
+    <div class="tab-nav">
+      <button class="tab-btn" [class.active]="activeTab() === 'risks'" (click)="activeTab.set('risks')">
+        <mat-icon>shield</mat-icon>
+        At-risk users
+      </button>
+      <button class="tab-btn" [class.active]="activeTab() === 'manage'" (click)="activeTab.set('manage')">
+        <mat-icon>manage_accounts</mat-icon>
+        Manage a user
+      </button>
+    </div>
+
+    <!-- ══ TAB 1 : Utilisateurs à risque ══ -->
+    @if (activeTab() === 'risks') {
+
+      @if (isLoading()) {
+        <div class="loading-center">
+          <mat-icon style="font-size:40px;color:#94a3b8;animation:spin 1s linear infinite">autorenew</mat-icon>
+        </div>
+      }
+
+      @if (!isLoading() && highRisk().length === 0) {
+        <div class="card">
+          <div class="empty-state">
+            <mat-icon class="empty-icon">verified_user</mat-icon>
+            <h3>No high-risk users</h3>
+            <p>No users with HIGH or CRITICAL risk level detected.</p>
+          </div>
+        </div>
+      }
+
+      @if (!isLoading() && highRisk().length > 0) {
+        <div class="card table-card">
+          <table class="risk-table">
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Risk Score</th>
+                <th>Level</th>
+                <th class="text-center">Adverse resolutions</th>
+                <th>SCAM / Harassment</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of highRisk(); track r.userId) {
+                <tr [class.selected-row]="lookedUp()?.userId === r.userId">
+                  <td class="mono">{{ r.userId }}</td>
+                  <td>
+                    <div class="score-wrap">
+                      <div class="score-bar">
+                        <div class="score-fill"
+                             [style.width.%]="r.riskScore"
+                             [style.background]="riskColor(r.riskLevel)"></div>
+                      </div>
+                      <span class="score-num">{{ r.riskScore }}/100</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="risk-badge"
+                          [style.background]="riskBg(r.riskLevel)"
+                          [style.color]="riskColor(r.riskLevel)">
+                      {{ r.riskLevel }}
+                    </span>
+                  </td>
+                  <td class="text-center">{{ r.resolvedAgainst }}</td>
+                  <td>
+                    <span class="scam-count">{{ r.scamCount }}</span>
+                    <span class="slash"> / </span>
+                    {{ r.harassmentCount }}
+                  </td>
+                  <td>
+                    <div class="row-actions">
+                      <button class="btn-icon" (click)="selectUser(r); activeTab.set('manage')" title="Manage">
+                        <mat-icon>manage_accounts</mat-icon>
+                      </button>
+                      <button class="btn-icon" (click)="recompute(r.userId)" title="Recalculate">
+                        <mat-icon>refresh</mat-icon>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    <!-- ══ TAB 2 : Gérer un utilisateur ══ -->
+    @if (activeTab() === 'manage') {
+
+      <!-- Barre de recherche -->
+      <div class="card lookup-card">
+        <div class="lookup-bar">
+          <div class="lookup-input-wrap">
+            <mat-icon class="lookup-icon">search</mat-icon>
+            <input class="lookup-input" type="text"
+                   [ngModel]="lookupId()" (ngModelChange)="lookupId.set($event)"
+                   (keyup.enter)="lookup()" placeholder="Enter user UUID…">
+          </div>
+          <button class="btn-create" [disabled]="lookupLoading()" (click)="lookup()">
+            @if (lookupLoading()) {
+              <span class="inline-spinner"></span>
+            } @else {
+              <mat-icon>person_search</mat-icon>
+            }
+            Search
+          </button>
+        </div>
+      </div>
+
+      @if (lookedUp()) {
+
+        <!-- Carte profil de risque -->
+        <div class="card profile-card">
+          <div class="profile-header">
+            <div class="profile-score" [style.border-color]="riskColor(lookedUp()!.riskLevel)">
+              <span class="big-score" [style.color]="riskColor(lookedUp()!.riskLevel)">
+                {{ lookedUp()!.riskScore }}
+              </span>
+              <span class="score-max">/100</span>
+            </div>
+            <div class="profile-details">
+              <span class="risk-badge lg"
+                    [style.background]="riskBg(lookedUp()!.riskLevel)"
+                    [style.color]="riskColor(lookedUp()!.riskLevel)">
+                {{ lookedUp()!.riskLevel }}
+              </span>
+              <div class="profile-stats">
+                <div class="stat-pill">
+                  <span class="stat-pill-label">Complaints received</span>
+                  <span class="stat-pill-value">{{ lookedUp()!.totalComplaintsReceived }}</span>
+                </div>
+                <div class="stat-pill">
+                  <span class="stat-pill-label">Resolved against</span>
+                  <span class="stat-pill-value">{{ lookedUp()!.resolvedAgainst }}</span>
+                </div>
+                <div class="stat-pill danger">
+                  <span class="stat-pill-label">SCAM</span>
+                  <span class="stat-pill-value">{{ lookedUp()!.scamCount }}</span>
+                </div>
+                <div class="stat-pill danger">
+                  <span class="stat-pill-label">Harassment</span>
+                  <span class="stat-pill-value">{{ lookedUp()!.harassmentCount }}</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn-icon" (click)="recompute(lookedUp()!.userId)" title="Recalculate score">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulaire sanction -->
+        <div class="card form-section">
+          <div class="card-header">
+            <div class="section-num danger-num">
+              <mat-icon style="font-size:16px;width:16px;height:16px">block</mat-icon>
+            </div>
+            <div>
+              <h3>Apply a manual sanction</h3>
+              <p>Choose the type and provide a reason</p>
+            </div>
+          </div>
+          <div class="card-body">
+            @if (applySuccess()) {
+              <div class="success-banner">
+                <mat-icon>check_circle</mat-icon> Sanction applied successfully.
+              </div>
+            }
+            @if (applyError()) {
+              <div class="error-banner">
+                <mat-icon>error</mat-icon> {{ applyError() }}
+              </div>
+            }
+            <div class="sanction-form-grid">
+              <div class="field-group">
+                <label class="field-label">Sanction type</label>
+                <div class="form-select-wrap">
+                  <select class="form-select"
+                          [ngModel]="sanctionType()" (ngModelChange)="sanctionType.set($event)">
+                    @for (t of sanctionTypes; track t) {
+                      <option [value]="t">{{ t }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Reason *</label>
+                <input class="form-input" type="text"
+                       [ngModel]="sanctionReason()" (ngModelChange)="sanctionReason.set($event)"
+                       placeholder="Explain the reason for the sanction">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn-danger" [disabled]="applying()" (click)="applyManualSanction()">
+                @if (applying()) {
+                  <span class="inline-spinner"></span> Applying…
+                } @else {
+                  <mat-icon>block</mat-icon> Apply sanction
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historique sanctions -->
+        <div class="card">
+          <div class="card-header">
+            <div class="section-num gray-num">
+              <mat-icon style="font-size:16px;width:16px;height:16px">history</mat-icon>
+            </div>
+            <div>
+              <h3>Sanctions history</h3>
+              <p>All sanctions applied to this user</p>
+            </div>
+          </div>
+
+          @if (sanctions().length === 0) {
+            <div class="empty-state small">
+              <mat-icon>check_circle</mat-icon>
+              <p>No sanctions for this user.</p>
+            </div>
+          } @else {
+            <table class="sanction-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Reason</th>
+                  <th>Applied on</th>
+                  <th>Expires on</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of sanctions(); track s.id) {
+                  <tr>
+                    <td>
+                      <span class="sanction-badge"
+                            [style.background]="sanctionBg(s.type)"
+                            [style.color]="sanctionColor(s.type)">
+                        {{ s.type }}
+                      </span>
+                    </td>
+                    <td class="reason-cell">{{ s.reason }}</td>
+                    <td>{{ s.appliedAt | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ s.expiresAt ? (s.expiresAt | date:'dd/MM/yyyy') : '—' }}</td>
+                    <td>
+                      @if (s.active) {
+                        <span class="status-badge active-st">Active</span>
+                      } @else {
+                        <span class="status-badge lifted-st">Lifted</span>
+                      }
+                    </td>
+                    <td>
+                      @if (s.active) {
+                        <button class="btn-icon" (click)="lift(s.id)" title="Lift sanction">
+                          <mat-icon>lock_open</mat-icon>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+      }
+    }
+
+  </div>
+</div>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>

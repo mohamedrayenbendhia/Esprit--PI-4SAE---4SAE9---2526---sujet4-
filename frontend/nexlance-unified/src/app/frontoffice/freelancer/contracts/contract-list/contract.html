@@ -1,0 +1,130 @@
+<div class="contract-list-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>My Contracts</h1>
+      <p>View and manage your freelance contracts</p>
+    </div>
+  </div>
+
+  <!-- Stats + Earnings -->
+  <div class="dashboard-grid">
+
+    <div class="stats-section">
+      <h3>Statistics</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">{{ stats.totalContracts }}</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card pending">
+          <div class="stat-value">{{ stats.pendingSignature }}</div>
+          <div class="stat-label">To Sign</div>
+        </div>
+        <div class="stat-card active">
+          <div class="stat-value">{{ stats.activeContracts }}</div>
+          <div class="stat-label">Active</div>
+        </div>
+        <div class="stat-card completed">
+          <div class="stat-value">{{ stats.completedContracts }}</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="earnings-section">
+      <h3>Earnings</h3>
+      <div class="earnings-grid">
+        <div class="earning-card total">
+          <div class="earning-label">Total Earned</div>
+          <div class="earning-value">{{ earnings.totalEarnings | currency:'EUR' }}</div>
+        </div>
+        <div class="earning-card pending">
+          <div class="earning-label">In Progress</div>
+          <div class="earning-value">{{ earnings.pendingEarnings | currency:'EUR' }}</div>
+        </div>
+        <div class="earning-card count">
+          <div class="earning-label">Completed Contracts</div>
+          <div class="earning-value">{{ earnings.completedContracts }}</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Pending contracts alert -->
+  <div class="alert-banner" *ngIf="stats.pendingSignature > 0">
+    You have <strong>{{ stats.pendingSignature }}</strong>
+    contract(s) pending your signature!
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <input
+      type="text"
+      placeholder="Search contracts..."
+      [(ngModel)]="searchKeyword"
+      (ngModelChange)="applyFilters()"
+      class="search-input"
+    />
+    <select [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters()" class="filter-select">
+      <option value="">All Statuses</option>
+      <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+    </select>
+    <button class="btn-reset" (click)="resetFilters()">Reset</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading"><p>Loading...</p></div>
+  <div class="error-state" *ngIf="error"><p>{{ error }}</p></div>
+
+  <!-- List -->
+  <div class="contracts-grid" *ngIf="!loading && !error">
+    <div
+      class="contract-card"
+      *ngFor="let contract of filteredContracts"
+      [class.pending-action]="hasPendingAction(contract)"
+      (click)="goToDetail(contract.id!)">
+
+      <!-- Action required badge -->
+      <div class="action-required" *ngIf="hasPendingAction(contract)">
+        Action Required
+      </div>
+
+      <div class="card-header">
+        <span class="contract-number">{{ contract.contractNumber }}</span>
+        <app-contract-status-badge [status]="contract.status!"></app-contract-status-badge>
+      </div>
+
+      <div class="card-body">
+        <h3 class="mission-title">{{ contract.missionTitle }}</h3>
+        <p class="client-name">Client: {{ contract.clientName || '—' }}</p>
+        <p class="client-company" *ngIf="contract.clientCompany">
+          {{ contract.clientCompany }}
+        </p>
+        <p class="contract-type">Type: {{ getTypeLabel(contract.contractType) }}</p>
+        <p class="contract-amount">
+          {{ contract.totalAmount | currency: (contract.currency || 'EUR') }}
+        </p>
+        <p class="contract-dates" *ngIf="contract.startDate">
+          {{ contract.startDate | date:'dd/MM/yyyy' }} →
+          {{ contract.endDate | date:'dd/MM/yyyy' }}
+        </p>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn-detail" (click)="goToDetail(contract.id!)">
+          View Details 
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="filteredContracts.length === 0">
+      <p>No contracts found</p>
+    </div>
+  </div>
+
+</div>

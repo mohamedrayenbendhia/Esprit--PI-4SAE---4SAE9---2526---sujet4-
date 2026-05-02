@@ -1,0 +1,252 @@
+<div class="browse-jobs-container">
+  <!-- Search Header -->
+  <div class="search-header">
+    <h1>{{ 'jobs.searchMissions' | translate }}</h1>
+    <div class="search-bar-wrapper">
+      <div class="search-bar">
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (input)="onSearchInput($event)"
+          (keyup.enter)="onSearch(); showSuggestions = false"
+          (blur)="hideSuggestions()"
+          (focus)="searchSuggestions.length > 0 && (showSuggestions = true)"
+          [placeholder]="'jobs.searchPlaceholder' | translate"
+          class="search-input"
+          autocomplete="off"
+        />
+        <button class="btn-search" (click)="onSearch(); showSuggestions = false">
+          <mat-icon>search</mat-icon> {{ 'jobs.search' | translate }}
+        </button>
+      </div>
+      <!-- Live Search Suggestions (powered by Algolia) -->
+      <div class="search-suggestions" *ngIf="showSuggestions && searchSuggestions.length > 0">
+        <div class="search-powered-by" *ngIf="useAlgolia">
+          <mat-icon class="algolia-icon">bolt</mat-icon>
+          <span>Powered by Algolia</span>
+        </div>
+        <div 
+          *ngFor="let suggestion of searchSuggestions"
+          class="suggestion-item"
+          (mousedown)="selectSuggestion(suggestion)">
+          <mat-icon class="suggestion-icon">work_outline</mat-icon>
+          <div class="suggestion-text">
+            <span class="suggestion-title">{{ suggestion.title }}</span>
+            <span class="suggestion-meta">{{ suggestion.category }} &middot; {{ suggestion.budget }} DT</span>
+          </div>
+          <mat-icon class="suggestion-arrow">arrow_forward</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommended Jobs Section -->
+  <div *ngIf="recommendedJobs.length > 0" class="recommended-section">
+    <h2><mat-icon>star</mat-icon> {{ 'jobs.recommendedForYou' | translate }}</h2>
+    <div class="recommended-grid">
+      <div 
+        *ngFor="let job of recommendedJobs"
+        class="recommended-card"
+        (click)="viewJobDetail(job.id)"
+      >
+        <div class="card-badge">{{ 'jobs.recommended' | translate }}</div>
+        <h3>{{ job.title }}</h3>
+          <p class="job-budget">{{ job.budget }} DT <span>({{ job.budgetType === 'FIXED' ? ('jobs.fixed' | translate) : ('jobs.hourly' | translate) }})</span></p>
+        <div class="skills">
+          <span *ngFor="let skill of job.requiredSkills.slice(0, 3)" class="skill-tag">{{ skill }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <!-- Filters Sidebar -->
+    <aside class="filters-sidebar" [class.collapsed]="!showFilters">
+      <div class="filters-header">
+        <h3>{{ 'jobs.filters' | translate }}</h3>
+        <button *ngIf="hasActiveFilters()" class="btn-clear" (click)="clearFilters()">
+          {{ 'jobs.clearFilters' | translate }}
+        </button>
+      </div>
+
+      <div class="filter-group">
+        <label>{{ 'jobs.category' | translate }}</label>
+        <select [(ngModel)]="filters.category" (change)="onFilterChange()" class="filter-select">
+          <option [value]="undefined">{{ 'jobs.allCategories' | translate }}</option>
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat | titlecase }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>{{ 'jobs.budget' | translate }}</label>
+        <div class="budget-inputs">
+          <input 
+            type="number" 
+            [(ngModel)]="filters.minBudget" 
+            (change)="onFilterChange()"
+            placeholder="Min (DT)"
+            class="filter-input"
+          />
+          <input 
+            type="number" 
+            [(ngModel)]="filters.maxBudget" 
+            (change)="onFilterChange()"
+            placeholder="Max (DT)"
+            class="filter-input"
+          />
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>{{ 'jobs.budgetType' | translate }}</label>
+        <select [(ngModel)]="filters.budgetType" (change)="onFilterChange()" class="filter-select">
+          <option [value]="undefined">{{ 'jobs.allTypes' | translate }}</option>
+          <option *ngFor="let type of budgetTypes" [value]="type">
+            {{ type === 'FIXED' ? ('jobs.fixedBudget' | translate) : ('jobs.hourly' | translate) }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>{{ 'jobs.experienceLevel' | translate }}</label>
+        <select [(ngModel)]="filters.experienceLevel" (change)="onFilterChange()" class="filter-select">
+          <option [value]="undefined">{{ 'jobs.allLevels' | translate }}</option>
+          <option *ngFor="let level of experienceLevels" [value]="level">
+            {{ level | titlecase }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Location</label>
+        <input 
+          type="text" 
+          [(ngModel)]="filters.location" 
+          (change)="onFilterChange()"
+          placeholder="City, country..."
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group checkbox-group">
+        <label>
+          <input 
+            type="checkbox" 
+            [(ngModel)]="filters.isRemote" 
+            (change)="onFilterChange()"
+          />
+          {{ 'jobs.remoteOnly' | translate }}
+        </label>
+      </div>
+    </aside>
+
+    <!-- Jobs List -->
+    <div class="jobs-content">
+      <div class="content-header">
+        <div class="results-info">
+          <p><strong>{{ totalElements }}</strong> {{ 'jobs.jobsFound' | translate }}</p>
+        </div>
+        <button class="btn-toggle-filters" (click)="toggleFilters()">
+          {{ showFilters ? ('jobs.hideFilters' | translate) : ('jobs.showFilters' | translate) }}
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>{{ 'jobs.loadingJobs' | translate }}</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && jobs.length === 0" class="empty-state">
+        <div class="empty-icon"><mat-icon>search</mat-icon></div>
+        <h2>{{ 'jobs.noJobsFound' | translate }}</h2>
+        <p>{{ 'jobs.modifySearch' | translate }}</p>
+        <button class="btn-primary" (click)="clearFilters()">
+          {{ 'jobs.clearFilters' | translate }}
+        </button>
+      </div>
+
+      <!-- Jobs Grid -->
+      <div *ngIf="!isLoading && jobs.length > 0" class="jobs-list">
+        <div 
+          *ngFor="let job of jobs"
+          class="job-card"
+          (click)="viewJobDetail(job.id)"
+        >
+          <div class="job-card-header">
+            <div class="category-badge">
+              <span class="icon">{{ getCategoryIcon(job.category) }}</span>
+              {{ job.category }}
+            </div>
+            <span class="post-date">{{ formatDate(job.publishedAt || job.createdAt) }}</span>
+          </div>
+
+          <!-- Smart Badges -->
+          <app-job-smart-badges [job]="job"></app-job-smart-badges>
+
+          <h3 class="job-title">{{ job.title }}</h3>
+          
+          <p class="job-description">{{ job.description | slice:0:150 }}...</p>
+
+          <div class="job-budget">
+            <span class="budget-amount"><mat-icon>attach_money</mat-icon> {{ job.budget }} DT</span>
+              <span class="budget-type">({{ job.budgetType === 'FIXED' ? ('jobs.fixedBudget' | translate) : ('jobs.hourlyRate' | translate) }})</span>
+          </div>
+
+          <div class="job-details">
+            <div class="detail-item">
+              <span><mat-icon>schedule</mat-icon> {{ job.estimatedDuration }} {{ 'jobs.days' | translate }}</span>
+            </div>
+            <div class="detail-item">
+              <span><mat-icon>location_on</mat-icon> {{ job.location }}</span>
+              <span *ngIf="job.isRemote" class="remote-badge">{{ 'jobs.remote' | translate }}</span>
+            </div>
+            <div class="detail-item">
+              <span><mat-icon>assessment</mat-icon> {{ (job.experienceLevel || '') | titlecase }}</span>
+            </div>
+          </div>
+
+          <div class="job-skills">
+            <span *ngFor="let skill of job.requiredSkills.slice(0, 5)" class="skill-tag">
+              {{ skill }}
+            </span>
+            <span *ngIf="job.requiredSkills.length > 5" class="skill-tag more">
+              +{{ job.requiredSkills.length - 5 }}
+            </span>
+          </div>
+
+          <div class="job-footer">
+            <div class="applicant-count">
+              <span><mat-icon>assignment</mat-icon> {{ job.applicantCount }} {{ 'jobs.applicants' | translate }}</span>
+            </div>
+            <button class="btn-apply" (click)="viewJobDetail(job.id); $event.stopPropagation()">
+              {{ 'jobs.apply' | translate }} →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="!isLoading && jobs.length > 0 && totalPages > 1" class="pagination">
+        <button 
+          class="btn-page" 
+          [disabled]="filters.page === 0"
+          (click)="previousPage()"
+        >
+          ← Previous
+        </button>
+        <span class="page-info">
+          Page {{ (filters.page || 0) + 1 }} of {{ totalPages }}
+        </span>
+        <button 
+          class="btn-page" 
+          [disabled]="filters.page === totalPages - 1"
+          (click)="nextPage()"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

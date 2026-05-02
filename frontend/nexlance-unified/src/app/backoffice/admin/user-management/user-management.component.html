@@ -1,0 +1,196 @@
+<div class="user-management-container">
+  <div class="header">
+    <h1>User Management</h1>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="exportUsers()">
+        <mat-icon>download</mat-icon>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <mat-form-field class="search-field" appearance="outline">
+      <mat-label>Search</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="Name, email...">
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Role</mat-label>
+      <mat-select [value]="roleFilter()" (selectionChange)="onRoleFilterChange($event.value)">
+        <mat-option value="ALL">All Roles</mat-option>
+        <mat-option *ngFor="let role of availableRoles" [value]="role">
+          {{ role }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [value]="statusFilter()" (selectionChange)="onStatusFilterChange($event.value)">
+        <mat-option value="ALL">All Statuses</mat-option>
+        <mat-option *ngFor="let status of availableStatuses" [value]="status">
+          {{ status }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-stroked-button (click)="resetFilters()">
+      <mat-icon>refresh</mat-icon>
+      Reset
+    </button>
+  </div>
+
+  <!-- Stats Summary -->
+  <div class="stats-summary">
+    <div class="stat-card">
+      <mat-icon>people</mat-icon>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalUsers() }}</span>
+        <span class="stat-label">Total Users</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <mat-icon>trending_up</mat-icon>
+      <div class="stat-info">
+        <span class="stat-value">{{ activeUsersCount }}</span>
+        <span class="stat-label">Active</span>
+      </div>
+    </div>
+    <div class="stat-card inactive">
+      <mat-icon>pause_circle</mat-icon>
+      <div class="stat-info">
+        <span class="stat-value">{{ inactiveUsersCount }}</span>
+        <span class="stat-label">Inactive</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="table-container">
+    @if (loading()) {
+      <div class="loading-spinner">
+        <mat-icon class="spinner">refresh</mat-icon>
+        <p>Loading...</p>
+      </div>
+    } @else {
+      <table mat-table [dataSource]="users()" class="users-table">
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let user">
+            <div class="user-name">
+              @if (user.avatar) {
+                <img [src]="user.avatar" [alt]="user.firstName + ' ' + user.lastName" class="user-avatar-img">
+              } @else {
+                <div class="user-avatar-initials">{{ user.firstName?.charAt(0) }}{{ user.lastName?.charAt(0) }}</div>
+              }
+              <span>{{ user.firstName }} {{ user.lastName }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Email Column -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+        </ng-container>
+
+        <!-- Role Column -->
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Role</th>
+          <td mat-cell *matCellDef="let user">
+            <mat-chip [color]="getRoleColor(user.type)" highlighted>
+              {{ user.type }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let user">
+            <mat-chip 
+              [class.status-active]="user.status === UserStatus.ACTIVE"
+              [class.status-suspended]="user.status === UserStatus.SUSPENDED"
+              [class.status-pending]="user.status === UserStatus.PENDING_VERIFICATION"
+              [class.status-deleted]="user.status === UserStatus.DELETED">
+              <mat-icon class="status-icon">
+                @if (user.status === UserStatus.ACTIVE) {
+                  check_circle
+                } @else if (user.status === UserStatus.SUSPENDED) {
+                  pause_circle
+                } @else if (user.status === UserStatus.PENDING_VERIFICATION) {
+                  schedule
+                } @else {
+                  cancel
+                }
+              </mat-icon>
+              {{ user.status }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Created At Column -->
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Created At</th>
+          <td mat-cell *matCellDef="let user">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
+        </ng-container>
+
+        <!-- Last Login Column -->
+        <ng-container matColumnDef="lastLogin">
+          <th mat-header-cell *matHeaderCellDef>Last Login</th>
+          <td mat-cell *matCellDef="let user">
+            {{ user.lastLogin ? (user.lastLogin | date: 'dd/MM/yyyy HH:mm') : 'Never' }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let user">
+            <div class="action-buttons">
+              <button 
+                mat-icon-button 
+                [matTooltip]="user.status === UserStatus.ACTIVE ? 'Deactivate' : 'Activate'"
+                (click)="toggleUserStatus(user)"
+                [disabled]="user.status === UserStatus.DELETED">
+                <mat-icon>
+                  {{ user.status === UserStatus.ACTIVE ? 'block' : 'check_circle' }}
+                </mat-icon>
+              </button>
+              
+              <button 
+                mat-icon-button 
+                matTooltip="View Details"
+                (click)="viewUserDetails(user)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      @if (users().length === 0) {
+        <div class="no-data">
+          <mat-icon>inbox</mat-icon>
+          <p>No users found</p>
+        </div>
+      }
+
+      <mat-paginator
+        [length]="totalUsers()"
+        [pageSize]="pageSize()"
+        [pageIndex]="pageIndex()"
+        [pageSizeOptions]="[5, 10, 25, 50, 100]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    }
+  </div>
+</div>

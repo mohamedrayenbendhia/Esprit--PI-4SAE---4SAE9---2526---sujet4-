@@ -1,0 +1,369 @@
+<div class="create-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <button class="btn-back" (click)="cancel()" type="button">← Back</button>
+    <h1>New Contract</h1>
+  </div>
+
+  <!-- Stepper -->
+  <div class="stepper">
+    <div class="step" [class.active]="currentStep === 1" [class.done]="currentStep > 1">
+      <div class="step-circle">{{ currentStep > 1 ? '✓' : '1' }}</div>
+      <div class="step-label">General</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 2" [class.done]="currentStep > 2">
+      <div class="step-circle">{{ currentStep > 2 ? '✓' : '2' }}</div>
+      <div class="step-label">Financial</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 3" [class.done]="currentStep > 3">
+      <div class="step-circle">{{ currentStep > 3 ? '✓' : '3' }}</div>
+      <div class="step-label">Milestones</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 4" [class.done]="currentStep > 4">
+      <div class="step-circle">{{ currentStep > 4 ? '✓' : '4' }}</div>
+      <div class="step-label">Legal</div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h2 class="step-title">{{ stepTitle }}</h2>
+
+    <!-- STEP 1: General Information -->
+    <div *ngIf="currentStep === 1">
+      <!-- Contract Type -->
+      <div class="form-group">
+        <label>Contract Type <span class="required">*</span></label>
+        <select [(ngModel)]="contract.contractType" name="contractType">
+          <option [ngValue]="ContractType.STANDARD">Standard</option>
+          <option [ngValue]="ContractType.PROFESSIONAL">Professional</option>
+          <option [ngValue]="ContractType.PREMIUM">Premium</option>
+        </select>
+      </div>
+
+      <!-- Client Information -->
+      <div class="form-section">
+        <h3>Your Information</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="contract.clientName" name="clientName" placeholder="John Doe">
+          </div>
+          <div class="form-group">
+            <label>Email <span class="required">*</span></label>
+            <input type="email" [(ngModel)]="contract.clientEmail" name="clientEmail" placeholder="client@email.com">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" [(ngModel)]="contract.clientPhone" name="clientPhone" placeholder="+216 XX XXX XXX">
+          </div>
+          <div class="form-group">
+            <label>Company</label>
+            <input type="text" [(ngModel)]="contract.clientCompany" name="clientCompany" placeholder="Company name">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Address</label>
+            <input type="text" [(ngModel)]="contract.clientAddress" name="clientAddress" placeholder="Street address">
+          </div>
+          <div class="form-group">
+            <label>Country</label>
+            <input type="text" [(ngModel)]="contract.clientCountry" name="clientCountry" placeholder="Country">
+          </div>
+        </div>
+      </div>
+
+      <!-- Freelancer Search -->
+      <div class="form-section">
+        <h3>Find Freelancer</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Freelancer Email <span class="required">*</span></label>
+            <input type="email" 
+                   [(ngModel)]="freelancerEmail" 
+                   name="freelancerEmail" 
+                   placeholder="email@freelancer.com"
+                   [class.error]="freelancerEmail && !emailValid">
+            <span class="error-text" *ngIf="freelancerEmail && !emailValid">Invalid email format</span>
+          </div>
+          <div class="form-group">
+            <label>CIN (8 digits) <span class="required">*</span></label>
+            <input type="text" 
+                   [(ngModel)]="freelancerCin" 
+                   name="freelancerCin" 
+                   placeholder="12345678"
+                   maxlength="8"
+                   [class.error]="cinInvalid">
+            <span class="error-text" *ngIf="cinInvalid">Must contain 8 digits</span>
+          </div>
+        </div>
+
+        <button class="btn-verify" 
+                type="button" 
+                (click)="resolveFreelancer()"
+                [disabled]="!emailValid || !cinValid || freelancerLookupLoading">
+          {{ freelancerLookupLoading ? 'Searching...' : 'Verify Freelancer' }}
+        </button>
+
+        <div class="message error" *ngIf="freelancerLookupError">{{ freelancerLookupError }}</div>
+        <div class="message success" *ngIf="freelancerResolved">
+          ✓ Freelancer found: {{ contract.freelancerName }} ({{ contract.freelancerEmail }})
+        </div>
+      </div>
+
+      <!-- Freelancer Additional Info -->
+      <div class="form-section" *ngIf="freelancerResolved">
+        <h3>Freelancer Details (Optional)</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" [(ngModel)]="contract.freelancerPhone" name="freelancerPhone" placeholder="+216 XX XXX XXX">
+          </div>
+          <div class="form-group">
+            <label>Specialty</label>
+            <input type="text" [(ngModel)]="contract.freelancerSpecialty" name="freelancerSpecialty" placeholder="Full Stack Developer">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Address</label>
+            <input type="text" [(ngModel)]="contract.freelancerAddress" name="freelancerAddress" placeholder="Freelancer address">
+          </div>
+          <div class="form-group">
+            <label>Country</label>
+            <input type="text" [(ngModel)]="contract.freelancerCountry" name="freelancerCountry" placeholder="Country">
+          </div>
+        </div>
+      </div>
+
+      <!-- Mission Details -->
+      <div class="form-section">
+        <h3>Mission Details</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Mission Title <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="contract.missionTitle" name="missionTitle" placeholder="Website Development">
+          </div>
+          <div class="form-group">
+            <label>Technologies</label>
+            <input type="text" [(ngModel)]="contract.technologies" name="technologies" placeholder="Angular, Spring Boot">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="contract.missionDescription" name="missionDescription" rows="3" placeholder="Describe the mission..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Deliverables</label>
+          <textarea [(ngModel)]="contract.deliverables" name="deliverables" rows="2" placeholder="List expected deliverables..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" [(ngModel)]="contract.startDate" name="startDate">
+          </div>
+          <div class="form-group">
+            <label>End Date</label>
+            <input type="date" [(ngModel)]="contract.endDate" name="endDate">
+          </div>
+          <div class="form-group">
+            <label>Duration (months)</label>
+            <input type="number" [(ngModel)]="contract.durationMonths" name="durationMonths" min="1" placeholder="6">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Financial Information -->
+    <div *ngIf="currentStep === 2">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total Amount <span class="required">*</span></label>
+          <input type="number" [(ngModel)]="contract.totalAmount" name="totalAmount" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label>Currency</label>
+          <select [(ngModel)]="contract.currency" name="currency">
+            <option value="EUR">EUR - Euro</option>
+            <option value="USD">USD - US Dollar</option>
+            <option value="TND">TND - Tunisian Dinar</option>
+            <option value="GBP">GBP - British Pound</option>
+            <option value="CAD">CAD - Canadian Dollar</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>VAT (%)</label>
+          <input type="number" [(ngModel)]="contract.vatRate" name="vatRate" min="0" max="100" step="0.1" placeholder="20">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Payment Method</label>
+        <select [(ngModel)]="contract.paymentMethod" name="paymentMethod">
+          <option value="BANK_TRANSFER">Bank Transfer</option>
+          <option value="CREDIT_CARD">Credit Card</option>
+          <option value="PAYPAL">PayPal</option>
+          <option value="CHECK">Check</option>
+          <option value="CASH">Cash</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>IBAN</label>
+          <input type="text" [(ngModel)]="contract.iban" name="iban" placeholder="FR76 XXXX XXXX XXXX">
+        </div>
+        <div class="form-group">
+          <label>BIC / SWIFT</label>
+          <input type="text" [(ngModel)]="contract.bic" name="bic" placeholder="BNPAFRPP">
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Milestones & Payments -->
+    <div *ngIf="currentStep === 3">
+      <h3 class="section-title">Milestones</h3>
+      
+      <div class="add-item-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Title <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="newMilestone.title" placeholder="Design phase completed">
+          </div>
+          <div class="form-group">
+            <label>Due Date <span class="required">*</span></label>
+            <input type="date" [(ngModel)]="newMilestone.dueDate">
+          </div>
+          <div class="form-group">
+            <label>Amount</label>
+            <input type="number" [(ngModel)]="newMilestone.linkedPaymentAmount" placeholder="0.00">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" [(ngModel)]="newMilestone.description" placeholder="Brief description">
+        </div>
+        <button class="btn-add" type="button" (click)="addMilestone()" [disabled]="!newMilestone.title || !newMilestone.dueDate">
+          + Add Milestone
+        </button>
+      </div>
+
+      <div class="items-list" *ngIf="milestones.length > 0">
+        <div class="item-row" *ngFor="let m of milestones; let i = index">
+          <span class="item-number">{{ i + 1 }}</span>
+          <div class="item-info">
+            <strong>{{ m.title }}</strong>
+            <span>{{ m.dueDate | date:'dd/MM/yyyy' }}</span>
+            <span *ngIf="m.linkedPaymentAmount">{{ m.linkedPaymentAmount | currency:'EUR' }}</span>
+          </div>
+          <button class="btn-remove" type="button" (click)="removeMilestone(i)">✕</button>
+        </div>
+      </div>
+
+      <h3 class="section-title">Payment Schedule</h3>
+      
+      <div class="add-item-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Label <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="newPayment.label" placeholder="Initial payment">
+          </div>
+          <div class="form-group">
+            <label>Amount <span class="required">*</span></label>
+            <input type="number" [(ngModel)]="newPayment.amount" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label>Due Date <span class="required">*</span></label>
+            <input type="date" [(ngModel)]="newPayment.dueDate">
+          </div>
+          <div class="form-group">
+            <label>Percentage</label>
+            <input type="number" [(ngModel)]="newPayment.percentage" placeholder="%">
+          </div>
+        </div>
+        <button class="btn-add" type="button" (click)="addPayment()" [disabled]="!newPayment.label || !newPayment.amount || !newPayment.dueDate">
+          + Add Payment
+        </button>
+      </div>
+
+      <div class="items-list" *ngIf="payments.length > 0">
+        <div class="item-row" *ngFor="let p of payments; let i = index">
+          <span class="item-number">{{ i + 1 }}</span>
+          <div class="item-info">
+            <strong>{{ p.label }}</strong>
+            <span>{{ p.amount | currency:'EUR' }}</span>
+            <span>{{ p.dueDate | date:'dd/MM/yyyy' }}</span>
+            <span *ngIf="p.percentage">{{ p.percentage }}%</span>
+          </div>
+          <button class="btn-remove" type="button" (click)="removePayment(i)">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Legal Information -->
+    <div *ngIf="currentStep === 4">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Applicable Law</label>
+          <select [(ngModel)]="contract.applicableLaw" name="applicableLaw">
+            <option value="FRENCH">French Law</option>
+            <option value="TUNISIAN">Tunisian Law</option>
+            <option value="AMERICAN">American Law</option>
+            <option value="CANADIAN">Canadian Law</option>
+            <option value="UK">UK Law</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Competent Court</label>
+          <input type="text" [(ngModel)]="contract.competentCourt" placeholder="Paris Court of Commerce">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Confidentiality Duration (years)</label>
+        <input type="number" [(ngModel)]="contract.confidentialityYears" min="0" max="10" placeholder="2">
+      </div>
+
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" [(ngModel)]="contract.ipTransferToClient">
+          Transfer of intellectual property rights to client
+        </label>
+      </div>
+
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" [(ngModel)]="contract.portfolioAllowed">
+          Authorization for use in freelancer's portfolio
+        </label>
+      </div>
+
+      <div class="form-group" *ngIf="contract.portfolioAllowed">
+        <label>Delay before portfolio use (months)</label>
+        <input type="number" [(ngModel)]="contract.portfolioDelayMonths" min="0" max="36" placeholder="6">
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="error">{{ error }}</div>
+
+    <!-- Navigation -->
+    <div class="form-actions">
+      <button class="btn-secondary" type="button" (click)="prevStep()" *ngIf="currentStep > 1">← Previous</button>
+      <button class="btn-secondary" type="button" (click)="cancel()">Cancel</button>
+      <button class="btn-primary" type="button" (click)="nextStep()" *ngIf="currentStep < totalSteps">Next →</button>
+      <button class="btn-submit" type="button" (click)="submit()" *ngIf="currentStep === totalSteps" [disabled]="loading">
+        {{ loading ? 'Creating...' : 'Create Contract' }}
+      </button>
+    </div>
+  </div>
+</div>

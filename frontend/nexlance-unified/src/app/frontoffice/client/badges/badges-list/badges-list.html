@@ -1,0 +1,41 @@
+<div class="badges-container">
+  <div class="header">
+    <h2>Tous les badges disponibles</h2>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Chargement des badges...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && badges.length === 0" class="no-data">
+    <p>Aucun badge disponible pour le moment.</p>
+  </div>
+
+  <div class="badges-grid" *ngIf="!isLoading && badges.length > 0">
+    <div class="badge-card" *ngFor="let badge of badges">
+      <div class="badge-icon">
+        {{ getBadgeIcon(badge.name) }}
+      </div>
+      <div class="badge-info">
+        <h3>{{ badge.name }}</h3>
+        <p class="badge-description">{{ badge.description }}</p>
+        <div class="badge-requirements">
+          <span class="requirement" [attr.data-tooltip]="'Score minimum requis'">
+            ⭐ {{ badge.minScore }}/5
+          </span>
+          <span class="requirement" [attr.data-tooltip]="'Nombre minimum de projets'">
+            📋 {{ badge.minProjects }}
+          </span>
+        </div>
+        <div class="badge-footer">
+          <small class="badge-date">Créé le {{ badge.createdAt | date:'dd/MM/yyyy' }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

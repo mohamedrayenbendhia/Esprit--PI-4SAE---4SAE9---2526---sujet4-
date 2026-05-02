@@ -1,0 +1,60 @@
+<div class="evaluations-container">
+  <div class="header">
+    <h2>Freelancer Evaluations</h2>
+    <button class="btn-back" routerLink="/frontoffice/client/freelancers">← Back</button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">Loading...</div>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+  <div *ngIf="!isLoading && evaluations.length === 0" class="empty">
+    No evaluations for this freelancer.
+  </div>
+
+  <div class="evaluations-list" *ngIf="!isLoading && evaluations.length > 0">
+    <div class="evaluation-card" *ngFor="let evaluation of evaluations">
+      <div class="card-header">
+        <span class="date">{{ evaluation.createdAt | date:'dd/MM/yyyy' }}</span>
+        <span class="global-rating">{{ evaluation.ratingGlobal }}/5</span>
+      </div>
+
+      <div class="scores">
+        <div class="score-item">
+          <span class="label">Quality</span>
+          <div class="stars">
+            <span *ngFor="let star of getStars(evaluation.qualityScore)"
+                  class="star" [class.filled]="star <= evaluation.qualityScore">★</span>
+          </div>
+        </div>
+        <div class="score-item">
+          <span class="label">Deadline</span>
+          <div class="stars">
+            <span *ngFor="let star of getStars(evaluation.deadlineScore)"
+                  class="star" [class.filled]="star <= evaluation.deadlineScore">★</span>
+          </div>
+        </div>
+        <div class="score-item">
+          <span class="label">Communication</span>
+          <div class="stars">
+            <span *ngFor="let star of getStars(evaluation.communicationScore)"
+                  class="star" [class.filled]="star <= evaluation.communicationScore">★</span>
+          </div>
+        </div>
+        <div class="score-item">
+          <span class="label">Professionalism</span>
+          <div class="stars">
+            <span *ngFor="let star of getStars(evaluation.professionalismScore)"
+                  class="star" [class.filled]="star <= evaluation.professionalismScore">★</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="comment" *ngIf="evaluation.comment">"{{ evaluation.comment }}"</p>
+      
+      <div class="response" *ngIf="evaluation.responseText">
+        <span class="response-label">Freelancer response:</span>
+        <p class="response-text">{{ evaluation.responseText }}</p>
+      </div>
+    </div>
+  </div>
+</div>

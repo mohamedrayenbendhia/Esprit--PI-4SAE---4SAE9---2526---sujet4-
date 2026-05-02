@@ -1,0 +1,162 @@
+<div class="my-recommendations-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>{{ 'recommendations.title' | translate }}</h1>
+      <p>{{ 'recommendations.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="controls-section">
+    <div class="status-filters">
+      <button 
+        *ngFor="let option of statusOptions"
+        class="filter-btn"
+        [class.active]="statusFilter === option.value"
+        (click)="onStatusFilterChange(option.value)"
+      >
+        {{ option.label }}
+      </button>
+    </div>
+
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input 
+        type="text" 
+        [placeholder]="'recommendations.searchPlaceholder' | translate"
+        [(ngModel)]="searchQuery"
+        (input)="onSearchChange($event)"
+      />
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>{{ 'recommendations.loading' | translate }}</p>
+  </div>
+
+  <!-- Recommendations List -->
+  <div *ngIf="!isLoading && filteredRecommendations.length > 0" class="recommendations-list">
+    <div *ngFor="let rec of filteredRecommendations" class="recommendation-card">
+      <!-- Card Header -->
+      <div class="card-header">
+        <div class="freelancer-info">
+          <div class="avatar"><mat-icon>person</mat-icon></div>
+          <div class="info">
+            <h3>{{ getFreelancerName(rec.freelanceId) }}</h3>
+            <p class="freelancer-contact">
+              <span *ngIf="getFreelancerEmail(rec.freelanceId)">
+                <mat-icon class="contact-icon">email</mat-icon> {{ getFreelancerEmail(rec.freelanceId) }}
+              </span>
+              <span *ngIf="getFreelancerPhone(rec.freelanceId) !== 'N/A'">
+                <mat-icon class="contact-icon">phone</mat-icon> {{ getFreelancerPhone(rec.freelanceId) }}
+              </span>
+            </p>
+            <p class="job-title">
+              <mat-icon class="contact-icon">work</mat-icon> {{ 'recommendations.card.offer' | translate }}: {{ getJobOfferTitle(rec.jobOfferId) }}
+            </p>
+          </div>
+        </div>
+        <div class="status-badge" [ngClass]="getStatusClass(rec.status)">
+          <mat-icon class="status-icon">{{ getStatusIcon(rec.status) }}</mat-icon> {{ getStatusLabel(rec.status) }}
+        </div>
+      </div>
+
+      <!-- Card Body -->
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-item">
+            <mat-icon class="info-icon">calendar_today</mat-icon> {{ 'recommendations.card.sentOn' | translate }}: {{ formatDate(rec.sentDate) }}
+          </span>
+          <span class="info-item" *ngIf="rec.status === RecommendationStatus.PENDING && rec.expirationDate">
+            • <mat-icon class="info-icon">timer</mat-icon> Expires: {{ formatDate(rec.expirationDate) }}
+          </span>
+          <span class="info-item" *ngIf="rec.status === RecommendationStatus.ACCEPTED && rec.responseDate">
+            • <mat-icon class="info-icon">check_circle</mat-icon> {{ 'recommendations.card.acceptedOn' | translate }}: {{ formatDate(rec.responseDate) }}
+          </span>
+          <span class="info-item" *ngIf="rec.status === RecommendationStatus.REJECTED && rec.responseDate">
+            • <mat-icon class="info-icon">cancel</mat-icon> {{ 'recommendations.card.rejectedOn' | translate }}: {{ formatDate(rec.responseDate) }}
+          </span>
+        </div>
+
+        <div class="info-row" *ngIf="rec.proposedBudget">
+          <span class="info-item budget">
+            <mat-icon class="info-icon">attach_money</mat-icon> {{ 'recommendations.card.proposedBudget' | translate }}: {{ rec.proposedBudget }} DT
+          </span>
+        </div>
+
+        <div class="info-row stats">
+          <span class="info-item">
+            <mat-icon class="info-icon">visibility</mat-icon> {{ 'recommendations.card.viewed' | translate:{count: rec.viewCount} }}
+          </span>
+          <span class="info-item" *ngIf="rec.isReminderSent">
+            • <mat-icon class="info-icon">notifications_active</mat-icon> Reminder sent
+          </span>
+        </div>
+
+        <!-- Cancellation Reason -->
+        <div class="response-box" *ngIf="rec.cancellationReason">
+          <mat-icon>cancel</mat-icon>
+          <div class="response-content">
+            <p class="response-label">
+              Cancellation Reason:
+            </p>
+            <p class="response-text">
+              "{{ rec.cancellationReason }}"
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Actions -->
+      <div class="card-actions">
+        <button class="btn btn-secondary" (click)="viewDetail(rec.id)">
+          <mat-icon>visibility</mat-icon> {{ 'recommendations.actions.viewDetail' | translate }}
+        </button>
+
+        <button 
+          *ngIf="rec.status === RecommendationStatus.PENDING"
+          class="btn btn-info" 
+          (click)="sendReminder(rec.id)"
+        >
+          <mat-icon>notifications</mat-icon> {{ 'recommendations.actions.sendReminder' | translate }}
+        </button>
+
+        <button 
+          *ngIf="rec.status === RecommendationStatus.PENDING"
+          class="btn btn-danger" 
+          (click)="cancelRecommendation(rec.id)"
+        >
+          <mat-icon>close</mat-icon> {{ 'recommendations.actions.cancel' | translate }}
+        </button>
+
+        <button 
+          *ngIf="rec.status === RecommendationStatus.ACCEPTED"
+          class="btn btn-success btn-create-project" 
+          (click)="createProject(rec.id)"
+        >
+          <mat-icon>rocket_launch</mat-icon> {{ 'recommendations.actions.createProject' | translate }}
+        </button>
+
+        <button 
+          *ngIf="rec.status === RecommendationStatus.REJECTED"
+          class="btn btn-primary" 
+          (click)="recommendForAnother(rec.id)"
+        >
+          <mat-icon>refresh</mat-icon> {{ 'recommendations.actions.recommendForAnother' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredRecommendations.length === 0" class="empty-state">
+    <mat-icon>inbox</mat-icon>
+    <h3>{{ 'recommendations.noRecommendations' | translate }}</h3>
+    <p>{{ 'recommendations.noRecommendationsMessage' | translate }}</p>
+    <button class="btn btn-primary" routerLink="/frontoffice/client/freelancers">
+      <mat-icon>search</mat-icon> {{ 'nav.findFreelancers' | translate }}
+    </button>
+  </div>
+</div>

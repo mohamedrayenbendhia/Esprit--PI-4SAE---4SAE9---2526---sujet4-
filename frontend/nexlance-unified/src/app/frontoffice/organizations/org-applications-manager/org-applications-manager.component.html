@@ -1,0 +1,79 @@
+<div class="manager-section">
+  <div class="section-header">
+    <h3><mat-icon>people</mat-icon> Received Applications</h3>
+    <span class="count">{{ total() }} total</span>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading"><div class="spinner"></div></div>
+  }
+
+  @if (!isLoading() && apps().length === 0) {
+    <div class="empty"><mat-icon>inbox</mat-icon><p>No applications received.</p></div>
+  }
+
+  <div class="app-list">
+    @for (app of apps(); track app.id) {
+      <div class="app-item">
+        <div class="app-top">
+          <div class="app-info">
+            <mat-icon>person</mat-icon>
+            <span class="applicant">Applicant {{ app.applicantId.slice(0, 8) }}…</span>
+            <span class="date">{{ app.createdAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <span class="status-badge"
+                [style.background]="getStatusColor(app.status) + '20'"
+                [style.color]="getStatusColor(app.status)">
+            {{ getStatusLabel(app.status) }}
+          </span>
+        </div>
+        <p class="message">{{ app.message }}</p>
+        @if (app.cvUrl) {
+          <a [href]="app.cvUrl" target="_blank" class="cv-link">
+            <mat-icon>attach_file</mat-icon> View CV
+          </a>
+        }
+        @if (app.status === ApplicationStatus.PENDING && respondingId() !== app.id) {
+          <button mat-stroked-button color="primary" (click)="openRespond(app.id)">
+            <mat-icon>reply</mat-icon> Respond
+          </button>
+        }
+        @if (respondingId() === app.id) {
+          <div class="respond-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Decision</mat-label>
+              <mat-select [(ngModel)]="respondForm.status">
+                <mat-option value="ACCEPTED">Accept</mat-option>
+                <mat-option value="REJECTED">Reject</mat-option>
+              </mat-select>
+            </mat-form-field>
+            @if (respondForm.status === 'REJECTED') {
+              <mat-form-field appearance="outline" style="width:100%">
+                <mat-label>Reason (optional)</mat-label>
+                <input matInput [(ngModel)]="respondForm.rejectionReason">
+              </mat-form-field>
+            }
+            <div class="respond-actions">
+              <button mat-button (click)="cancelRespond()">Cancel</button>
+              <button mat-raised-button color="primary" (click)="submitRespond(app)">
+                <mat-icon>send</mat-icon> Confirm
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (total() > 20) {
+    <div class="pagination">
+      <button mat-icon-button [disabled]="page() === 0" (click)="prevPage()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span>Page {{ page() + 1 }}</span>
+      <button mat-icon-button [disabled]="(page()+1)*20 >= total()" (click)="nextPage()">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  }
+</div>

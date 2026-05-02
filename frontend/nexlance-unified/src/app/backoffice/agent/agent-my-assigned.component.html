@@ -1,0 +1,97 @@
+<div class="assigned-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>My Complaints</h1>
+      <p class="subtitle">Complaints assigned to you</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-queue" (click)="goToQueue()">
+        <mat-icon>inbox</mat-icon> Queue
+      </button>
+      <button class="btn-refresh" (click)="load()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats rapides -->
+  <div *ngIf="!isLoading() && complaints().length > 0" class="stats-row">
+    <div class="stat-card">
+      <span class="stat-value">{{ complaints().length }}</span>
+      <span class="stat-label">Total</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value in-progress">{{ countByStatus('IN_PROGRESS') }}</span>
+      <span class="stat-label">In Progress</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value pending">{{ countByStatus('PENDING_USER') }}</span>
+      <span class="stat-label">Pending</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value resolved">{{ countByStatus('RESOLVED') }}</span>
+      <span class="stat-label">Resolved</span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="state-box">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!isLoading() && complaints().length === 0" class="state-box empty">
+    <mat-icon class="empty-icon">assignment_turned_in</mat-icon>
+    <h2>No complaints assigned</h2>
+    <p>Go to the queue to take on a complaint.</p>
+    <button class="btn-queue" (click)="goToQueue()">
+      <mat-icon>inbox</mat-icon> View Queue
+    </button>
+  </div>
+
+  <!-- Liste -->
+  <div *ngIf="!isLoading() && complaints().length > 0" class="list">
+    <div *ngFor="let c of complaints()" class="card" (click)="viewDetail(c.id)">
+
+      <div class="priority-bar" [style.background]="getPriorityColor(c.priority)"></div>
+
+      <div class="card-body">
+        <div class="top-row">
+          <span class="ticket">{{ c.ticketNumber }}</span>
+          <span class="status-badge"
+            [style.background]="getStatusColor(c.status) + '20'"
+            [style.color]="getStatusColor(c.status)">
+            {{ getStatusLabel(c.status) }}
+          </span>
+        </div>
+
+        <h3>{{ c.subject }}</h3>
+        <p class="desc">{{ c.description | slice:0:90 }}{{ c.description.length > 90 ? '...' : '' }}</p>
+
+        <div class="footer-row">
+          <span class="meta">
+            <mat-icon>category</mat-icon>
+            {{ getCategoryLabel(c.category) }}
+          </span>
+          <span class="meta" [style.color]="getPriorityColor(c.priority)">
+            <mat-icon>flag</mat-icon>
+            {{ getPriorityLabel(c.priority) }}
+          </span>
+          <span class="meta">
+            <mat-icon>schedule</mat-icon>
+            {{ formatDate(c.createdAt) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="arrow">
+        <mat-icon>chevron_right</mat-icon>
+      </div>
+
+    </div>
+  </div>
+
+</div>

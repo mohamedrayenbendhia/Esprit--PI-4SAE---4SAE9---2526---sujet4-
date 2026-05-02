@@ -1,0 +1,103 @@
+<div class="stats-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <button class="btn-back" (click)="goToList()"><mat-icon>arrow_back</mat-icon> All complaints</button>
+      <h1>Statistics</h1>
+      <p class="subtitle">Overview of all platform complaints</p>
+    </div>
+    <button class="btn-refresh" (click)="load()"><mat-icon>refresh</mat-icon></button>
+  </div>
+
+  <div *ngIf="isLoading()" class="state-box"><div class="spinner"></div></div>
+
+  <ng-container *ngIf="!isLoading()">
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card total">
+        <div class="kpi-icon"><mat-icon>inbox</mat-icon></div>
+        <div class="kpi-body">
+          <span class="kpi-val">{{ totalComplaints() }}</span>
+          <span class="kpi-label">Total complaints</span>
+        </div>
+      </div>
+      <div *ngFor="let s of getStatusEntries() | slice:0:4" class="kpi-card">
+        <div class="kpi-icon" [style.background]="s.color + '20'" [style.color]="s.color">
+          <mat-icon>{{ s.key === 'OPEN' ? 'fiber_new' : s.key === 'IN_PROGRESS' ? 'pending' : s.key === 'RESOLVED' ? 'check_circle' : 'lock' }}</mat-icon>
+        </div>
+        <div class="kpi-body">
+          <span class="kpi-val" [style.color]="s.color">{{ s.count }}</span>
+          <span class="kpi-label">{{ s.label }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="charts-row">
+
+      <!-- Par statut -->
+      <div class="chart-card">
+        <h3 class="chart-title"><mat-icon>donut_large</mat-icon> Distribution by status</h3>
+        <div class="bar-chart">
+          <div *ngFor="let s of getStatusEntries()" class="bar-item">
+            <div class="bar-label">{{ s.label }}</div>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width]="s.pct + '%'" [style.background]="s.color"></div>
+            </div>
+            <div class="bar-stats">
+              <span class="bar-count">{{ s.count }}</span>
+              <span class="bar-pct">{{ s.pct }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Par priorité -->
+      <div class="chart-card">
+        <h3 class="chart-title"><mat-icon>flag</mat-icon> Distribution by priority</h3>
+        <div class="bar-chart">
+          <div *ngFor="let p of getPriorityEntries()" class="bar-item">
+            <div class="bar-label">{{ p.label }}</div>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width]="p.pct + '%'" [style.background]="p.color"></div>
+            </div>
+            <div class="bar-stats">
+              <span class="bar-count">{{ p.count }}</span>
+              <span class="bar-pct">{{ p.pct }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Performance agents -->
+    <div class="agents-card" *ngIf="agents().length > 0">
+      <h3 class="chart-title"><mat-icon>people</mat-icon> Support agents ({{ agents().length }})</h3>
+      <div class="agents-grid">
+        <div *ngFor="let agent of agents()" class="agent-row">
+          <div class="agent-avatar">{{ agent.firstName[0] }}{{ agent.lastName[0] }}</div>
+          <div class="agent-info">
+            <span class="agent-name">{{ agent.firstName }} {{ agent.lastName }}</span>
+            <span class="agent-email">{{ agent.email }}</span>
+          </div>
+          <div class="agent-load">
+            <span class="load-count" [class.load-high]="(agentComplaintCounts()[agent.id] || 0) >= 5">
+              {{ agentComplaintCounts()[agent.id] ?? '…' }}
+            </span>
+            <span class="load-label">case{{ (agentComplaintCounts()[agent.id] || 0) > 1 ? 's' : '' }}</span>
+          </div>
+          <div class="agent-specs" *ngIf="agent.specialties?.length > 0">
+            <span *ngFor="let s of agent.specialties | slice:0:3" class="spec-chip">{{ s }}</span>
+            <span *ngIf="agent.specialties.length > 3" class="spec-more">+{{ agent.specialties.length - 3 }}</span>
+          </div>
+          <span *ngIf="!agent.specialties?.length" class="no-spec">All categories</span>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

@@ -1,0 +1,57 @@
+<div class="respond-page">
+  <mat-card class="respond-card">
+
+    @if (result() === null && !isLoading()) {
+      <mat-card-content class="center">
+        <mat-icon class="big-icon">mail</mat-icon>
+        <h2>Invitation to Join an Organization</h2>
+        <p>You have been invited to join an organization on NexLance.</p>
+        <div class="actions">
+          <button mat-raised-button color="primary" (click)="respond(true)">
+            <mat-icon>check</mat-icon> Accept Invitation
+          </button>
+          <button mat-stroked-button color="warn" (click)="respond(false)">
+            <mat-icon>close</mat-icon> Decline
+          </button>
+        </div>
+      </mat-card-content>
+    }
+
+    @if (isLoading()) {
+      <mat-card-content class="center">
+        <mat-spinner diameter="48"></mat-spinner>
+        <p>Processing...</p>
+      </mat-card-content>
+    }
+
+    @if (result() === 'accepted') {
+      <mat-card-content class="center success">
+        <mat-icon class="big-icon success-icon">check_circle</mat-icon>
+        <h2>Invitation Accepted!</h2>
+        @if (orgName()) { <p>You have joined <strong>{{ orgName() }}</strong>.</p> }
+        <button mat-raised-button color="primary" (click)="goHome()">
+          <mat-icon>home</mat-icon> Go to home
+        </button>
+      </mat-card-content>
+    }
+
+    @if (result() === 'declined') {
+      <mat-card-content class="center">
+        <mat-icon class="big-icon">do_not_disturb</mat-icon>
+        <h2>Invitation Declined</h2>
+        <p>You have declined this invitation.</p>
+        <button mat-button (click)="goHome()">Back to home</button>
+      </mat-card-content>
+    }
+
+    @if (result() === 'error') {
+      <mat-card-content class="center error">
+        <mat-icon class="big-icon error-icon">error_outline</mat-icon>
+        <h2>Invalid Link</h2>
+        <p>{{ errorMsg() }}</p>
+        <button mat-button (click)="goHome()">Back to home</button>
+      </mat-card-content>
+    }
+
+  </mat-card>
+</div>

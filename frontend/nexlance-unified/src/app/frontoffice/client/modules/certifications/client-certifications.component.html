@@ -1,0 +1,113 @@
+<div class="client-certifications">
+
+  <!-- Hero -->
+  <div class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <mat-icon>workspace_premium</mat-icon>
+          {{ selectedFreelancer() ? 'Freelancer Certifications' : 'All Certifications' }}
+        </h1>
+        <p class="hero-description">
+          {{ selectedFreelancer() ? 'Certifications earned by this freelancer' : 'Browse all freelancer certifications and scores' }}
+        </p>
+        <button mat-raised-button class="cta-button" (click)="back()" *ngIf="selectedFreelancer()">
+          <mat-icon>arrow_back</mat-icon> Back to Freelancers
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-box">
+          <div class="stat-value">{{ selectedFreelancer() ? selectedFreelancer()!.certifications.length : freelancerGroups().length }}</div>
+          <div class="stat-label">{{ selectedFreelancer() ? 'Certifications' : 'Freelancers' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <div class="loading-state" *ngIf="loading()">
+      <mat-icon>autorenew</mat-icon>
+      <p>Loading...</p>
+    </div>
+
+    <!-- Freelancers List -->
+    <div class="freelancers-list" *ngIf="!loading() && !selectedFreelancer()">
+      <div class="empty-state" *ngIf="freelancerGroups().length === 0">
+        <mat-icon>workspace_premium</mat-icon>
+        <h3>No certifications yet</h3>
+      </div>
+
+      <mat-card class="freelancer-card" *ngFor="let f of freelancerGroups()" (click)="selectFreelancer(f)">
+        <mat-card-content>
+          <div class="freelancer-header">
+<div class="freelancer-avatar">{{ getName(f.userId).substring(0,2).toUpperCase() }}</div>
+            <div class="freelancer-info">
+<h3>{{ getName(f.userId) }}</h3>
+              <div class="cert-count">
+                <mat-icon>workspace_premium</mat-icon>
+                {{ f.certifications.length }} certification(s)
+              </div>
+            </div>
+            <div class="avg-score" [style.color]="getScoreColor(getAvgScore(f.certifications))">
+              {{ getAvgScore(f.certifications) }}%
+              <span class="avg-label">avg</span>
+            </div>
+            <mat-icon class="arrow">arrow_forward</mat-icon>
+          </div>
+
+          <div class="cert-previews">
+            <span class="cert-preview" *ngFor="let c of f.certifications.slice(0,3)">
+              {{ c.testTitle }}
+            </span>
+            <span class="cert-more" *ngIf="f.certifications.length > 3">+{{ f.certifications.length - 3 }} more</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Freelancer Detail -->
+    <div class="freelancer-detail" *ngIf="selectedFreelancer()">
+      <mat-card class="detail-card">
+        <mat-card-header>
+          <div class="detail-header">
+<div class="detail-avatar">{{ getName(selectedFreelancer()!.userId).substring(0,2).toUpperCase() }}</div>
+            <div class="detail-info">
+<h2>{{ getName(selectedFreelancer()!.userId) }}</h2>
+              <span>{{ selectedFreelancer()!.certifications.length }} certification(s)</span>
+            </div>
+            <div class="avg-score-large" [style.color]="getScoreColor(getAvgScore(selectedFreelancer()!.certifications))">
+              {{ getAvgScore(selectedFreelancer()!.certifications) }}%
+              <span>avg score</span>
+            </div>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <table mat-table [dataSource]="selectedFreelancer()!.certifications" class="cert-table">
+
+            <ng-container matColumnDef="testTitle">
+              <th mat-header-cell *matHeaderCellDef>Certification</th>
+              <td mat-cell *matCellDef="let c"><strong>{{ c.testTitle }}</strong></td>
+            </ng-container>
+
+            <ng-container matColumnDef="score">
+              <th mat-header-cell *matHeaderCellDef>Score</th>
+              <td mat-cell *matCellDef="let c">
+                <span class="score-badge" [style.color]="getScoreColor(c.score)">{{ c.score }}%</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let c">{{ c.date | date:'dd/MM/yyyy' }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  </div>
+</div>

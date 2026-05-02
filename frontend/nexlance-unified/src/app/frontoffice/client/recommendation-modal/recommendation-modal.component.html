@@ -1,0 +1,132 @@
+<div class="recommendation-modal">
+  <div class="modal-header">
+    <h2>✕ RECOMMEND A FREELANCER</h2>
+    <button class="close-btn" (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <!-- Freelancer Info -->
+    <div class="freelancer-info-card">
+      <p class="label">Selected freelancer:</p>
+      <div class="freelancer-card">
+        <div class="avatar">👤</div>
+        <div class="info">
+          <h3>{{ data.freelancer.name }}</h3>
+          <p class="title">💼 {{ data.freelancer.title }} • ⭐ {{ data.freelancer.rating }} ({{ data.freelancer.reviewCount }})</p>
+          <p class="details">💰 {{ data.freelancer.hourlyRate }} DT/h • 📍 {{ data.freelancer.location }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="recommendationForm" (ngSubmit)="onSubmit()">
+      <!-- Job Offer Selection -->
+      <div class="form-group">
+        <label for="jobOffer">Select an offer *</label>
+        @if (isLoadingOffers) {
+          <p style="color: #888; font-style: italic;">Loading offers...</p>
+        } @else if (jobOffers.length === 0) {
+          <p style="color: #e74c3c; font-style: italic;">No available offers. All your open offers already have a recommendation for this freelancer.</p>
+        } @else {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-select 
+            id="jobOffer" 
+            formControlName="jobOfferId"
+            placeholder="Select an offer"
+            (selectionChange)="onJobOfferChange($event.value)"
+          >
+            <mat-option *ngFor="let offer of jobOffers" [value]="offer.id">
+              {{ offer.title }} ({{ getBudgetRange(offer.id) }})
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="recommendationForm.get('jobOfferId')?.hasError('required')">
+            Please select an offer
+          </mat-error>
+        </mat-form-field>
+        }
+      </div>
+
+      <!-- Proposed Budget -->
+      <div class="form-group">
+        <label for="budget">Proposed Budget (optional)</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input 
+            matInput 
+            id="budget"
+            type="number" 
+            formControlName="proposedBudget"
+            placeholder="Enter an amount"
+          />
+          <span matSuffix>DT</span>
+        </mat-form-field>
+      </div>
+
+      <!-- Message -->
+      <div class="form-group">
+        <label for="message">Recommendation message *</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea 
+            matInput 
+            id="message"
+            formControlName="message"
+            rows="8"
+            placeholder="Hello,&#10;&#10;I noticed your profile and your skills. I think you would be perfect for my project..."
+          ></textarea>
+          <mat-error *ngIf="recommendationForm.get('message')?.hasError('required')">
+            Message is required
+          </mat-error>
+          <mat-error *ngIf="recommendationForm.get('message')?.hasError('maxlength')">
+            Maximum 1000 characters
+          </mat-error>
+        </mat-form-field>
+        <div class="character-count">
+          {{ getCharacterCount() }} / 1000 characters
+        </div>
+      </div>
+
+      <!-- Expiration Date -->
+      <div class="form-group">
+        <label for="expirationDate">Response deadline *</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input 
+            matInput 
+            id="expirationDate"
+            [matDatepicker]="picker"
+            formControlName="expirationDate"
+            placeholder="Select a date"
+            readonly
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-hint>Default: +7 days</mat-hint>
+          <mat-error *ngIf="recommendationForm.get('expirationDate')?.hasError('required')">
+            Deadline is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Info Box -->
+      <div class="info-box">
+        <mat-icon>info</mat-icon>
+        <p>The freelancer will receive a notification by email and on the platform</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="!recommendationForm.valid"
+        >
+          <mat-icon>email</mat-icon>
+          Send Recommendation
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

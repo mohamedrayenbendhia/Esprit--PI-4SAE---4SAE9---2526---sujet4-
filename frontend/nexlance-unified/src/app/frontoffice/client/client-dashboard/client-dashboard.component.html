@@ -1,0 +1,229 @@
+<div class="client-dashboard">
+  <!-- Hero Profile Section -->
+  <div class="hero-profile-section">
+    <div class="hero-profile-container">
+      <div class="profile-content">
+        <h1 class="greeting-title">{{ 'dashboard.welcome' | translate }}, {{ user?.firstName }}!</h1>
+        <h2 class="profile-name">{{ user?.firstName }} {{ user?.lastName }}</h2>
+        <p class="profile-description">
+          {{ 'dashboard.clientSubtitle' | translate }}
+        </p>
+        <div class="hero-actions">
+          <button mat-raised-button class="cta-button primary" (click)="navigateToCreateJob()">
+            <mat-icon>add_circle</mat-icon>
+            {{ 'nav.createJob' | translate }}
+          </button>
+          <button mat-raised-button class="cta-button secondary" (click)="navigateToFindFreelancers()">
+            <mat-icon>search</mat-icon>
+            {{ 'dashboard.actions.findFreelancers' | translate }}
+          </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+          <div class="stat-box">
+            <div class="stat-icon">
+              <mat-icon>work</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ stats().activeJobs }}</div>
+              <div class="stat-label">{{ 'dashboard.stats.activeJobs' | translate }}</div>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">
+              <mat-icon>folder_open</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ stats().activeProjects }}</div>
+              <div class="stat-label">{{ 'dashboard.stats.activeProjects' | translate }}</div>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">
+              <mat-icon>assignment</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ stats().totalApplicationsReceived }}</div>
+              <div class="stat-label">{{ 'dashboard.stats.applicationsReceived' | translate }}</div>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">
+              <mat-icon>payments</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ stats().totalSpent }} DT</div>
+              <div class="stat-label">{{ 'dashboard.stats.totalSpent' | translate }}</div>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">
+              <mat-icon>people</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ stats().freelancersHired }}</div>
+              <div class="stat-label">{{ 'dashboard.stats.freelancersHired' | translate }}</div>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">
+              <mat-icon>check_circle</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ stats().completedProjects }}</div>
+              <div class="stat-label">{{ 'dashboard.stats.completedProjects' | translate }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-image">
+        <div class="profile-avatar-large">
+          @if (avatarUrl()) {
+            <img [src]="avatarUrl()" alt="Profile" class="avatar-img-large">
+          } @else {
+            <mat-icon class="avatar-icon-large">person</mat-icon>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="actions-section">
+    <div class="section-header">
+      <h2>{{ 'dashboard.quickActions' | translate }}</h2>
+      <p>{{ 'dashboard.yourActivity' | translate }}</p>
+    </div>
+    <div class="action-cards">
+      <mat-card class="action-card" (click)="navigateToCreateJob()">
+        <mat-card-content>
+          <div class="action-icon primary">
+            <mat-icon>add_circle</mat-icon>
+          </div>
+          <h3>{{ 'nav.createJob' | translate }}</h3>
+          <p>{{ 'dashboard.actions.postProjectDesc' | translate }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="navigateToMyJobs()">
+        <mat-card-content>
+          <div class="action-icon secondary">
+            <mat-icon>work</mat-icon>
+          </div>
+          <h3>{{ 'nav.myJobs' | translate }}</h3>
+          <p>{{ 'dashboard.actions.myProjectsDesc' | translate }}</p>
+          @if (stats().activeJobs > 0) {
+            <span class="action-badge">{{ stats().activeJobs }}</span>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="navigateToProjects()">
+        <mat-card-content>
+          <div class="action-icon accent">
+            <mat-icon>folder</mat-icon>
+          </div>
+          <h3>{{ 'dashboard.actions.myProjects' | translate }}</h3>
+          <p>{{ 'dashboard.actions.myProjectsDesc' | translate }}</p>
+          @if (stats().activeProjects > 0) {
+            <span class="action-badge">{{ stats().activeProjects }}</span>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="navigateToFindFreelancers()">
+        <mat-card-content>
+          <div class="action-icon primary">
+            <mat-icon>person_search</mat-icon>
+          </div>
+          <h3>{{ 'dashboard.actions.findFreelancers' | translate }}</h3>
+          <p>{{ 'dashboard.actions.findFreelancersDesc' | translate }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="navigateToRecommendations()">
+        <mat-card-content>
+          <div class="action-icon secondary">
+            <mat-icon>recommend</mat-icon>
+          </div>
+          <h3>{{ 'nav.myRecommendations' | translate }}</h3>
+          <p>{{ 'dashboard.actions.findFreelancersDesc' | translate }}</p>
+          @if (stats().pendingInvites > 0) {
+            <span class="action-badge">{{ stats().pendingInvites }}</span>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Recent Jobs -->
+  @if (recentJobs().length > 0) {
+    <div class="recommended-section">
+      <div class="section-header">
+        <h2>{{ 'jobs.myJobs' | translate }}</h2>
+        <button mat-button class="view-all-btn" (click)="navigateToMyJobs()">
+          {{ 'admin.dashboard.actions.viewAll' | translate }}
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+      <div class="freelancer-cards">
+        @for (job of recentJobs(); track job.id) {
+          <mat-card class="freelancer-card" (click)="viewJobDetails(job.id)" style="cursor: pointer">
+            <mat-card-content>
+              <div class="freelancer-avatar">
+                <mat-icon>work</mat-icon>
+              </div>
+              <h3>{{ job.title }}</h3>
+              <p class="skill">{{ job.category }} · {{ job.budget }} DT</p>
+              <div class="rating">
+                <mat-icon>assignment</mat-icon>
+                <span>{{ job.applicantCount || 0 }} {{ 'jobs.applications' | translate }}</span>
+              </div>
+              <div class="rate">
+                <span [style.color]="job.status === 'OPEN' ? '#4caf50' : job.status === 'IN_PROGRESS' ? '#2196f3' : '#999'">
+                  {{ job.status }}
+                </span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Recommended Freelancers -->
+  @if (recommendedFreelancers().length > 0) {
+    <div class="recommended-section">
+      <div class="section-header">
+        <h2>{{ 'dashboard.recommended.freelancers' | translate }}</h2>
+        <button mat-button class="view-all-btn" (click)="navigateToFindFreelancers()">
+          {{ 'common.search' | translate }}
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+      <div class="freelancer-cards">
+        @for (freelancer of recommendedFreelancers(); track freelancer.name) {
+          <mat-card class="freelancer-card">
+            <mat-card-content>
+              <div class="freelancer-avatar">
+                <mat-icon>person</mat-icon>
+              </div>
+              <h3>{{ freelancer.name }}</h3>
+              <p class="skill">{{ freelancer.skill }}</p>
+              <div class="rating">
+                <mat-icon>star</mat-icon>
+                <span>{{ freelancer.rating }}</span>
+              </div>
+              <div class="rate">{{ freelancer.hourlyRate }} DT/hr</div>
+              <button mat-raised-button class="view-profile-btn" (click)="navigateToFindFreelancers()">
+                {{ 'dashboard.recommended.viewProfile' | translate }}
+              </button>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </div>
+  }
+</div>

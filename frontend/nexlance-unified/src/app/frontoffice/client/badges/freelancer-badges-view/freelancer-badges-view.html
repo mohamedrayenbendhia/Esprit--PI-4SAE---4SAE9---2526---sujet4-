@@ -1,0 +1,21 @@
+<div class="badges-container">
+  <h2>Badges du Freelancer</h2>
+
+  <div *ngIf="isLoading" class="loading">Chargement...</div>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+  <div *ngIf="!isLoading && userBadges.length === 0" class="empty">
+    Aucun badge obtenu pour le moment.
+  </div>
+
+  <div class="badges-grid" *ngIf="!isLoading && userBadges.length > 0">
+    <div class="badge-card earned" *ngFor="let userBadge of userBadges">
+      <div class="badge-icon">{{ userBadge.badge.icon }}</div>
+      <h3>{{ userBadge.badge.name }}</h3>
+      <p>{{ userBadge.badge.description }}</p>
+      <div class="badge-date">
+        Obtenu le {{ userBadge.assignedAt | date:'dd/MM/yyyy' }}
+      </div>
+    </div>
+  </div>
+</div>

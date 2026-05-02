@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/ConfigServer/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/api-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/complaint-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/contrat/Esprit--PI-4SAE---4SAE9---2526---sujet4--contrat/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/eureka-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/evaluation/Esprit--PI-4SAE---4SAE9---2526---sujet4--evaluation/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/joboffer/service_joboffer/NexLance/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservices/complaint-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservices/contrat/Esprit--PI-4SAE---4SAE9---2526---sujet4--contrat/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservices/evaluation/Esprit--PI-4SAE---4SAE9---2526---sujet4--evaluation/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservices/joboffer/service_joboffer/NexLance/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservices/module_certification/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservices/module_competence/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservices/module_portfolio/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservices/notification-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservices/organization-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservices/service_projects/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservices/service_user/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/module_certification/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/module_competence/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/module_portfolio/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/organization-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/service_projects/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/service_user/src/main/java" charset="UTF-8" />
+  </component>
+</project>

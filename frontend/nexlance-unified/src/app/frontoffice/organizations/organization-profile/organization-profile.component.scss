@@ -1,0 +1,429 @@
+// ─── Variables (claude-design.md) ────────────────────────────────────────────
+$primary:      #0EA5E9;
+$primary-hover:#0284C7;
+$primary-bg:   #F0F9FF;
+$gray-50:      #F8FAFC;
+$gray-100:     #F1F5F9;
+$gray-200:     #E2E8F0;
+$gray-300:     #CBD5E1;
+$gray-400:     #94A3B8;
+$gray-500:     #64748B;
+$gray-600:     #475569;
+$gray-700:     #334155;
+$gray-800:     #1E293B;
+$gray-900:     #0F172A;
+$success:      #10B981;
+$success-bg:   #ECFDF5;
+$warning:      #F59E0B;
+$error:        #EF4444;
+
+$shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+$shadow-md: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -1px rgba(0,0,0,.04);
+
+// ─── LOADING ──────────────────────────────────────────────────────────────────
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 64px);
+  background: $gray-50;
+}
+
+// ─── PAGE ─────────────────────────────────────────────────────────────────────
+.profile-page {
+  min-height: calc(100vh - 64px);
+  background: $gray-50;
+  width: 100%;
+}
+
+// ─── HEADER BANNER ────────────────────────────────────────────────────────────
+.profile-header {
+  background: white;
+  border-bottom: 1px solid $gray-200;
+  box-shadow: $shadow-sm;
+  padding: 32px;
+
+  .header-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+}
+
+// Logo
+.org-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  background: $gray-100;
+  border: 1px solid $gray-200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: $gray-400;
+  }
+}
+
+// Infos principales
+.org-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.org-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+
+  h1 {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: $gray-900;
+    margin: 0;
+  }
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  background: $gray-100;
+  color: $gray-600;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  background: $success-bg;
+  color: #065F46;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+
+  mat-icon { font-size: 13px; width: 13px; height: 13px; }
+}
+
+// Méta (location, web, membres…)
+.org-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+
+  span, a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: $gray-500;
+    text-decoration: none;
+    transition: color 150ms ease;
+
+    mat-icon { font-size: 15px; width: 15px; height: 15px; }
+
+    &:hover { color: $primary; }
+  }
+}
+
+// Boutons d'action header
+.header-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+.tabs-container {
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 0 32px;
+
+  @media (max-width: 768px) { padding: 0 16px; }
+}
+
+.tab-content {
+  padding: 24px 0;
+}
+
+// ─── ABOUT SECTION ────────────────────────────────────────────────────────────
+.about-section {
+  background: white;
+  border: 1px solid $gray-200;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: $shadow-sm;
+
+  h3 {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: $gray-700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: $gray-500;
+    flex-shrink: 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: $gray-600;
+    line-height: 1.7;
+    margin: 0;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  span {
+    font-size: 11px;
+    font-weight: 600;
+    color: $gray-400;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: $gray-800;
+  }
+}
+
+// ─── MEMBRES ──────────────────────────────────────────────────────────────────
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: white;
+  border: 1px solid $gray-200;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: $shadow-sm;
+  transition: border-color 150ms ease;
+
+  &:hover { border-color: $gray-300; }
+}
+
+.member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: $gray-100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; color: $gray-400; }
+}
+
+.member-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.member-id {
+  font-size: 13px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  color: $gray-600;
+}
+
+.member-role {
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  background: $gray-100;
+  color: $gray-500;
+
+  &.role-owner   { background: rgba($primary,.1);  color: #0369A1; }
+  &.role-manager { background: rgba($warning,.12); color: #92400E; }
+  &.role-member  { background: $gray-100;          color: $gray-600; }
+}
+
+// ─── REVIEWS ──────────────────────────────────────────────────────────────────
+.review-form {
+  background: white;
+  border: 1px solid $gray-200;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: $shadow-sm;
+
+  h4 {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: $gray-800;
+    margin: 0 0 16px;
+  }
+}
+
+.ratings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.rating-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 40px;
+  align-items: center;
+  gap: 12px;
+
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: $gray-700;
+  }
+
+  input[type="range"] { accent-color: $primary; }
+
+  span {
+    font-size: 13px;
+    font-weight: 700;
+    color: $gray-800;
+    text-align: right;
+  }
+}
+
+.review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.empty-reviews {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: $gray-400;
+  text-align: center;
+
+  mat-icon { font-size: 40px; width: 40px; height: 40px; margin-bottom: 12px; }
+  p { font-size: 14px; margin: 0; }
+}
+
+.review-card {
+  background: white;
+  border: 1px solid $gray-200;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: $shadow-sm;
+  transition: border-color 150ms ease;
+
+  &:hover { border-color: $gray-300; }
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+
+  .stars {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .review-date {
+    font-size: 12px;
+    color: $gray-400;
+    margin-left: auto;
+  }
+}
+
+.review-text {
+  font-size: 14px;
+  color: $gray-600;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+.owner-reply {
+  display: flex;
+  gap: 10px;
+  background: $primary-bg;
+  border-left: 3px solid $primary;
+  border-radius: 0 8px 8px 0;
+  padding: 12px;
+  margin-top: 10px;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; color: $primary; flex-shrink: 0; margin-top: 2px; }
+
+  p { font-size: 13px; color: $gray-700; margin: 0; line-height: 1.5; }
+}
+
+.reply-form {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

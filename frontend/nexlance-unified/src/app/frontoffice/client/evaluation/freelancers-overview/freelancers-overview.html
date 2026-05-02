@@ -1,0 +1,47 @@
+<div class="overview-container">
+  <div class="header">
+    <h2>All Freelancers</h2>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">Loading...</div>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+  <div *ngIf="!isLoading && !errorMessage" class="freelancers-grid">
+    <div *ngFor="let item of freelancers | keyvalue" class="freelancer-card">
+      <div class="card-header">
+        <h3>{{ item.key }}</h3>
+        <span class="badge-count">{{ item.value.badges?.length || 0 }} badge(s)</span>
+      </div>
+
+      <div class="stats">
+        <div class="rating">
+          <span class="value">{{ (item.value.averageRating || 0).toFixed(1) }}/5</span>
+          <div class="stars">
+            <span *ngFor="let star of getStars(5)" 
+                  class="star" 
+                  [class.filled]="star <= (item.value.averageRating || 0)">★</span>
+          </div>
+        </div>
+
+        <div class="evaluations-count">
+          {{ item.value.totalEvaluations }} evaluation(s)
+        </div>
+      </div>
+
+      <div class="recent-evaluations" *ngIf="item.value.recentEvaluations?.length">
+        <h4>Recent Evaluations</h4>
+        <div *ngFor="let eval of item.value.recentEvaluations.slice(0, 3)" class="recent-eval">
+          <div class="eval-rating">{{ eval.ratingGlobal }}/5</div>
+          <div class="eval-date">{{ eval.createdAt | date:'dd/MM/yyyy' }}</div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <a [routerLink]="['/frontoffice/client/evaluations/freelancer-details', item.key]" 
+           class="btn-details">
+          View Details
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

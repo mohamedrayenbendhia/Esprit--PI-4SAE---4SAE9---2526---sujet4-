@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <!-- Logo dots/circles -->
+  <circle cx="12" cy="10" r="4" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="12" cy="20" r="4" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="20" cy="15" r="4" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="28" cy="10" r="4" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="22" cy="28" r="4.5" fill="#F97316"/>
+</svg>

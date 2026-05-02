@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: complaint-service
+  cloud:
+    config:
+      enabled: true
+      uri: http://localhost:8888
+      fail-fast: true
+  config:
+    import: configserver:http://localhost:8888
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+# ── Hugging Face Inference API ──────────────────────────────
+# Surcharger via variable d'env HF_API_TOKEN en production
+hf:
+  api-token: ${HF_API_TOKEN:your-huggingface-token-here}
+  model-url: https://api-inference.huggingface.co/models/joeddav/xlm-roberta-large-xnli

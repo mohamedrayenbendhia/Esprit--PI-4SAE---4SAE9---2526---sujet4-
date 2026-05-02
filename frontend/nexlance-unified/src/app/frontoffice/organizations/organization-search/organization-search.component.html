@@ -1,0 +1,113 @@
+<div class="org-search-page">
+  <div class="search-header">
+    <h1>Discover Organizations</h1>
+    <p>Find agencies, startups and freelance cooperatives</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <mat-form-field appearance="outline">
+      <mat-label>Search</mat-label>
+      <input matInput [ngModel]="query()" (ngModelChange)="query.set($event)" (keyup.enter)="search()" placeholder="Name, specialty...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Type</mat-label>
+      <mat-select [ngModel]="selectedType()" (ngModelChange)="selectedType.set($event)">
+        <mat-option value="">All</mat-option>
+        @for (t of types; track t) {
+          <mat-option [value]="t">{{ t }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Size</mat-label>
+      <mat-select [ngModel]="selectedSize()" (ngModelChange)="selectedSize.set($event)">
+        <mat-option value="">All</mat-option>
+        @for (s of sizes; track s) {
+          <mat-option [value]="s">{{ s }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="search()">
+      <mat-icon>search</mat-icon> Search
+    </button>
+    <button mat-stroked-button (click)="reset()">
+      <mat-icon>clear</mat-icon> Reset
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="loading-center">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  }
+
+  <!-- Results -->
+  @if (!isLoading()) {
+    @if (results().length === 0) {
+      <div class="empty-state">
+        <mat-icon>domain_disabled</mat-icon>
+        <p>No organizations found.</p>
+      </div>
+    } @else {
+      <div class="org-grid">
+        @for (org of results(); track org.id) {
+          <mat-card class="org-card" (click)="goToProfile(org.id)">
+            <div class="org-logo">
+              @if (org.logoUrl) {
+                <img [src]="org.logoUrl" [alt]="org.name">
+              } @else {
+                <mat-icon>domain</mat-icon>
+              }
+            </div>
+            <mat-card-content>
+              <h3>{{ org.name }}</h3>
+              <span class="badge badge-type">{{ org.type }}</span>
+              <span class="badge badge-size">{{ org.size }}</span>
+
+              @if (org.location) {
+                <p class="location"><mat-icon>place</mat-icon>{{ org.location }}</p>
+              }
+
+              <div class="rating">
+                <span class="stars">{{ stars(org.averageRating) }}</span>
+                <span class="review-count">({{ org.reviewCount }} reviews)</span>
+              </div>
+
+              <div class="meta">
+                <span><mat-icon>people</mat-icon>{{ org.memberCount }} members</span>
+                <span><mat-icon>check_circle</mat-icon>{{ org.completedProjectsCount }} projects</span>
+              </div>
+
+              @if ((org.specialties?.length ?? 0) > 0) {
+                <div class="specialties">
+                  @for (s of (org.specialties ?? []).slice(0, 3); track s) {
+                    <mat-chip>{{ s }}</mat-chip>
+                  }
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button mat-icon-button (click)="prev()" [disabled]="currentPage() === 0">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <span>Page {{ currentPage() + 1 }} / {{ totalPages() }}</span>
+          <button mat-icon-button (click)="next()" [disabled]="currentPage() === totalPages() - 1">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      }
+    }
+  }
+</div>

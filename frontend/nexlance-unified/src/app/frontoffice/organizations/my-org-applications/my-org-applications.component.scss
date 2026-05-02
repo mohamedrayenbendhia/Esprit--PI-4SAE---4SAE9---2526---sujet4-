@@ -1,0 +1,52 @@
+// my-org-applications — design system compliant
+$primary:    #0EA5E9;
+$border:     #E2E8F0;
+$page-bg:    #F8FAFC;
+$gray-100:   #F1F5F9;
+$gray-200:   #E2E8F0;
+$gray-300:   #CBD5E1;
+$gray-400:   #94A3B8;
+$gray-500:   #64748B;
+$gray-600:   #475569;
+$gray-700:   #334155;
+$gray-800:   #1E293B;
+$error:      #EF4444;
+$error-bg:   #FEF2F2;
+$shadow-sm:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+
+:host { display: block; background: $page-bg; min-height: 100vh; }
+
+.page-container { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+.page-header { display: flex; align-items: center; margin-bottom: 24px; }
+.page-header h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.3rem; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; color: $gray-800; }
+
+.loading { display: flex; justify-content: center; padding: 48px; }
+.spinner { width: 32px; height: 32px; border: 3px solid $gray-200; border-top-color: $primary; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty { text-align: center; padding: 64px 16px; }
+.empty mat-icon { font-size: 48px; height: 48px; width: 48px; color: $gray-300; }
+.empty h3 { color: $gray-700; margin: 16px 0 8px; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+.empty p { color: $gray-400; margin: 0 0 24px; }
+
+.apps-list { display: flex; flex-direction: column; gap: 12px; }
+
+.app-card {
+  border: 1px solid $gray-200;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: $shadow-sm;
+  transition: box-shadow 150ms ease, border-color 150ms ease;
+  &:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -1px rgba(0,0,0,.04); border-color: $gray-300; }
+}
+
+.app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.org-info { display: flex; align-items: center; gap: 6px; }
+.org-link { background: none; border: none; cursor: pointer; color: $primary; font-weight: 500; text-decoration: underline; }
+.status-chip { padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; }
+.message { color: $gray-600; font-size: 0.9rem; margin: 0 0 10px; }
+.meta { display: flex; gap: 16px; font-size: 0.78rem; color: $gray-400; }
+.meta span { display: inline-flex; align-items: center; gap: 3px; }
+.meta mat-icon { font-size: 14px; height: 14px; width: 14px; }
+.rejection { display: flex; align-items: center; gap: 6px; background: $error-bg; color: $error; border-radius: 8px; padding: 6px 10px; margin-top: 8px; font-size: 0.85rem; }

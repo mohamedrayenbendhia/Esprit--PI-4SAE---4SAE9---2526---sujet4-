@@ -1,0 +1,46 @@
+<div class="container">
+  <button class="btn-back" (click)="goBack()">← Back</button>
+
+  <div *ngIf="isLoading" class="loading">Loading...</div>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+  <div *ngIf="badge && !isLoading" class="badge-details">
+    <div class="badge-header">
+      <div class="badge-icon-large">{{ badge.icon }}</div>
+      <h2>{{ badge.name }}</h2>
+    </div>
+
+    <div class="info-card">
+      <h3>Description</h3>
+      <p>{{ badge.description }}</p>
+    </div>
+
+    <div class="requirements-grid">
+      <div class="requirement-card">
+        <div class="requirement-label">Minimum Score</div>
+        <div class="requirement-value">{{ badge.minScore }}/5</div>
+      </div>
+      <div class="requirement-card">
+        <div class="requirement-label">Minimum Projects</div>
+        <div class="requirement-value">{{ badge.minProjects }}</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>Information</h3>
+      <div class="info-row">
+        <span>ID:</span>
+        <span>{{ badge.id }}</span>
+      </div>
+      <div class="info-row">
+        <span>Created Date:</span>
+        <span>{{ badge.createdAt | date:'dd/MM/yyyy' }}</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-edit" (click)="editBadge()">Edit</button>
+      <button class="btn-delete" (click)="deleteBadge()">Delete</button>
+    </div>
+  </div>
+</div>

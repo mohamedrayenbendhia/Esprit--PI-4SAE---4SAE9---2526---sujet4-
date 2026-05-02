@@ -1,0 +1,222 @@
+.badges-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+h2 {
+  color: #333;
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.loading, .no-data {
+  text-align: center;
+  padding: 4rem;
+  background: #f9f9f9;
+  border-radius: 12px;
+  color: #666;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.alert-error {
+  background: #fee;
+  color: #c00;
+  border-left: 4px solid #c00;
+}
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.badge-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+  display: flex;
+  gap: 1.2rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.badge-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.badge-icon {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.badge-info {
+  flex: 1;
+}
+
+.badge-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.badge-description {
+  color: #666;
+  margin: 0 0 1rem 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.badge-requirements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.requirement {
+  background: #f8f9fa;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: help;
+  transition: background-color 0.2s;
+}
+
+.requirement:hover {
+  background: #e9ecef;
+}
+
+.badge-footer {
+  margin-top: 0.5rem;
+  color: #999;
+  font-size: 0.8rem;
+}
+
+/* Tooltips */
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]:before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 0.8rem;
+  background: #333;
+  color: white;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s;
+  z-index: 10;
+  pointer-events: none;
+  margin-bottom: 5px;
+}
+
+[data-tooltip]:hover:before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .badges-container {
+    padding: 0 1rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .badges-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .badge-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.2rem;
+  }
+
+  .badge-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.8rem;
+  }
+
+  .badge-requirements {
+    justify-content: center;
+  }
+
+  .badge-info h3 {
+    font-size: 1.2rem;
+  }
+}
+
+/* Pour les écrans moyens */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .badges-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

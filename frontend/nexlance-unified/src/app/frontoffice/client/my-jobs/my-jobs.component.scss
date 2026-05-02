@@ -1,0 +1,397 @@
+@use 'sass:color';
+@use '../../../../styles/nexlance-theme.scss' as *;
+
+// ========================================
+// MY JOBS COMPONENT - Professional Design
+// ========================================
+
+.my-jobs-container {
+  min-height: calc(100vh - 80px);
+  background: $nexlance-gray-50;
+  padding: $space-8 $space-6;
+
+  .page-header {
+    @include container;
+    margin-bottom: $space-8;
+
+    .header-content {
+      @include flex-between;
+      align-items: center;
+
+      h1 {
+        font-size: $text-4xl;
+        font-weight: $font-bold;
+        color: $nexlance-gray-900;
+        font-family: $font-family-heading;
+      }
+
+      .btn-primary {
+        @include btn-primary;
+        display: flex;
+        align-items: center;
+        gap: $space-2;
+
+        .icon {
+          font-size: $text-2xl;
+          line-height: 1;
+        }
+      }
+    }
+  }
+
+  .filters-section {
+    @include container;
+    margin-bottom: $space-8;
+
+    .status-filters {
+      display: flex;
+      gap: $space-3;
+      flex-wrap: wrap;
+
+      .filter-btn {
+        padding: $space-3 $space-6;
+        background: white;
+        border: 2px solid $nexlance-gray-200;
+        border-radius: $radius-lg;
+        color: $nexlance-gray-700;
+        font-size: $text-sm;
+        font-weight: $font-semibold;
+        cursor: pointer;
+        transition: all $transition-fast;
+
+        &:hover {
+          border-color: $nexlance-primary;
+          background: $nexlance-primary-lighter;
+          color: $nexlance-primary;
+        }
+
+        &.active {
+          @include gradient-primary;
+          border-color: $nexlance-primary;
+          color: white;
+        }
+      }
+    }
+  }
+
+  .loading-state {
+    @include container;
+    text-align: center;
+    padding: $space-20;
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid $nexlance-gray-200;
+      border-top-color: $nexlance-primary;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto $space-4;
+    }
+
+    p {
+      color: $nexlance-gray-600;
+      font-size: $text-lg;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  }
+
+  .empty-state {
+    @include container;
+    text-align: center;
+    padding: $space-20;
+
+    .empty-icon {
+      mat-icon {
+        font-size: 120px;
+        width: 120px;
+        height: 120px;
+        color: $nexlance-gray-300;
+        margin-bottom: $space-6;
+      }
+    }
+
+    h2 {
+      font-size: $text-3xl;
+      font-weight: $font-bold;
+      color: $nexlance-gray-700;
+      margin-bottom: $space-3;
+    }
+
+    p {
+      font-size: $text-lg;
+      color: $nexlance-gray-600;
+      margin-bottom: $space-8;
+    }
+
+    .btn-primary {
+      @include btn-primary;
+    }
+  }
+
+  .jobs-grid {
+    @include container;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: $space-6;
+
+    .job-card {
+      @include card;
+      border: 1px solid $nexlance-gray-200;
+      cursor: pointer;
+      transition: all $transition-base;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+
+      &:hover {
+        border-color: $nexlance-primary;
+        box-shadow: $shadow-xl;
+        transform: translateY(-4px);
+      }
+
+      .job-card-header {
+        @include flex-between;
+        margin-bottom: $space-4;
+
+        .category-badge {
+          display: flex;
+          align-items: center;
+          gap: $space-2;
+          padding: $space-2 $space-4;
+          background: $nexlance-primary-lighter;
+          color: $nexlance-primary;
+          border-radius: $radius-md;
+          font-size: $text-sm;
+          font-weight: $font-semibold;
+
+          .icon {
+            font-size: $text-lg;
+          }
+        }
+
+        .status-badge {
+          @include badge($nexlance-gray-200, $nexlance-gray-700);
+          font-size: $text-xs;
+
+          &.status-OPEN {
+            @include badge($nexlance-success, white);
+          }
+
+          &.status-DRAFT {
+            @include badge($nexlance-gray-400, white);
+          }
+
+          &.status-IN_PROGRESS {
+            @include badge($nexlance-info, white);
+          }
+
+          &.status-COMPLETED {
+            @include badge($nexlance-success, white);
+          }
+
+          &.status-CANCELLED {
+            @include badge($nexlance-error, white);
+          }
+
+          &.status-ARCHIVED {
+            @include badge($nexlance-gray-500, white);
+          }
+        }
+      }
+
+      .job-card-body {
+        flex: 1;
+        margin-bottom: $space-5;
+        min-width: 0;
+        overflow: hidden;
+
+        .job-title {
+          font-size: $text-xl;
+          font-weight: $font-bold;
+          color: $nexlance-gray-900;
+          margin-bottom: $space-3;
+          line-height: 1.3;
+        }
+
+        .job-description {
+          font-size: $text-sm;
+          color: $nexlance-gray-600;
+          line-height: 1.6;
+          margin-bottom: $space-4;
+          word-break: break-all;
+          overflow-wrap: break-word;
+          white-space: pre-line;
+        }
+
+        .job-meta {
+          display: flex;
+          flex-direction: column;
+          gap: $space-2;
+          margin-bottom: $space-4;
+
+          .meta-item {
+            display: flex;
+            align-items: center;
+            gap: $space-2;
+            font-size: $text-sm;
+            color: $nexlance-gray-600;
+
+            .meta-icon {
+              mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+                color: $nexlance-primary;
+              }
+            }
+
+            .meta-label {
+              color: $nexlance-gray-500;
+              font-size: $text-xs;
+            }
+
+            .remote-badge {
+              @include badge($nexlance-secondary, white);
+              font-size: $text-xs;
+              margin-left: $space-2;
+            }
+          }
+        }
+
+        .job-skills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: $space-2;
+
+          .skill-tag {
+            @include badge($nexlance-gray-100, $nexlance-gray-700);
+            font-size: $text-xs;
+
+            &.more {
+              @include badge($nexlance-primary-lighter, $nexlance-primary);
+            }
+          }
+        }
+      }
+
+      .job-card-footer {
+        border-top: 2px solid $nexlance-gray-100;
+        padding-top: $space-4;
+
+        .stats {
+          display: flex;
+          gap: $space-5;
+          margin-bottom: $space-4;
+
+          .stat-item {
+            display: flex;
+            align-items: center;
+            gap: $space-2;
+            font-size: $text-sm;
+            color: $nexlance-gray-600;
+
+            .stat-icon {
+              mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+                color: $nexlance-primary;
+              }
+            }
+          }
+        }
+
+        .job-date {
+          font-size: $text-xs;
+          color: $nexlance-gray-500;
+          margin-bottom: $space-4;
+        }
+
+        .job-actions {
+          display: flex;
+          gap: $space-2;
+
+          .btn-action {
+            flex: 1;
+            padding: $space-3;
+            border: none;
+            border-radius: $radius-md;
+            font-size: $text-sm;
+            font-weight: $font-semibold;
+            cursor: pointer;
+            transition: all $transition-fast;
+
+            &.btn-view {
+              @include btn-primary;
+            }
+
+            &.btn-edit {
+              background: $nexlance-gray-200;
+              color: $nexlance-gray-700;
+
+              &:hover {
+                background: $nexlance-gray-300;
+              }
+            }
+
+            &.btn-archive {
+              background: $nexlance-error;
+              color: white;
+
+              &:hover {
+                background: color.adjust($nexlance-error, $lightness: -10%);
+              }
+            }
+
+            &.btn-delete {
+              background: #dc2626;
+              color: white;
+              border: 1px solid #dc2626;
+
+              &:hover {
+                background: #b91c1c;
+                border-color: #b91c1c;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: $breakpoint-md) {
+  .my-jobs-container {
+    padding: $space-6 $space-4;
+
+    .page-header {
+      .header-content {
+        flex-direction: column;
+        gap: $space-4;
+        align-items: stretch;
+
+        .btn-primary {
+          justify-content: center;
+        }
+      }
+    }
+
+    .jobs-grid {
+      grid-template-columns: 1fr;
+
+      .job-card {
+        .job-card-footer {
+          .job-actions {
+            flex-direction: column;
+          }
+        }
+      }
+    }
+  }
+}

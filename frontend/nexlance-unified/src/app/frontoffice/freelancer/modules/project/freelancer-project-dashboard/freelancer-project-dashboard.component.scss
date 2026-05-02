@@ -1,0 +1,378 @@
+@use 'sass:color';
+@use '../../../../../../styles/nexlance-theme.scss' as *;
+
+.dashboard-container {
+  padding: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+  min-height: 70vh;
+  animation: fadeIn 0.5s ease;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // ===== PAGE HEADER =====
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .back-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: 1px solid $nexlance-gray-200;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        mat-icon { color: $nexlance-gray-600; font-size: 20px; width: 20px; height: 20px; }
+
+        &:hover {
+          background: $nexlance-primary-lighter;
+          border-color: $nexlance-primary-light;
+          transform: translateX(-4px);
+          mat-icon { color: $nexlance-primary; }
+        }
+      }
+
+      .header-text {
+        h1 {
+          font-size: 26px;
+          font-weight: 700;
+          color: $nexlance-gray-900;
+          margin: 0;
+          letter-spacing: -0.5px;
+        }
+        .project-id {
+          font-size: 13px;
+          color: $nexlance-gray-400;
+          margin: 2px 0 0 0;
+        }
+      }
+    }
+
+    .status-badge {
+      padding: 6px 18px;
+      border-radius: 24px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &[data-status="ACTIVE"] { background: rgba($nexlance-success, 0.12); color: color.adjust($nexlance-success, $lightness: -8%); }
+      &[data-status="ON_HOLD"] { background: rgba($nexlance-warning, 0.12); color: color.adjust($nexlance-warning, $lightness: -10%); }
+      &[data-status="COMPLETED"] { background: rgba($nexlance-primary, 0.12); color: $nexlance-primary-dark; }
+      &[data-status="CANCELLED"] { background: rgba($nexlance-error, 0.1); color: $nexlance-error; }
+    }
+  }
+
+  // ===== PROGRESS CARD =====
+  .progress-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid $nexlance-gray-100;
+    margin-bottom: 28px;
+
+    .card-accent {
+      height: 4px;
+      background: linear-gradient(90deg, $nexlance-primary, $nexlance-primary-light);
+    }
+
+    .card-body { padding: 28px; }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+
+      .progress-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        mat-icon { color: $nexlance-primary; font-size: 22px; width: 22px; height: 22px; }
+        h2 { margin: 0; font-size: 18px; font-weight: 700; color: $nexlance-gray-800; }
+      }
+
+      .progress-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: $nexlance-primary;
+        &.complete { color: $nexlance-success; }
+      }
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: $nexlance-gray-100;
+      border-radius: 10px;
+      overflow: hidden;
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, $nexlance-primary, $nexlance-primary-light);
+        border-radius: 10px;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        &.complete { background: linear-gradient(90deg, $nexlance-success, color.adjust($nexlance-success, $lightness: 10%)); }
+      }
+    }
+
+    .current-milestone-alert {
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: $nexlance-primary-lighter;
+      border-radius: 12px;
+      display: flex;
+      align-items: flex-start;
+      animation: pulseGlow 2s ease-in-out infinite;
+
+      @keyframes pulseGlow {
+        0%, 100% {
+          box-shadow: 0 0 0 rgba($nexlance-primary, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 20px rgba($nexlance-primary, 0.6);
+        }
+      }
+      gap: 14px;
+
+      > mat-icon { color: $nexlance-primary; font-size: 20px; width: 20px; height: 20px; margin-top: 2px; }
+
+      .alert-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .alert-label { font-size: 11px; font-weight: 600; color: $nexlance-primary-dark; text-transform: uppercase; letter-spacing: 0.5px; }
+        .alert-title { font-size: 15px; font-weight: 600; color: $nexlance-gray-800; }
+        .alert-deadline {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 13px;
+          color: $nexlance-gray-500;
+          margin-top: 2px;
+          mat-icon { font-size: 14px; width: 14px; height: 14px; }
+        }
+      }
+    }
+  }
+
+  // ===== MILESTONES SECTION =====
+  .milestones-section {
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        mat-icon { color: $nexlance-primary; font-size: 22px; width: 22px; height: 22px; }
+        h2 { margin: 0; font-size: 20px; font-weight: 700; color: $nexlance-gray-800; }
+      }
+
+      .milestone-count {
+        font-size: 13px;
+        font-weight: 600;
+        color: $nexlance-gray-400;
+        background: $nexlance-gray-50;
+        padding: 4px 14px;
+        border-radius: 20px;
+      }
+    }
+
+    .milestones-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .milestone-card {
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      border: 1px solid $nexlance-gray-100;
+      display: flex;
+
+      &:hover {
+        transform: translateX(8px);
+        box-shadow: 0 12px 32px rgba(14, 165, 233, 0.15);
+        border-color: $nexlance-primary-light;
+        .chevron { 
+          color: $nexlance-primary; 
+          transform: translateX(4px) scale(1.2); 
+        }
+        .milestone-icon {
+          transform: rotate(5deg) scale(1.1);
+        }
+      }
+
+      .milestone-status-indicator {
+        width: 4px;
+        flex-shrink: 0;
+        &[data-status="pending"] { background: $nexlance-gray-300; }
+        &[data-status="in_progress"] { background: $nexlance-info; }
+        &[data-status="submitted"] { background: $nexlance-warning; }
+        &[data-status="approved"] { background: $nexlance-success; }
+        &[data-status="rejected"] { background: $nexlance-error; }
+      }
+
+      .milestone-body {
+        flex: 1;
+        padding: 20px 24px;
+
+        .milestone-top {
+          display: flex;
+          align-items: flex-start;
+          gap: 14px;
+          margin-bottom: 14px;
+
+          .milestone-icon {
+            width: 40px;
+            transition: all 0.3s ease;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+
+            mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+            &[data-status="pending"] { background: $nexlance-gray-100; mat-icon { color: $nexlance-gray-500; } }
+            &[data-status="in_progress"] { background: rgba($nexlance-info, 0.1); mat-icon { color: $nexlance-info; } }
+            &[data-status="submitted"] { background: rgba($nexlance-warning, 0.1); mat-icon { color: $nexlance-warning; } }
+            &[data-status="approved"] { background: rgba($nexlance-success, 0.1); mat-icon { color: $nexlance-success; } }
+            &[data-status="rejected"] { background: rgba($nexlance-error, 0.1); mat-icon { color: $nexlance-error; } }
+          }
+
+          .milestone-info {
+            flex: 1;
+            h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: $nexlance-gray-800; }
+            .milestone-desc {
+              margin: 0;
+              font-size: 14px;
+              color: $nexlance-gray-500;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
+          }
+
+          .milestone-badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+
+            &[data-status="pending"] { background: $nexlance-gray-100; color: $nexlance-gray-600; }
+            &[data-status="in_progress"] { background: rgba($nexlance-info, 0.1); color: $nexlance-info; }
+            &[data-status="submitted"] { background: rgba($nexlance-warning, 0.1); color: color.adjust($nexlance-warning, $lightness: -10%); }
+            &[data-status="approved"] { background: rgba($nexlance-success, 0.1); color: color.adjust($nexlance-success, $lightness: -8%); }
+            &[data-status="rejected"] { background: rgba($nexlance-error, 0.1); color: $nexlance-error; }
+          }
+        }
+
+        .milestone-bottom {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 12px;
+          border-top: 1px solid $nexlance-gray-50;
+
+          .milestone-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+
+            .meta-item {
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              font-size: 13px;
+              color: $nexlance-gray-500;
+              mat-icon { font-size: 15px; width: 15px; height: 15px; }
+
+              &.warning {
+                color: $nexlance-warning;
+                font-weight: 600;
+              }
+            }
+          }
+
+          .chevron {
+            color: $nexlance-gray-500;
+            transition: all 0.2s ease;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+      }
+    }
+  }
+
+  // ===== STATES =====
+  .loading-container {
+    text-align: center;
+    padding: 80px 24px;
+    .loading-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid $nexlance-gray-100;
+      border-top-color: $nexlance-primary;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    p { font-size: 15px; color: $nexlance-gray-400; margin: 0; }
+  }
+
+  .error-state {
+    text-align: center;
+    padding: 80px 24px;
+    mat-icon { font-size: 48px; width: 48px; height: 48px; color: $nexlance-gray-300; margin-bottom: 12px; }
+    h3 { color: $nexlance-gray-500; font-weight: 600; margin: 0; }
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 20px 16px;
+    .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .milestone-card .milestone-body .milestone-top { flex-wrap: wrap; }
+  }
+}

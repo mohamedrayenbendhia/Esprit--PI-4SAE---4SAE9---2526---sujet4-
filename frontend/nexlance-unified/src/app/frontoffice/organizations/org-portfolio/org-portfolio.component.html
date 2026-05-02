@@ -1,0 +1,104 @@
+<div class="portfolio">
+  <div class="portfolio-header">
+    <h3><mat-icon>work</mat-icon> Portfolio</h3>
+    @if (canEdit) {
+      <button mat-stroked-button color="primary" (click)="openCreate()">
+        <mat-icon>add</mat-icon> Add
+      </button>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading"><div class="spinner"></div></div>
+  }
+
+  @if (!isLoading() && items().length === 0) {
+    <div class="empty"><mat-icon>folder_open</mat-icon><p>No projects in portfolio.</p></div>
+  }
+
+  <!-- Form -->
+  @if (showForm()) {
+    <div class="form-card">
+      <h4>{{ editingId() ? 'Edit Project' : 'Add Project' }}</h4>
+      <div class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Title *</mat-label>
+          <input matInput [(ngModel)]="form.title" placeholder="Project name">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Client</mat-label>
+          <input matInput [(ngModel)]="form.clientName" placeholder="Client name">
+        </mat-form-field>
+        <mat-form-field appearance="outline" style="grid-column: 1/-1">
+          <mat-label>Description</mat-label>
+          <textarea matInput rows="3" [(ngModel)]="form.description"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Image URL</mat-label>
+          <input matInput [(ngModel)]="form.imageUrl">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Project URL</mat-label>
+          <input matInput [(ngModel)]="form.projectUrl">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Completion date</mat-label>
+          <input matInput type="date" [(ngModel)]="form.completedAt">
+        </mat-form-field>
+        <div class="tag-field">
+          <mat-form-field appearance="outline">
+            <mat-label>Add a tag</mat-label>
+            <input matInput [(ngModel)]="tagInput" (keydown.enter)="addTag(); $event.preventDefault()">
+          </mat-form-field>
+          <button mat-icon-button (click)="addTag()"><mat-icon>add</mat-icon></button>
+          <div class="tags">
+            @for (t of form.tags; track t) {
+              <span class="tag">{{ t }} <button (click)="removeTag(t)">✕</button></span>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button mat-button (click)="cancel()">Cancel</button>
+        <button mat-raised-button color="primary" [disabled]="saving() || !form.title?.trim()" (click)="save()">
+          <mat-icon>save</mat-icon> {{ saving() ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Grid -->
+  <div class="portfolio-grid">
+    @for (item of items(); track item.id) {
+      <div class="portfolio-card">
+        @if (item.imageUrl) {
+          <div class="card-img" [style.background-image]="'url(' + item.imageUrl + ')'"></div>
+        }
+        <div class="card-body">
+          <h4>{{ item.title }}</h4>
+          @if (item.clientName) { <span class="client">{{ item.clientName }}</span> }
+          @if (item.description) { <p class="desc">{{ item.description }}</p> }
+          @if (item.tags.length > 0) {
+            <div class="tags-row">
+              @for (t of item.tags; track t) { <span class="tag">{{ t }}</span> }
+            </div>
+          }
+          @if (item.completedAt) {
+            <span class="date"><mat-icon>event</mat-icon>{{ item.completedAt | date:'MM/yyyy' }}</span>
+          }
+          <div class="card-actions">
+            @if (item.projectUrl) {
+              <a [href]="item.projectUrl" target="_blank" mat-icon-button>
+                <mat-icon>open_in_new</mat-icon>
+              </a>
+            }
+            @if (canEdit) {
+              <button mat-icon-button (click)="openEdit(item)"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button color="warn" (click)="delete(item)"><mat-icon>delete</mat-icon></button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

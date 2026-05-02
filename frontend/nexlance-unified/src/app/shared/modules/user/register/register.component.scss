@@ -1,0 +1,204 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #0EA5E9 100%);
+  padding: 20px;
+  position: relative;
+}
+
+.top-nav {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.home-button {
+  background: white;
+  color: #1E40AF;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    background: #F3F4F6;
+  }
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.register-card {
+  width: 100%;
+  max-width: 600px;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+
+  mat-card-header {
+    display: block;
+    margin-bottom: 0;
+    padding: 0;
+  }
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 32px;
+
+  .register-logo {
+    height: 80px;
+    width: auto;
+    margin-bottom: 24px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  h1 {
+    margin: 0 0 8px 0;
+    color: #1E40AF;
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .subtitle {
+    color: #64748B;
+    font-size: 14px;
+    margin: 0;
+    text-align: center;
+  }
+}
+
+mat-card-header {
+  margin-bottom: 0;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  
+  .half-width {
+    flex: 1;
+    margin-bottom: 16px;
+  }
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.terms-checkbox {
+  margin: 20px 0 24px;
+  
+  mat-checkbox {
+    font-size: 14px;
+    color: #475569;
+    
+    a {
+      color: #3B82F6;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+      
+      &:hover {
+        color: #1E40AF;
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  mat-error {
+    color: #EF4444;
+    font-size: 12px;
+    margin-top: 8px;
+    display: block;
+  }
+}
+
+.submit-btn {
+  height: 52px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 8px;
+  border-radius: 12px;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(30, 64, 175, 0.3);
+  }
+}
+
+.login-link {
+  margin-top: 32px;
+  text-align: center;
+  padding-top: 32px;
+  border-top: 1px solid #E5E7EB;
+  
+  p {
+    margin: 0 0 12px 0;
+    color: #64748B;
+    font-size: 14px;
+  }
+  
+  a {
+    color: #3B82F6;
+    font-weight: 500;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: #1E40AF;
+    }
+  }
+}
+
+::ng-deep .error-snackbar {
+  background-color: #EF4444;
+  color: white;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .register-card {
+    padding: 24px;
+    max-width: 100%;
+  }
+
+  .register-header {
+    h1 {
+      font-size: 24px;
+    }
+
+    .register-logo {
+      height: 50px;
+    }
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+
+    .half-width {
+      width: 100%;
+    }
+  }
+
+  .submit-btn {
+    height: 48px;
+  }
+}

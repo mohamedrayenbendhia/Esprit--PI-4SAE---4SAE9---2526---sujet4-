@@ -1,0 +1,148 @@
+<div class="filter-bar">
+
+  <!-- Row 1 : search + sort -->
+  <div class="fb-row fb-row--search">
+    <label class="fb-search" [class.fb-search--filled]="!!searchValue">
+      <mat-icon class="fb-search__icon">search</mat-icon>
+      <input
+        type="text"
+        class="fb-search__input"
+        [placeholder]="config.searchPlaceholder || 'Search…'"
+        [value]="searchValue"
+        (input)="onSearchInput($event)"
+        autocomplete="off"/>
+      <button
+        *ngIf="searchValue"
+        type="button"
+        class="fb-search__clear"
+        (click)="clearSearch()"
+        aria-label="Clear">
+        <mat-icon>close</mat-icon>
+      </button>
+    </label>
+
+    <div class="fb-row__right">
+      <span *ngIf="resultCount !== undefined" class="fb-count">
+        <strong>{{ resultCount }}</strong> {{ resultLabel }}
+      </span>
+
+      <app-filter-dropdown
+        *ngIf="config.sort"
+        [label]="config.sort.label"
+        [icon]="config.sort.icon || 'sort'"
+        [options]="config.sort.options"
+        [value]="filters[config.sort.key]"
+        (valueChange)="patch(config.sort!.key, $event)">
+      </app-filter-dropdown>
+    </div>
+  </div>
+
+  <!-- Row 2 : category pills -->
+  <div class="fb-row fb-row--pills" *ngIf="config.pills as pills">
+    <app-filter-chip
+      *ngIf="pills.allowClear !== false"
+      [label]="pills.clearLabel || 'All'"
+      icon="apps"
+      [selected]="!filters[pills.key]"
+      (toggled)="clearPill()">
+    </app-filter-chip>
+
+    <app-filter-chip
+      *ngFor="let opt of pills.options"
+      [label]="opt.label"
+      [icon]="opt.icon"
+      [count]="opt.count"
+      [selected]="isPillSelected(opt)"
+      (toggled)="selectPill(opt)">
+    </app-filter-chip>
+  </div>
+
+  <!-- Row 3 : dropdowns / ranges / toggles -->
+  <div class="fb-row fb-row--dropdowns"
+       *ngIf="(config.dropdowns?.length) || (config.ranges?.length) || (config.toggles?.length)">
+
+    <!-- Single-select dropdowns -->
+    <app-filter-dropdown
+      *ngFor="let dd of config.dropdowns"
+      [label]="dd.label"
+      [icon]="dd.icon"
+      [options]="dd.options"
+      [value]="filters[dd.key]"
+      (valueChange)="patch(dd.key, $event)">
+    </app-filter-dropdown>
+
+    <!-- Ranges (custom template) -->
+    <ng-container *ngFor="let r of config.ranges">
+      <app-filter-dropdown
+        [label]="r.label"
+        [icon]="r.icon"
+        [value]="filters[r.minKey] || filters[r.maxKey] ? 'set' : null"
+        [customTemplate]="rangeTpl">
+      </app-filter-dropdown>
+
+      <ng-template #rangeTpl>
+        <div class="fb-range">
+          <div class="fb-range__label">{{ r.label }}{{ r.unit ? ' (' + r.unit + ')' : '' }}</div>
+
+          <div class="fb-range__inputs">
+            <input
+              type="number"
+              class="fb-input"
+              placeholder="Min"
+              [step]="r.step || 1"
+              [ngModel]="filters[r.minKey]"
+              (ngModelChange)="patchRange(r, $event, filters[r.maxKey])"/>
+            <span class="fb-range__sep">—</span>
+            <input
+              type="number"
+              class="fb-input"
+              placeholder="Max"
+              [step]="r.step || 1"
+              [ngModel]="filters[r.maxKey]"
+              (ngModelChange)="patchRange(r, filters[r.minKey], $event)"/>
+          </div>
+
+          <div class="fb-range__presets" *ngIf="r.presets?.length">
+            <button
+              *ngFor="let p of r.presets"
+              type="button"
+              class="fb-preset"
+              (click)="applyPreset(r, p)">
+              {{ p.label }}
+            </button>
+          </div>
+        </div>
+      </ng-template>
+    </ng-container>
+
+    <!-- Boolean toggles -->
+    <app-filter-chip
+      *ngFor="let t of config.toggles"
+      [label]="t.label"
+      [icon]="t.icon"
+      [selected]="!!filters[t.key]"
+      (toggled)="toggleBool(t)">
+    </app-filter-chip>
+
+    <button
+      *ngIf="hasActiveFilters"
+      type="button"
+      class="fb-clear-all"
+      (click)="clearAll()">
+      <mat-icon>restart_alt</mat-icon>
+      Reset
+    </button>
+  </div>
+
+  <!-- Row 4 : active filter chips -->
+  <div class="fb-row fb-row--active" *ngIf="activeChips.length > 0">
+    <span class="fb-active-label">Active filters:</span>
+    <app-filter-chip
+      *ngFor="let chip of activeChips"
+      mode="removable"
+      [label]="chip.label"
+      [icon]="chip.icon"
+      (removed)="chip.onRemove()">
+    </app-filter-chip>
+  </div>
+</div>

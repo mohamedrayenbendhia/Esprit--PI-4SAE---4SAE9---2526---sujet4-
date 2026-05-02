@@ -1,0 +1,330 @@
+<div class="matching-page">
+
+  <!-- ── En-tête ──────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <mat-icon class="header-icon">auto_awesome</mat-icon>
+    <div>
+      <h2>Smart Matching</h2>
+      <p>Enter your skills and preferences — the algorithm ranks organizations
+         and offers by compatibility score (0–100).</p>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- ── Panneau critères ─────────────────────────────────────────────────── -->
+    <aside class="criteria-panel">
+      <h3>Your profile</h3>
+
+      <!-- Compétences (chips) -->
+      <div class="skill-input-row">
+        <mat-form-field appearance="outline" class="full-w">
+          <mat-label>Add a skill</mat-label>
+          <input matInput [(ngModel)]="skillInput"
+                 (keydown)="addOnEnter($event)"
+                 placeholder="React, Node.js, Design…" />
+        </mat-form-field>
+        <button mat-mini-fab color="primary" (click)="addSkill()" matTooltip="Add">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      @if (skills().length > 0) {
+        <div class="chips-row">
+          @for (s of skills(); track s) {
+            <span class="skill-chip">
+              {{ s }}
+              <button (click)="removeSkill(s)">✕</button>
+            </span>
+          }
+        </div>
+      }
+
+      <mat-divider style="margin: 12px 0"></mat-divider>
+
+      <!-- Localisation -->
+      <mat-form-field appearance="outline" class="full-w">
+        <mat-label>Your city</mat-label>
+        <input matInput [(ngModel)]="location" placeholder="Paris, Lyon…" />
+        <mat-icon matSuffix>place</mat-icon>
+      </mat-form-field>
+
+      <!-- Type d'org préféré -->
+      <mat-form-field appearance="outline" class="full-w">
+        <mat-label>Organization type</mat-label>
+        <mat-select [(ngModel)]="preferredType">
+          <mat-option [value]="null">All</mat-option>
+          @for (t of orgTypes; track t) {
+            <mat-option [value]="t">{{ typeLabel(t) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Taille (filtre dur, non scoré) -->
+      <mat-form-field appearance="outline" class="full-w">
+        <mat-label>Organization size</mat-label>
+        <mat-select [(ngModel)]="preferredSize">
+          <mat-option [value]="null">All</mat-option>
+          @for (s of orgSizes; track s) {
+            <mat-option [value]="s">{{ sizeLabel(s) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Budget minimum (pour les offres collab) -->
+      <mat-form-field appearance="outline" class="full-w">
+        <mat-label>Minimum budget (€)</mat-label>
+        <input matInput type="number" [(ngModel)]="minBudget" placeholder="e.g.: 3000" />
+        <mat-icon matSuffix>euro</mat-icon>
+      </mat-form-field>
+
+      @if (error()) {
+        <div class="error-msg"><mat-icon>error_outline</mat-icon> {{ error() }}</div>
+      }
+
+      <button mat-raised-button color="primary" class="full-w search-btn"
+              [disabled]="isLoading()" (click)="search()">
+        @if (isLoading()) { <mat-spinner diameter="18"></mat-spinner> }
+        @else { <mat-icon>auto_awesome</mat-icon> }
+        {{ isLoading() ? 'Analyzing…' : 'Run matching' }}
+      </button>
+
+      @if (hasSearched()) {
+        <button mat-stroked-button class="full-w" style="margin-top:8px" (click)="reset()">
+          <mat-icon>refresh</mat-icon> Reset
+        </button>
+      }
+    </aside>
+
+    <!-- ── Résultats ─────────────────────────────────────────────────────── -->
+    <section class="results-section">
+
+      @if (!hasSearched() && !isLoading()) {
+        <div class="hint-state">
+          <mat-icon>tips_and_updates</mat-icon>
+          <p>Set your criteria and run matching to see your results.</p>
+        </div>
+      }
+
+      @if (isLoading()) {
+        <div class="loading-state">
+          <mat-spinner diameter="48"></mat-spinner>
+          <p>Calculating compatibility scores…</p>
+        </div>
+      }
+
+      @if (hasSearched() && !isLoading()) {
+        <mat-tab-group animationDuration="150ms">
+
+          <!-- ── Onglet Organisations ────────────────────────────────────── -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">domain</mat-icon>
+              Organizations
+              @if (orgResults().length > 0) {
+                <span class="tab-count">{{ orgResults().length }}</span>
+              }
+            </ng-template>
+
+            @if (orgResults().length === 0) {
+              <div class="empty-state">
+                <mat-icon>search_off</mat-icon>
+                <p>No organizations match your profile.</p>
+              </div>
+            }
+
+            <div class="results-list">
+              @for (r of orgResults(); track r.organization.id) {
+                <div class="result-card">
+
+                  <!-- Résumé -->
+                  <div class="result-summary">
+                    <div class="result-logo">
+                      @if (r.organization.logoUrl) {
+                        <img [src]="r.organization.logoUrl" [alt]="r.organization.name" />
+                      } @else {
+                        <mat-icon>domain</mat-icon>
+                      }
+                    </div>
+
+                    <div class="result-info">
+                      <h4 (click)="viewOrg(r.organization.id)">{{ r.organization.name }}</h4>
+                      <div class="result-meta">
+                        <span>{{ typeLabel(r.organization.type) }}</span>
+                        @if (r.organization.location) { <span>• {{ r.organization.location }}</span> }
+                        <span>• {{ stars(r.organization.averageRating ?? 0) }}</span>
+                      </div>
+                      <!-- Compétences communes -->
+                      @if (r.breakdown.matchedSkillCount > 0) {
+                        <div class="skill-match-info">
+                          <mat-icon>check_circle</mat-icon>
+                          {{ r.breakdown.matchedSkillCount }}/{{ r.breakdown.requiredSkillCount }}
+                          matching skills
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Score badge -->
+                    <div class="score-badge" [style.background]="scoreColor(r.compatibilityScore)">
+                      <span class="score-value">{{ r.compatibilityScore | number:'1.0-0' }}</span>
+                      <span class="score-label">{{ scoreLabel(r.compatibilityScore) }}</span>
+                    </div>
+
+                    <button mat-icon-button (click)="toggleOrg(r.organization.id)"
+                            [matTooltip]="expandedOrgId() === r.organization.id ? 'Hide' : 'Details'">
+                      <mat-icon>{{ expandedOrgId() === r.organization.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
+                  </div>
+
+                  <!-- Détail des signaux -->
+                  @if (expandedOrgId() === r.organization.id) {
+                    <div class="signal-detail">
+                      <div class="signal-row">
+                        <span class="sig-label"><mat-icon>code</mat-icon> Skills</span>
+                        <div class="sig-bar-wrap"><div class="sig-bar bar-skill" [style.width.%]="barPct(r.breakdown.skillScore, 40)"></div></div>
+                        <span class="sig-pts">{{ r.breakdown.skillScore | number:'1.1-1' }}/40</span>
+                      </div>
+                      <div class="signal-row">
+                        <span class="sig-label"><mat-icon>verified</mat-icon> Trust</span>
+                        <div class="sig-bar-wrap"><div class="sig-bar bar-trust" [style.width.%]="barPct(r.breakdown.trustScore, 25)"></div></div>
+                        <span class="sig-pts">{{ r.breakdown.trustScore | number:'1.1-1' }}/25</span>
+                      </div>
+                      <div class="signal-row">
+                        <span class="sig-label"><mat-icon>place</mat-icon> Location</span>
+                        <div class="sig-bar-wrap"><div class="sig-bar bar-loc" [style.width.%]="barPct(r.breakdown.locationScore, 15)"></div></div>
+                        <span class="sig-pts">{{ r.breakdown.locationScore | number:'1.1-1' }}/15
+                          <span class="sig-tag">{{ locLabel(r.breakdown.locationMatch) }}</span></span>
+                      </div>
+                      <div class="signal-row">
+                        <span class="sig-label"><mat-icon>business</mat-icon> Type</span>
+                        <div class="sig-bar-wrap"><div class="sig-bar bar-type" [style.width.%]="barPct(r.breakdown.typeScore, 10)"></div></div>
+                        <span class="sig-pts">{{ r.breakdown.typeScore | number:'1.1-1' }}/10</span>
+                      </div>
+                      <div class="signal-row">
+                        <span class="sig-label"><mat-icon>star</mat-icon> Rating</span>
+                        <div class="sig-bar-wrap"><div class="sig-bar bar-rating" [style.width.%]="barPct(r.breakdown.ratingScore, 10)"></div></div>
+                        <span class="sig-pts">{{ r.breakdown.ratingScore | number:'1.1-1' }}/10</span>
+                      </div>
+                      <button mat-stroked-button color="primary" (click)="viewOrg(r.organization.id)" style="margin-top:8px">
+                        <mat-icon>visibility</mat-icon> View profile
+                      </button>
+                    </div>
+                  }
+
+                </div>
+              }
+            </div>
+          </mat-tab>
+
+          <!-- ── Onglet Offres de collaboration ──────────────────────────── -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">handshake</mat-icon>
+              Collaboration Offers
+              @if (offerResults().length > 0) {
+                <span class="tab-count">{{ offerResults().length }}</span>
+              }
+            </ng-template>
+
+            @if (offerResults().length === 0) {
+              <div class="empty-state">
+                <mat-icon>search_off</mat-icon>
+                <p>No collaboration offers match your profile.</p>
+              </div>
+            }
+
+            <div class="results-list">
+              @for (r of offerResults(); track r.offer.id) {
+                <div class="result-card">
+
+                  <div class="result-summary">
+                    <div class="result-logo offer-icon">
+                      <mat-icon>handshake</mat-icon>
+                    </div>
+
+                    <div class="result-info">
+                      <h4 (click)="viewOrg(r.offer.organizationId)">{{ r.offer.title }}</h4>
+                      <div class="result-meta">
+                        <span>{{ r.organizationName }}</span>
+                        <span>• Level {{ r.organizationTrustLevel }}/5</span>
+                        @if (r.offer.budgetEstimate) {
+                          <span>• {{ r.offer.budgetEstimate | number }} €</span>
+                        }
+                        @if (r.offer.durationLabel) {
+                          <span>• {{ r.offer.durationLabel }}</span>
+                        }
+                      </div>
+                      @if (r.breakdown.matchedSkillCount > 0) {
+                        <div class="skill-match-info">
+                          <mat-icon>check_circle</mat-icon>
+                          {{ r.breakdown.matchedSkillCount }}/{{ r.breakdown.offerSkillCount }}
+                          required skills matched
+                        </div>
+                      }
+                      <!-- Fraîcheur -->
+                      <div class="freshness-info"
+                           [class.fresh]="r.breakdown.offerAgeDays < 14"
+                           [class.aging]="r.breakdown.offerAgeDays >= 30">
+                        <mat-icon>schedule</mat-icon>
+                        Published {{ r.breakdown.offerAgeDays }} day(s) ago
+                      </div>
+                    </div>
+
+                    <div class="score-badge" [style.background]="scoreColor(r.compatibilityScore)">
+                      <span class="score-value">{{ r.compatibilityScore | number:'1.0-0' }}</span>
+                      <span class="score-label">{{ scoreLabel(r.compatibilityScore) }}</span>
+                    </div>
+
+                    <button mat-icon-button (click)="toggleOffer(r.offer.id)"
+                            [matTooltip]="expandedOfferId() === r.offer.id ? 'Hide' : 'Details'">
+                      <mat-icon>{{ expandedOfferId() === r.offer.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
+                  </div>
+
+                  @if (expandedOfferId() === r.offer.id) {
+                    <div class="signal-detail">
+                      <div class="signal-row">
+                        <span class="sig-label"><mat-icon>code</mat-icon> Skills</span>
+                        <div class="sig-bar-wrap"><div class="sig-bar bar-skill" [style.width.%]="barPct(r.breakdown.skillScore, 50)"></div></div>
+                        <span class="sig-pts">{{ r.breakdown.skillScore | number:'1.1-1' }}/50</span>
+                      </div>
+                      <div class="signal-row">
+                        <span class="sig-label"><mat-icon>schedule</mat-icon> Freshness</span>
+                        <div class="sig-bar-wrap"><div class="sig-bar bar-fresh" [style.width.%]="barPct(r.breakdown.freshnessScore, 20)"></div></div>
+                        <span class="sig-pts">{{ r.breakdown.freshnessScore | number:'1.1-1' }}/20</span>
+                      </div>
+                      <div class="signal-row">
+                        <span class="sig-label"><mat-icon>verified</mat-icon> Org trust</span>
+                        <div class="sig-bar-wrap"><div class="sig-bar bar-trust" [style.width.%]="barPct(r.breakdown.trustScore, 15)"></div></div>
+                        <span class="sig-pts">{{ r.breakdown.trustScore | number:'1.1-1' }}/15</span>
+                      </div>
+                      <div class="signal-row">
+                        <span class="sig-label"><mat-icon>euro</mat-icon> Budget</span>
+                        <div class="sig-bar-wrap"><div class="sig-bar bar-budget" [style.width.%]="barPct(r.breakdown.budgetScore, 10)"></div></div>
+                        <span class="sig-pts">{{ r.breakdown.budgetScore | number:'1.1-1' }}/10
+                          <span class="sig-tag">{{ r.breakdown.budgetMatch }}</span></span>
+                      </div>
+                      <div class="signal-row">
+                        <span class="sig-label"><mat-icon>place</mat-icon> Location</span>
+                        <div class="sig-bar-wrap"><div class="sig-bar bar-loc" [style.width.%]="barPct(r.breakdown.locationScore, 5)"></div></div>
+                        <span class="sig-pts">{{ r.breakdown.locationScore | number:'1.1-1' }}/5
+                          <span class="sig-tag">{{ locLabel(r.breakdown.locationMatch) }}</span></span>
+                      </div>
+                      <button mat-stroked-button color="primary"
+                              (click)="viewOrg(r.offer.organizationId)" style="margin-top:8px">
+                        <mat-icon>visibility</mat-icon> View organization
+                      </button>
+                    </div>
+                  }
+
+                </div>
+              }
+            </div>
+          </mat-tab>
+
+        </mat-tab-group>
+      }
+    </section>
+
+  </div>
+</div>

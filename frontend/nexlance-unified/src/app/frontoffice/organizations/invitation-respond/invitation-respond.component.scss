@@ -1,0 +1,132 @@
+// invitation-respond — design system compliant
+$primary:    #0EA5E9;
+$border:     #E2E8F0;
+$page-bg:    #F8FAFC;
+$radius:     12px;
+$card-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+
+:host {
+  display: block;
+  width: 100%;
+  background: $page-bg;
+  min-height: 100vh;
+}
+
+// ── Page wrapper ─────────────────────────────────────────
+.respond-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 32px 24px;
+}
+
+// ── Card ─────────────────────────────────────────────────
+.respond-card {
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: $radius;
+  box-shadow: $card-shadow;
+  max-width: 480px;
+  width: 100%;
+}
+
+// ── Centred content layout ────────────────────────────────
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 28px;
+  gap: 16px;
+
+  h2 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0;
+  }
+
+  p {
+    color: #64748B;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .big-icon {
+    font-size: 72px;
+    height: 72px;
+    width: 72px;
+    color: #CBD5E1;
+  }
+}
+
+// ── Org info ──────────────────────────────────────────────
+.org-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #F8FAFC;
+  border: 1px solid $border;
+  border-radius: 8px;
+  width: 100%;
+  text-align: left;
+
+  .org-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  strong {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1E293B;
+  }
+}
+
+// ── Action buttons ────────────────────────────────────────
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+// Alias used in HTML
+.actions {
+  @extend .action-buttons;
+}
+
+// ── Success state ─────────────────────────────────────────
+.success-state {
+  // Handled by .center + .success modifier
+}
+
+.success {
+  .big-icon,
+  .success-icon {
+    color: #16A34A;
+  }
+
+  h2 { color: #15803D; }
+}
+
+// ── Error state ───────────────────────────────────────────
+.error-state {
+  // Handled by .center + .error modifier
+}
+
+.error {
+  .big-icon,
+  .error-icon {
+    color: #DC2626;
+  }
+
+  h2 { color: #B91C1C; }
+}

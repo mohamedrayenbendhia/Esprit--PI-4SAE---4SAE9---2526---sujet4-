@@ -1,0 +1,450 @@
+@use 'sass:color';
+@use '../../../../../styles/nexlance-theme.scss' as *;
+
+.invitation-detail-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: $space-8 $space-6;
+  min-height: 100vh;
+  background: $nexlance-gray-50;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $space-8;
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-2;
+      padding: $space-3 $space-5;
+      background: white;
+      border: 2px solid $nexlance-gray-200;
+      border-radius: $radius-lg;
+      font-weight: 600;
+      cursor: pointer;
+      transition: $transition-all;
+
+      &:hover {
+        background: $nexlance-gray-50;
+        transform: translateX(-2px);
+      }
+    }
+
+    .status-badge {
+      padding: $space-3 $space-6;
+      border-radius: $radius-full;
+      font-weight: 600;
+      font-size: $text-base;
+
+      &.badge-pending {
+        background: $nexlance-orange;
+        color: white;
+      }
+
+      &.badge-accepted {
+        background: $nexlance-success;
+        color: white;
+      }
+
+      &.badge-declined {
+        background: $nexlance-error;
+        color: white;
+      }
+
+      &.badge-expired {
+        background: $nexlance-gray-400;
+        color: white;
+      }
+    }
+  }
+
+  .alert {
+    padding: $space-5;
+    border-radius: $radius-lg;
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    margin-bottom: $space-6;
+    font-weight: 600;
+
+    &.alert-warning {
+      background: rgba($nexlance-error, 0.1);
+      border: 2px solid $nexlance-error;
+      color: $nexlance-error;
+
+      mat-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+    }
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: $space-8;
+
+    .left-column,
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: $space-6;
+    }
+
+    mat-card {
+      border-radius: $radius-2xl;
+      box-shadow: $shadow-md;
+
+      h3 {
+        display: flex;
+        align-items: center;
+        gap: $space-3;
+        font-size: $text-xl;
+        font-weight: 700;
+        color: $nexlance-text-primary;
+        margin-bottom: $space-6;
+
+        mat-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+          color: $nexlance-primary;
+        }
+      }
+    }
+
+    .client-card {
+      .client-profile {
+        display: flex;
+        gap: $space-4;
+        align-items: center;
+
+        .client-avatar {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, $nexlance-primary, $nexlance-primary-dark);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          mat-icon {
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+            color: white;
+          }
+        }
+
+        .client-details {
+          h2 {
+            font-size: $text-2xl;
+            font-weight: 700;
+            color: $nexlance-text-primary;
+            margin: 0 0 $space-2 0;
+          }
+
+          p {
+            color: $nexlance-text-secondary;
+            margin: 0 0 $space-3 0;
+          }
+
+          .client-meta {
+            display: flex;
+            gap: $space-4;
+            font-size: $text-sm;
+
+            span {
+              display: flex;
+              align-items: center;
+              gap: $space-1;
+              color: $nexlance-text-secondary;
+
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+                color: $nexlance-orange;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .job-card {
+      .job-title {
+        font-size: $text-3xl;
+        font-weight: 700;
+        color: $nexlance-text-primary;
+        margin: 0 0 $space-6 0;
+      }
+
+      .job-description {
+        color: $nexlance-text-secondary;
+        line-height: 1.8;
+        margin-bottom: $space-6;
+      }
+
+      mat-divider {
+        margin: $space-6 0;
+      }
+
+      .job-details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: $space-4;
+        margin-bottom: $space-6;
+
+        .detail-item {
+          display: flex;
+          gap: $space-3;
+          align-items: flex-start;
+
+          mat-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+            color: $nexlance-primary;
+            margin-top: $space-1;
+          }
+
+          div {
+            display: flex;
+            flex-direction: column;
+            gap: $space-1;
+
+            .label {
+              font-size: $text-sm;
+              color: $nexlance-text-secondary;
+            }
+
+            .value {
+              font-size: $text-base;
+              font-weight: 600;
+              color: $nexlance-text-primary;
+            }
+          }
+        }
+      }
+
+      .skills-section {
+        h4 {
+          font-size: $text-lg;
+          font-weight: 600;
+          color: $nexlance-text-primary;
+          margin-bottom: $space-4;
+        }
+
+        mat-chip-listbox {
+          mat-chip {
+            background: linear-gradient(135deg, $nexlance-primary-light, $nexlance-primary);
+            color: white;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .view-job-btn {
+        width: 100%;
+        margin-top: $space-6;
+        padding: $space-4;
+
+        mat-icon {
+          margin-right: $space-2;
+        }
+      }
+    }
+
+    .message-card {
+      .message-content {
+        padding: $space-6;
+        background: linear-gradient(135deg, rgba($nexlance-primary, 0.05), rgba($nexlance-primary, 0.1));
+        border-left: 4px solid $nexlance-primary;
+        border-radius: $radius-lg;
+        margin-bottom: $space-4;
+
+        p {
+          margin: 0;
+          color: $nexlance-text-primary;
+          line-height: 1.8;
+          font-style: italic;
+          font-size: $text-lg;
+        }
+      }
+
+      .message-meta {
+        display: flex;
+        align-items: center;
+        gap: $space-2;
+        font-size: $text-sm;
+        color: $nexlance-text-secondary;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+
+    .details-card {
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: $space-4 0;
+        border-bottom: 1px solid $nexlance-gray-100;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .label {
+          font-size: $text-sm;
+          color: $nexlance-text-secondary;
+        }
+
+        .value {
+          font-weight: 600;
+          color: $nexlance-text-primary;
+          text-align: right;
+
+          &.highlight {
+            color: $nexlance-primary;
+            font-size: $text-xl;
+          }
+
+          &.expired {
+            color: $nexlance-error;
+          }
+
+          &.warning {
+            color: $nexlance-orange;
+          }
+
+          .days-info {
+            font-size: $text-xs;
+            color: $nexlance-text-secondary;
+            display: block;
+          }
+
+          .status-badge {
+            padding: $space-2 $space-4;
+            border-radius: $radius-full;
+            font-size: $text-sm;
+
+            &.badge-pending {
+              background: $nexlance-orange;
+              color: white;
+            }
+
+            &.badge-accepted {
+              background: $nexlance-success;
+              color: white;
+            }
+
+            &.badge-declined {
+              background: $nexlance-error;
+              color: white;
+            }
+          }
+        }
+      }
+    }
+
+    .actions-card {
+      background: linear-gradient(135deg, rgba($nexlance-primary, 0.05), rgba($nexlance-primary, 0.1));
+      border: 2px solid $nexlance-primary;
+
+      .actions-description {
+        color: $nexlance-text-secondary;
+        margin-bottom: $space-6;
+      }
+
+      .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: $space-4;
+
+        button {
+          width: 100%;
+          padding: $space-4;
+          font-weight: 600;
+
+          mat-icon {
+            margin-right: $space-2;
+          }
+        }
+
+        .btn-accept {
+          font-size: $text-lg;
+        }
+      }
+    }
+
+    .info-card {
+      text-align: center;
+      padding: $space-8;
+      background: $nexlance-gray-50;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: $nexlance-primary;
+        margin-bottom: $space-4;
+      }
+
+      p {
+        color: $nexlance-text-secondary;
+        margin: 0;
+        font-size: $text-lg;
+      }
+    }
+  }
+}
+
+.loading-container {
+  text-align: center;
+  padding: $space-20;
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid $nexlance-gray-200;
+    border-top-color: $nexlance-primary;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto $space-4;
+  }
+
+  p {
+    color: $nexlance-text-secondary;
+    font-size: $text-lg;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive
+@media (max-width: 968px) {
+  .invitation-detail-container {
+    padding: $space-6 $space-4;
+
+    .content-grid {
+      grid-template-columns: 1fr;
+
+      .job-card .job-details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}

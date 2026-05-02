@@ -1,0 +1,84 @@
+<div class="freelancer-projects-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>My Projects</h1>
+      <p class="subtitle">Track and manage your active projects</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat-badge">
+        <mat-icon>folder_open</mat-icon>
+        <span>{{ projects.length }} project{{ projects.length !== 1 ? 's' : '' }}</span>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading your projects...</p>
+    </div>
+  } @else if (projects.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <mat-icon>folder_off</mat-icon>
+      </div>
+      <h3>No Projects Yet</h3>
+      <p>You don't have any assigned projects at the moment.<br>They will appear here once a client assigns you to a project.</p>
+    </div>
+  } @else {
+    <div class="projects-grid">
+      @for (project of projects; track project.id) {
+        <div class="project-card" [routerLink]="['/frontoffice/freelancer/my-projects', project.id]">
+          <div class="card-accent"></div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="project-title">
+                <mat-icon class="project-icon">work_outline</mat-icon>
+                <h3>{{ project.title || 'Project #' + project.id?.substring(0, 8) }}</h3>
+              </div>
+              <span class="status-badge" [attr.data-status]="project.status">
+                {{ project.status }}
+              </span>
+            </div>
+
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-label">Progress</span>
+                <span class="progress-value" [class.complete]="(project.progress || 0) === 100">{{ project.progress || 0 }}%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" [style.width.%]="project.progress || 0" [class.complete]="(project.progress || 0) === 100"></div>
+              </div>
+            </div>
+
+            <div class="card-divider"></div>
+
+            <div class="project-meta">
+              <div class="meta-item">
+                <mat-icon>calendar_today</mat-icon>
+                <div class="meta-text">
+                  <span class="meta-label">Timeline</span>
+                  <span class="meta-value">{{ project.startDate | date:'dd MMM yyyy' }} — {{ project.endDate | date:'dd MMM yyyy' }}</span>
+                </div>
+              </div>
+              <div class="meta-item">
+                <mat-icon>flag</mat-icon>
+                <div class="meta-text">
+                  <span class="meta-label">Milestones</span>
+                  <span class="meta-value">{{ project.milestones?.length || 0 }} milestone{{ (project.milestones?.length || 0) !== 1 ? 's' : '' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <span class="view-link">
+              View Details
+              <mat-icon>arrow_forward</mat-icon>
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

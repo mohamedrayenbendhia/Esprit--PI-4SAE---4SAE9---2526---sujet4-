@@ -1,0 +1,61 @@
+<div class="stats-container">
+  <h2>Mes statistiques d'évaluations</h2>
+
+  <div *ngIf="isLoading">Chargement...</div>
+
+  <div *ngIf="!isLoading && stats.total === 0">
+    <p>Vous n'avez pas encore reçu d'évaluation.</p>
+  </div>
+
+  <div *ngIf="!isLoading && stats.total > 0" class="stats-content">
+    
+    <!-- Résumé -->
+    <div class="summary">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-label">Évaluations reçues</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.average }}/5</div>
+        <div class="stat-label">Note moyenne</div>
+      </div>
+    </div>
+
+    <!-- Distribution -->
+    <div class="section">
+      <h3>Distribution des notes</h3>
+      <div class="distribution">
+        <div *ngFor="let star of [5,4,3,2,1]" class="dist-item">
+          <span class="star-label">{{star}} étoiles</span>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="(stats.distribution[star] / stats.total) * 100"></div>
+          </div>
+          <span class="dist-value">{{ stats.distribution[star] }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Moyennes par catégorie -->
+    <div class="section">
+      <h3>Moyennes par critère</h3>
+      <div class="categories">
+        <div class="category-item">
+          <span>Qualité</span>
+          <strong>{{ stats.byCategory.quality }}/5</strong>
+        </div>
+        <div class="category-item">
+          <span>Délais</span>
+          <strong>{{ stats.byCategory.deadline }}/5</strong>
+        </div>
+        <div class="category-item">
+          <span>Communication</span>
+          <strong>{{ stats.byCategory.communication }}/5</strong>
+        </div>
+        <div class="category-item">
+          <span>Professionnalisme</span>
+          <strong>{{ stats.byCategory.professionalism }}/5</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

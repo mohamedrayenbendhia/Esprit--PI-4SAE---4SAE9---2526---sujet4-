@@ -1,0 +1,855 @@
+@use '../../../../styles/nexlance-theme.scss' as *;
+
+// ========================================
+// SEARCH FREELANCERS - Clean & Simple Design
+// ========================================
+
+.search-freelancers-container {
+  min-height: calc(100vh - 80px);
+  background: #f8fafc;
+
+  .page-header {
+    background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+    padding: 3rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      p {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+  }
+
+  .content-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 2rem;
+    padding: 0 1.5rem 2rem;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr;
+    }
+
+    // SIDEBAR FILTERS
+    .filters-sidebar {
+      .filter-section {
+        background: white;
+        border-radius: $radius-lg;
+        padding: $space-5;
+        box-shadow: $shadow-md;
+        border: 1px solid $nexlance-gray-100;
+        position: sticky;
+        top: 5rem;
+
+        @media (max-width: 1024px) {
+          position: relative;
+          top: 0;
+        }
+
+        h3 {
+          font-size: $text-lg;
+          font-weight: $font-bold;
+          color: $nexlance-gray-900;
+          margin-bottom: $space-5;
+          padding-bottom: $space-3;
+          border-bottom: 2px solid $nexlance-primary-lighter;
+          display: flex;
+          align-items: center;
+          gap: $space-2;
+
+          &::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            border-radius: 2px;
+            background: $nexlance-primary;
+          }
+        }
+
+        .filter-group {
+          margin-bottom: $space-5;
+
+          & > label {
+            display: block;
+            font-size: $text-xs;
+            font-weight: $font-bold;
+            color: $nexlance-gray-500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: $space-3;
+          }
+
+          .search-input {
+            position: relative;
+            margin-bottom: $space-3;
+
+            mat-icon {
+              position: absolute;
+              left: $space-3;
+              top: 50%;
+              transform: translateY(-50%);
+              color: $nexlance-gray-400;
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+            }
+
+            input {
+              width: 100%;
+              padding: $space-2 $space-3 $space-2 $space-10;
+              border: 1.5px solid $nexlance-gray-200;
+              border-radius: $radius-md;
+              font-size: $text-sm;
+              background: $nexlance-gray-50;
+              transition: all $transition-fast;
+
+              &:focus {
+                outline: none;
+                border-color: $nexlance-primary;
+                background: white;
+                box-shadow: 0 0 0 3px rgba($nexlance-primary, 0.08);
+              }
+
+              &::placeholder {
+                color: $nexlance-gray-400;
+              }
+            }
+          }
+
+          .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: $space-3;
+            max-height: 140px;
+            overflow-y: auto;
+            padding-right: 2px;
+
+            &::-webkit-scrollbar {
+              width: 3px;
+            }
+            &::-webkit-scrollbar-thumb {
+              background: $nexlance-gray-300;
+              border-radius: 3px;
+            }
+
+            .skill-chip {
+              padding: 4px 10px;
+              background: $nexlance-gray-50;
+              border: 1.5px solid $nexlance-gray-200;
+              border-radius: $radius-full;
+              font-size: 11px;
+              font-weight: $font-medium;
+              color: $nexlance-gray-600;
+              cursor: pointer;
+              transition: all $transition-fast;
+              white-space: nowrap;
+
+              &:hover {
+                border-color: $nexlance-primary;
+                color: $nexlance-primary;
+                background: $nexlance-primary-lighter;
+              }
+
+              &.active {
+                background: $nexlance-primary;
+                color: white;
+                border-color: $nexlance-primary;
+                font-weight: $font-semibold;
+              }
+            }
+          }
+
+          .selected-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: $space-2;
+            background: $nexlance-primary-lighter;
+            border-radius: $radius-md;
+            border: 1px dashed rgba($nexlance-primary, 0.3);
+
+            .selected-skill-tag {
+              display: inline-flex;
+              align-items: center;
+              gap: 4px;
+              padding: 2px 8px;
+              background: $nexlance-primary;
+              color: white;
+              border-radius: $radius-full;
+              font-size: 11px;
+              font-weight: $font-semibold;
+
+              mat-icon {
+                font-size: 14px;
+                width: 14px;
+                height: 14px;
+                cursor: pointer;
+                opacity: 0.8;
+
+                &:hover {
+                  opacity: 1;
+                }
+              }
+            }
+          }
+
+          // Custom radio buttons
+          .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .radio-option {
+              display: flex;
+              align-items: center;
+              gap: $space-2;
+              padding: 6px 10px;
+              border-radius: $radius-md;
+              cursor: pointer;
+              transition: all $transition-fast;
+              border: 1.5px solid transparent;
+
+              input[type="radio"] {
+                display: none;
+              }
+
+              .radio-dot {
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                border: 2px solid $nexlance-gray-300;
+                position: relative;
+                flex-shrink: 0;
+                transition: all $transition-fast;
+
+                &::after {
+                  content: '';
+                  position: absolute;
+                  top: 3px;
+                  left: 3px;
+                  width: 6px;
+                  height: 6px;
+                  border-radius: 50%;
+                  background: transparent;
+                  transition: all $transition-fast;
+                }
+              }
+
+              .radio-label {
+                font-size: $text-sm;
+                font-weight: $font-medium;
+                color: $nexlance-gray-600;
+                transition: color $transition-fast;
+              }
+
+              &:hover {
+                background: $nexlance-gray-50;
+
+                .radio-dot {
+                  border-color: $nexlance-primary-light;
+                }
+              }
+
+              &.selected {
+                background: $nexlance-primary-lighter;
+                border-color: rgba($nexlance-primary, 0.2);
+
+                .radio-dot {
+                  border-color: $nexlance-primary;
+
+                  &::after {
+                    background: $nexlance-primary;
+                  }
+                }
+
+                .radio-label {
+                  color: $nexlance-primary-dark;
+                  font-weight: $font-semibold;
+                }
+              }
+            }
+          }
+
+          // Checkbox group
+          .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            .checkbox-option {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              padding: 8px 12px;
+              border-radius: $radius-md;
+              cursor: pointer;
+              transition: all $transition-fast;
+              font-size: $text-sm;
+              color: $nexlance-gray-700;
+              border: 1px solid transparent;
+              background: white;
+
+              &:hover {
+                background: $nexlance-gray-50;
+                border-color: $nexlance-gray-200;
+              }
+
+              ::ng-deep .mat-mdc-checkbox {
+                margin: 0;
+                
+                .mdc-checkbox {
+                  width: 18px;
+                  height: 18px;
+                  padding: 0;
+                  flex-shrink: 0;
+                }
+
+                .mdc-checkbox__background {
+                  border-radius: 4px;
+                  border-width: 2px;
+                }
+
+                // Custom checkbox colors
+                &.mat-primary {
+                  .mdc-checkbox__background {
+                    border-color: $nexlance-gray-300;
+                  }
+
+                  &.mdc-checkbox--selected .mdc-checkbox__background {
+                    background-color: $nexlance-primary;
+                    border-color: $nexlance-primary;
+                  }
+                }
+
+                // Ripple effect
+                .mat-mdc-checkbox-ripple {
+                  .mat-ripple-element {
+                    background-color: rgba($nexlance-primary, 0.1);
+                  }
+                }
+              }
+
+              span {
+                font-weight: $font-medium;
+                line-height: 1.4;
+              }
+
+              // When checkbox is checked, highlight the whole row
+              &:has(.mdc-checkbox--selected) {
+                background: $nexlance-primary-lighter;
+                border-color: rgba($nexlance-primary, 0.2);
+
+                span {
+                  color: $nexlance-primary-dark;
+                  font-weight: $font-semibold;
+                }
+              }
+            }
+          }
+
+          .rate-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: $space-2;
+            padding: 4px;
+            background: $nexlance-gray-50;
+            border-radius: $radius-md;
+            border: 1px solid $nexlance-gray-200;
+
+            .rate-input {
+              flex: 1;
+              max-width: 80px;
+              padding: 6px 8px;
+              border: 1px solid $nexlance-gray-200;
+              border-radius: 6px;
+              font-size: 13px;
+              font-weight: $font-semibold;
+              color: $nexlance-gray-700;
+              background: white;
+              transition: all $transition-fast;
+              text-align: center;
+
+              &:focus {
+                outline: none;
+                border-color: $nexlance-primary;
+                box-shadow: 0 0 0 2px rgba($nexlance-primary, 0.1);
+              }
+
+              &::placeholder {
+                color: $nexlance-gray-400;
+                font-weight: $font-normal;
+                font-size: 12px;
+              }
+
+              // Hide number spinners
+              &::-webkit-outer-spin-button,
+              &::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+              }
+            }
+
+            span {
+              color: $nexlance-gray-400;
+              font-weight: $font-bold;
+              font-size: 14px;
+              padding: 0 2px;
+            }
+          }
+
+          .rate-range {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: $nexlance-gray-400;
+            padding: 0 4px;
+            font-weight: $font-medium;
+          }
+
+          .rating-filter {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+
+            .star {
+              cursor: pointer;
+              transition: all $transition-fast;
+              display: flex;
+              align-items: center;
+
+              mat-icon {
+                font-size: 24px;
+                width: 24px;
+                height: 24px;
+                color: $nexlance-gray-300;
+                transition: all $transition-fast;
+              }
+
+              &.filled mat-icon {
+                color: #FBBF24;
+              }
+
+              &:hover mat-icon {
+                color: #FBBF24;
+                transform: scale(1.15);
+              }
+            }
+
+            .rating-text {
+              font-weight: $font-bold;
+              color: $nexlance-gray-700;
+              font-size: $text-sm;
+              margin-left: $space-2;
+              background: $nexlance-gray-100;
+              padding: 2px 8px;
+              border-radius: $radius-full;
+            }
+          }
+        }
+
+        .filter-actions {
+          display: flex;
+          gap: $space-2;
+          padding-top: $space-4;
+          border-top: 1.5px solid $nexlance-gray-100;
+          margin-top: $space-2;
+
+          .btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: $radius-md;
+            font-size: $text-sm;
+            font-weight: $font-semibold;
+            cursor: pointer;
+            transition: all $transition-fast;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+
+            mat-icon {
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+            }
+
+            &.btn-primary {
+              background: $nexlance-primary;
+              color: white;
+
+              &:hover {
+                background: $nexlance-primary-dark;
+                box-shadow: $shadow-sm;
+              }
+            }
+
+            &.btn-secondary {
+              background: $nexlance-gray-100;
+              color: $nexlance-gray-600;
+
+              &:hover {
+                background: $nexlance-gray-200;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // RESULTS SECTION
+    .results-section {
+      .results-header {
+        @include flex-between;
+        margin-bottom: $space-6;
+        padding: $space-5;
+        background: white;
+        border-radius: $radius-lg;
+        box-shadow: $shadow-sm;
+        border: 1px solid $nexlance-gray-200;
+
+        h2 {
+          font-size: $text-2xl;
+          font-weight: $font-bold;
+          color: $nexlance-gray-900;
+        }
+
+        .sort-control {
+          display: flex;
+          align-items: center;
+          gap: $space-3;
+
+          label {
+            font-size: $text-sm;
+            font-weight: $font-semibold;
+            color: $nexlance-gray-700;
+          }
+
+          select {
+            padding: $space-2 $space-4;
+            border: 2px solid $nexlance-gray-200;
+            border-radius: $radius-md;
+            font-size: $text-sm;
+            font-weight: $font-medium;
+            color: $nexlance-gray-700;
+            cursor: pointer;
+            transition: border-color $transition-fast;
+
+            &:focus {
+              outline: none;
+              border-color: $nexlance-primary;
+            }
+          }
+        }
+      }
+
+      .loading-state {
+        text-align: center;
+        padding: $space-20;
+
+        .spinner {
+          width: 50px;
+          height: 50px;
+          border: 4px solid $nexlance-gray-200;
+          border-top-color: $nexlance-primary;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto $space-4;
+        }
+
+        p {
+          color: $nexlance-gray-600;
+          font-size: $text-lg;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      }
+
+      .freelancers-list {
+        display: grid;
+        gap: $space-5;
+
+        .freelancer-card {
+          @include card;
+          border: 1px solid $nexlance-gray-200;
+          transition: all $transition-base;
+
+          &:hover {
+            border-color: $nexlance-primary;
+            box-shadow: $shadow-xl;
+            transform: translateY(-2px);
+          }
+
+          .freelancer-header {
+            display: flex;
+            gap: $space-5;
+            margin-bottom: $space-5;
+
+            .avatar {
+              width: 80px;
+              height: 80px;
+              border-radius: $radius-xl;
+              @include gradient-primary;
+              @include flex-center;
+              flex-shrink: 0;
+
+              mat-icon {
+                font-size: 40px;
+                width: 40px;
+                height: 40px;
+                color: white;
+              }
+            }
+
+            .freelancer-info {
+              flex: 1;
+
+              .name-rating {
+                @include flex-between;
+                margin-bottom: $space-2;
+
+                h3 {
+                  font-size: $text-2xl;
+                  font-weight: $font-bold;
+                  color: $nexlance-gray-900;
+                }
+
+                .rating {
+                  display: flex;
+                  align-items: center;
+                  gap: $space-1;
+
+                  mat-icon {
+                    color: $nexlance-secondary;
+                    font-size: 20px;
+                  }
+
+                  .rating-value {
+                    font-weight: $font-bold;
+                    color: $nexlance-gray-900;
+                    font-size: $text-lg;
+                  }
+
+                  .review-count {
+                    color: $nexlance-gray-500;
+                    font-size: $text-sm;
+                  }
+                }
+              }
+
+              .title-location {
+                display: flex;
+                flex-direction: column;
+                gap: $space-1;
+                color: $nexlance-gray-600;
+
+                p {
+                  display: flex;
+                  align-items: center;
+                  gap: $space-2;
+                  font-size: $text-sm;
+
+                  mat-icon {
+                    font-size: 16px;
+                    width: 16px;
+                    height: 16px;
+                  }
+                }
+
+                .available {
+                  color: $nexlance-success;
+                  font-weight: $font-semibold;
+                }
+
+                .unavailable {
+                  color: $nexlance-warning;
+                  font-weight: $font-medium;
+                }
+              }
+            }
+          }
+
+          .freelancer-stats {
+            display: flex;
+            gap: $space-6;
+            margin-bottom: $space-4;
+
+            .stat {
+              display: flex;
+              align-items: center;
+              gap: $space-2;
+
+              mat-icon {
+                color: $nexlance-primary;
+                font-size: 20px;
+              }
+
+              .stat-label {
+                font-size: $text-sm;
+                font-weight: $font-semibold;
+                color: $nexlance-gray-700;
+              }
+            }
+          }
+
+          .success-rate {
+            display: flex;
+            align-items: center;
+            gap: $space-2;
+            padding: $space-3;
+            background: $nexlance-success;
+            color: white;
+            border-radius: $radius-md;
+            font-size: $text-sm;
+            font-weight: $font-semibold;
+            margin-bottom: $space-5;
+            width: fit-content;
+
+            mat-icon {
+              font-size: 18px;
+            }
+          }
+
+          .skills-section {
+            margin-bottom: $space-5;
+
+            .skills-label {
+              font-size: $text-sm;
+              font-weight: $font-semibold;
+              color: $nexlance-gray-700;
+              margin-bottom: $space-3;
+            }
+
+            .skills-list {
+              display: flex;
+              flex-wrap: wrap;
+              gap: $space-2;
+
+              .skill-badge {
+                @include badge($nexlance-gray-100, $nexlance-gray-700);
+                font-size: $text-xs;
+              }
+
+              .more-skills {
+                @include badge($nexlance-primary-lighter, $nexlance-primary);
+                font-size: $text-xs;
+                font-weight: $font-bold;
+              }
+            }
+          }
+
+          .freelancer-actions {
+            display: flex;
+            gap: $space-2;
+            padding-top: $space-4;
+            border-top: 1.5px solid $nexlance-gray-100;
+
+            .btn {
+              flex: 1;
+              padding: 8px 12px;
+              border: none;
+              border-radius: $radius-md;
+              font-size: $text-xs;
+              font-weight: $font-semibold;
+              cursor: pointer;
+              transition: all $transition-fast;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 4px;
+
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+              }
+
+              &.btn-primary {
+                background: $nexlance-primary;
+                color: white;
+
+                &:hover {
+                  background: $nexlance-primary-dark;
+                  box-shadow: $shadow-sm;
+                }
+              }
+
+              &.btn-secondary {
+                background: $nexlance-gray-100;
+                color: $nexlance-gray-700;
+
+                &:hover {
+                  background: $nexlance-gray-200;
+                }
+              }
+
+              &.btn-outline {
+                background: transparent;
+                border: 1.5px solid $nexlance-secondary;
+                color: $nexlance-secondary;
+
+                &:hover {
+                  background: $nexlance-secondary-lighter;
+                  color: $nexlance-secondary-dark;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: $space-20;
+        background: white;
+        border-radius: $radius-lg;
+        border: 1px solid $nexlance-gray-200;
+
+        mat-icon {
+          font-size: 100px;
+          width: 100px;
+          height: 100px;
+          color: $nexlance-gray-300;
+          margin-bottom: $space-6;
+        }
+
+        h3 {
+          font-size: $text-2xl;
+          font-weight: $font-bold;
+          color: $nexlance-gray-700;
+          margin-bottom: $space-3;
+        }
+
+        p {
+          font-size: $text-lg;
+          color: $nexlance-gray-600;
+          margin-bottom: $space-8;
+        }
+
+        .btn-primary {
+          @include btn-primary;
+        }
+      }
+    }
+  }
+}

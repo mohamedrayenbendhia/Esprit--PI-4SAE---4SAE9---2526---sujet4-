@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contrat-service
+  namespace: nexlance
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: contrat-service
+  template:
+    metadata:
+      labels:
+        app: contrat-service
+    spec:
+      containers:
+        - name: contrat-service
+          image: img-contrat
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8086
+          env:
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: http://eureka-server:8761/eureka/
+            - name: SPRING_CLOUD_CONFIG_URI
+              value: http://config-server:8888
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contrat-service
+  namespace: nexlance
+spec:
+  selector:
+    app: contrat-service
+  ports:
+    - port: 8086
+      targetPort: 8086
+  type: ClusterIP

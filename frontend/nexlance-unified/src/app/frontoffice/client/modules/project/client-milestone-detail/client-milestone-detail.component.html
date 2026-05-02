@@ -1,0 +1,135 @@
+<div class="milestone-detail-page">
+  @if (loading) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading milestone...</p>
+    </div>
+  } @else if (milestone) {
+    <!-- Header -->
+    <div class="page-header">
+      <button class="btn-back" [routerLink]="['/frontoffice/client/projects', projectId, 'dashboard']">
+        ← Back to Project
+      </button>
+      <div class="header-info">
+        <h1>{{ milestone.title }}</h1>
+        <span class="status-badge" [ngClass]="'badge-' + (milestone.status.toLowerCase())">{{ milestone.status }}</span>
+      </div>
+    </div>
+
+    <!-- Description Card -->
+    <div class="card">
+      <div class="card-header">
+        <mat-icon class="card-icon">description</mat-icon>
+        <h2>Description</h2>
+      </div>
+      <div class="card-body">
+        <p class="description-text">{{ milestone.description || 'No description provided.' }}</p>
+
+        @if (milestone.acceptanceCriteria) {
+          <div class="info-section">
+            <h3>Acceptance Criteria</h3>
+            <p>{{ milestone.acceptanceCriteria }}</p>
+          </div>
+        }
+
+        <div class="date-box">
+          <mat-icon class="date-icon">calendar_today</mat-icon>
+          <div>
+            <span class="date-label">Deadline</span>
+            <span class="date-value">{{ milestone.dueDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submitted Deliverables & Actions -->
+    @if (milestone.status === 'SUBMITTED') {
+      <div class="card">
+        <div class="card-header">
+          <mat-icon class="card-icon">inventory</mat-icon>
+          <h2>Submitted Deliverables</h2>
+        </div>
+        <div class="card-body">
+          @if (milestone.attachments) {
+            <div class="attachments-section">
+              <h3>📎 Attachments ({{ getAttachments().length }} files)</h3>
+              <div class="attachments-list">
+                @for (url of getAttachments(); track url) {
+                  <a class="attachment-item" [href]="url" target="_blank" rel="noopener noreferrer">
+                    <mat-icon>{{ getFileIconFromUrl(url) }}</mat-icon>
+                    <span class="attachment-name">{{ getFileNameFromUrl(url) }}</span>
+                    <mat-icon class="download-icon">download</mat-icon>
+                  </a>
+                }
+              </div>
+            </div>
+          } @else {
+            <p class="review-message">No attachments were submitted for this milestone.</p>
+          }
+
+          <!-- Approve -->
+          <div class="approve-section">
+            <button class="btn-approve" (click)="approveMilestone()">
+              <mat-icon>check_circle</mat-icon>
+              Approve Milestone
+            </button>
+          </div>
+
+          <!-- Request Revisions -->
+          <div class="revision-section">
+            <h3>Request Revisions</h3>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Rejection Reason</mat-label>
+              <textarea matInput rows="3" [(ngModel)]="rejectionReason" placeholder="Describe what needs to be improved..."></textarea>
+            </mat-form-field>
+            <button class="btn-reject" [disabled]="!rejectionReason.trim()" (click)="requestRevisions()">
+              <mat-icon>edit</mat-icon>
+              Request Revisions
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Approved State -->
+    @if (milestone.status === 'APPROVED') {
+      <div class="card success-card">
+        <mat-icon class="success-icon" style="color:#22c55e">check_circle</mat-icon>
+        <h2>Milestone Approved</h2>
+        <p>This milestone was approved on {{ milestone.approvedAt | date:'dd/MM/yyyy' }}</p>
+      </div>
+    }
+
+    <!-- Rejected State -->
+    @if (milestone.status === 'REJECTED') {
+      <div class="card" style="border-left:4px solid #ef4444;">
+        <div class="card-header" style="background:rgba(239,68,68,0.06);">
+          <mat-icon class="card-icon" style="color:#ef4444">cancel</mat-icon>
+          <h2 style="color:#b91c1c">Revisions Requested</h2>
+        </div>
+        <div class="card-body">
+          <p class="description-text"><strong>Reason:</strong> {{ milestone.rejectionReason }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- Pending State -->
+    @if (milestone.status === 'PENDING' || milestone.status === 'IN_PROGRESS') {
+      <div class="card">
+        <div class="card-header">
+          <mat-icon class="card-icon">hourglass_empty</mat-icon>
+          <h2>Awaiting Submission</h2>
+        </div>
+        <div class="card-body">
+          <p class="review-message">The freelancer has not submitted deliverables for this milestone yet.</p>
+        </div>
+      </div>
+    }
+
+  } @else {
+    <div class="error-container">
+      <mat-icon class="error-icon" style="color:#ef4444">error_outline</mat-icon>
+      <h2>Milestone not found</h2>
+    </div>
+  }
+</div>

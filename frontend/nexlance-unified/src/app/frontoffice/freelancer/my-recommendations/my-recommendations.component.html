@@ -1,0 +1,120 @@
+<div class="my-recommendations-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>
+        <mat-icon>recommend</mat-icon>
+        My Recommendations
+      </h1>
+      <p class="subtitle">View and respond to recommendations from clients</p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group [(selectedIndex)]="activeTabIndex" (selectedIndexChange)="onTabChange($event)">
+    <mat-tab *ngFor="let tab of tabs" [label]="tab.label + ' (' + getTabCount(tab.id) + ')'">
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading recommendations...</p>
+  </div>
+
+  <!-- Recommendations List -->
+  <div *ngIf="!isLoading" class="recommendations-list">
+    <!-- Empty State -->
+    <div *ngIf="filteredRecommendations.length === 0" class="empty-state">
+      <mat-icon>inbox</mat-icon>
+      <h2>No recommendations yet</h2>
+      <p>When clients recommend you for job offers, they will appear here.</p>
+      <button mat-raised-button color="primary" routerLink="/frontoffice/freelancer/browse-jobs">
+        <mat-icon>search</mat-icon>
+        Browse Jobs
+      </button>
+    </div>
+
+    <!-- Recommendation Cards -->
+    <mat-card *ngFor="let rec of filteredRecommendations" class="recommendation-card">
+      <!-- Status Badge -->
+      <div class="status-badge" [ngClass]="getStatusClass(rec.status)">
+        <mat-icon class="status-icon">{{ getStatusIcon(rec.status) }}</mat-icon>
+        {{ getStatusLabel(rec.status) }}
+      </div>
+
+      <mat-card-header>
+        <div class="card-header-content">
+          <div class="client-info">
+            <div class="client-avatar">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="client-details">
+              <h3>{{ getClientName(rec.clientId) }}</h3>
+              <span class="recommendation-date">
+                <mat-icon>schedule</mat-icon>
+                {{ formatDate(rec.sentDate) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Job Title -->
+        <div class="job-title" (click)="viewJobOffer(rec.jobOfferId, $event)">
+          <mat-icon>work</mat-icon>
+          <h2>{{ getJobOfferTitle(rec.jobOfferId) }}</h2>
+          <mat-icon class="link-icon">open_in_new</mat-icon>
+        </div>
+
+        <!-- Message -->
+        <div class="recommendation-message" *ngIf="rec.message">
+          <mat-icon>message</mat-icon>
+          <p>{{ rec.message }}</p>
+        </div>
+
+        <!-- Details -->
+        <div class="details-grid">
+          <div class="detail-item" *ngIf="rec.proposedBudget">
+            <mat-icon>attach_money</mat-icon>
+            <div class="detail-content">
+              <span class="label">Proposed Budget</span>
+              <span class="value">{{ rec.proposedBudget }} DT</span>
+            </div>
+          </div>
+
+          <div class="detail-item" *ngIf="rec.expirationDate">
+            <mat-icon>event</mat-icon>
+            <div class="detail-content">
+              <span class="label">Expires</span>
+              <span class="value">{{ formatDate(rec.expirationDate) }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <!-- Actions -->
+      <mat-card-actions *ngIf="rec.status === RecommendationStatus.PENDING">
+        <button mat-raised-button color="primary" 
+                (click)="acceptRecommendation(rec, $event)"
+                [disabled]="isProcessing">
+          <mat-icon>check_circle</mat-icon>
+          Accept
+        </button>
+        <button mat-raised-button color="warn" 
+                (click)="rejectRecommendation(rec, $event)"
+                [disabled]="isProcessing">
+          <mat-icon>cancel</mat-icon>
+          Reject
+        </button>
+      </mat-card-actions>
+
+      <!-- Response date for non-pending -->
+      <div class="response-info" *ngIf="rec.responseDate && rec.status !== RecommendationStatus.PENDING">
+        <mat-icon>info</mat-icon>
+        <span>Responded on {{ formatDate(rec.responseDate) }}</span>
+      </div>
+    </mat-card>
+  </div>
+</div>

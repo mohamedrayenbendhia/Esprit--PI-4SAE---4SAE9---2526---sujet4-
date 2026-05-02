@@ -1,0 +1,174 @@
+<div class="collab-offers">
+
+  <!-- En-tête -->
+  <div class="section-header">
+    <h3><mat-icon>handshake</mat-icon> Collaboration Offers</h3>
+    @if (isOwnerOrManager) {
+      <button mat-raised-button color="primary" (click)="createOffer()">
+        <mat-icon>add</mat-icon> New offer
+      </button>
+    }
+  </div>
+
+  <!-- Chargement -->
+  @if (isLoading()) {
+    <div class="loading"><mat-spinner diameter="32"></mat-spinner></div>
+  }
+
+  <!-- Erreur -->
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
+
+  <!-- Liste vide -->
+  @if (!isLoading() && offers().length === 0) {
+    <div class="empty">
+      <mat-icon>work_off</mat-icon>
+      <p>No collaboration offers available at the moment.</p>
+    </div>
+  }
+
+  <!-- Offres -->
+  @for (offer of offers(); track offer.id) {
+    <div class="offer-card" [class.offer-closed]="offer.status !== 'OPEN'">
+
+      <!-- Statut -->
+      <div class="offer-header">
+        <span class="offer-status" [class]="statusClass(offer.status)">
+          {{ statusLabel(offer.status) }}
+        </span>
+        @if (offer.deadlineDate && offer.status === 'OPEN') {
+          <span class="deadline" [class.expired]="isExpired(offer.deadlineDate)">
+            <mat-icon>event</mat-icon>
+            {{ isExpired(offer.deadlineDate) ? 'Expired' : 'Deadline: ' + (offer.deadlineDate | date:'dd/MM/yyyy') }}
+          </span>
+        }
+      </div>
+
+      <!-- Titre + infos -->
+      <h4 class="offer-title">{{ offer.title }}</h4>
+      <p class="offer-desc">{{ offer.description }}</p>
+
+      <!-- Meta -->
+      <div class="offer-meta">
+        @if (offer.durationLabel) {
+          <span><mat-icon>schedule</mat-icon> {{ offer.durationLabel }}</span>
+        }
+        @if (offer.budgetEstimate) {
+          <span><mat-icon>euro</mat-icon> {{ offer.budgetEstimate | number }} €</span>
+        }
+        @if (offer.maxApplicants) {
+          <span><mat-icon>group</mat-icon> {{ offer.acceptedCount }} / {{ offer.maxApplicants }} collaborators</span>
+        }
+        <span><mat-icon>people</mat-icon> {{ offer.applicationCount }} application(s)</span>
+      </div>
+
+      <!-- Compétences requises -->
+      @if (offer.requiredSkills?.length) {
+        <div class="skills">
+          @for (skill of offer.requiredSkills; track skill) {
+            <mat-chip>{{ skill }}</mat-chip>
+          }
+        </div>
+      }
+
+      <!-- Actions freelance externe -->
+      @if (!isOwnerOrManager && isFreelance && offer.status === 'OPEN') {
+        @if (hasApplied(offer.id)) {
+          <div class="already-applied">
+            <mat-icon>check_circle</mat-icon> Application submitted
+          </div>
+        } @else if (applyingOfferId() === offer.id) {
+          <!-- Formulaire inline -->
+          <div class="apply-form">
+            <textarea [(ngModel)]="applyForm.message"
+                      rows="4"
+                      placeholder="Introduce yourself and explain your interest in this collaboration..."
+                      class="apply-textarea"></textarea>
+            <input type="text" [(ngModel)]="applyForm.portfolioUrl"
+                   placeholder="Portfolio / profile link (optional)"
+                   class="apply-input" />
+            <div class="apply-actions">
+              <button mat-button (click)="cancelApply()">Cancel</button>
+              <button mat-raised-button color="primary"
+                      [disabled]="applying() || !applyForm.message.trim()"
+                      (click)="submitApply(offer.id)">
+                <mat-icon>send</mat-icon>
+                {{ applying() ? 'Submitting...' : 'Submit my application' }}
+              </button>
+            </div>
+          </div>
+        } @else {
+          <button mat-raised-button color="accent" (click)="startApply(offer.id)">
+            <mat-icon>person_add</mat-icon> Apply
+          </button>
+        }
+      }
+
+      <!-- Actions owner/manager -->
+      @if (isOwnerOrManager) {
+        <div class="manager-actions">
+          <button mat-button color="primary"
+                  (click)="toggleApplications(offer.id)">
+            <mat-icon>{{ selectedOfferId() === offer.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+            {{ selectedOfferId() === offer.id ? 'Hide' : 'View applications' }}
+            ({{ offer.applicationCount }})
+          </button>
+          @if (offer.status === 'OPEN') {
+            <button mat-button (click)="closeOffer(offer.id)">
+              <mat-icon>lock</mat-icon> Close
+            </button>
+            <button mat-button color="warn" (click)="cancelOffer(offer.id)">
+              <mat-icon>cancel</mat-icon> Cancel
+            </button>
+          }
+        </div>
+
+        <!-- Candidatures de l'offre (expandable) -->
+        @if (selectedOfferId() === offer.id) {
+          <div class="applications-panel">
+            @if (loadingApps()) {
+              <mat-spinner diameter="24"></mat-spinner>
+            } @else if (applications().length === 0) {
+              <p class="no-apps">No applications for this offer.</p>
+            } @else {
+              @for (app of applications(); track app.id) {
+                <div class="app-row" [class]="appStatusClass(app.status)">
+                  <div class="app-info">
+                    <span class="app-status-badge" [class]="appStatusClass(app.status)">
+                      {{ appStatusLabel(app.status) }}
+                    </span>
+                    <span class="app-msg">{{ app.message | slice:0:120 }}{{ app.message.length > 120 ? '…' : '' }}</span>
+                    @if (app.portfolioUrl) {
+                      <a [href]="app.portfolioUrl" target="_blank" rel="noopener" class="portfolio-link">
+                        <mat-icon>open_in_new</mat-icon> Portfolio
+                      </a>
+                    }
+                  </div>
+                  @if (app.status === 'PENDING') {
+                    <div class="app-response-actions">
+                      <button mat-icon-button color="primary"
+                              [disabled]="respondingAppId() === app.id"
+                              (click)="respondToApp(app.id, true)"
+                              matTooltip="Accept">
+                        <mat-icon>check_circle</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn"
+                              [disabled]="respondingAppId() === app.id"
+                              (click)="respondToApp(app.id, false)"
+                              matTooltip="Decline">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </div>
+        }
+      }
+
+    </div>
+  }
+
+</div>

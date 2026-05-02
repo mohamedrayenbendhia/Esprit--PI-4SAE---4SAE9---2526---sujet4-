@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.nexlance</groupId>
+    <artifactId>nexlance-backend</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>NexLance Backend</name>
+
+    <modules>
+        <module>eureka-server</module>
+        <module>ConfigServer</module>
+        <module>api-gateway</module>
+        <module>microservices/service_user</module>
+        <module>microservices/complaint-service</module>
+        <module>microservices/contrat/Esprit--PI-4SAE---4SAE9---2526---sujet4--contrat</module>
+        <module>microservices/evaluation/Esprit--PI-4SAE---4SAE9---2526---sujet4--evaluation</module>
+        <module>microservices/joboffer/service_joboffer/NexLance</module>
+        <module>microservices/module_certification</module>
+        <module>microservices/module_portfolio</module>
+        <module>microservices/module_competence</module>
+        <module>microservices/notification-service</module>
+        <module>microservices/organization-service</module>
+        <module>microservices/service_projects</module>
+    </modules>
+
+</project>

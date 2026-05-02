@@ -1,0 +1,68 @@
+<div class="manager-section">
+  <div class="section-header">
+    <h3><mat-icon>request_quote</mat-icon> Received Quote Requests</h3>
+    <span class="count">{{ total() }} total</span>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading"><div class="spinner"></div></div>
+  }
+
+  @if (!isLoading() && rfqs().length === 0) {
+    <div class="empty"><mat-icon>inbox</mat-icon><p>No quote requests.</p></div>
+  }
+
+  <div class="rfq-list">
+    @for (rfq of rfqs(); track rfq.id) {
+      <div class="rfq-item">
+        <div class="rfq-top">
+          <div>
+            <h4>{{ rfq.title }}</h4>
+            <span class="date">{{ rfq.createdAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <span class="status-badge"
+                [style.background]="getStatusColor(rfq.status) + '20'"
+                [style.color]="getStatusColor(rfq.status)">
+            {{ getStatusLabel(rfq.status) }}
+          </span>
+        </div>
+        <p class="desc">{{ rfq.description }}</p>
+        @if (rfq.budgetMin || rfq.budgetMax) {
+          <p class="budget">Budget: {{ rfq.budgetMin ?? '?' }}€ — {{ rfq.budgetMax ?? '?' }}€</p>
+        }
+        @if (rfq.responseMessage) {
+          <div class="response"><mat-icon>reply</mat-icon><p>{{ rfq.responseMessage }}</p></div>
+        }
+        @if (rfq.status === RfqStatus.PENDING && respondingId() !== rfq.id) {
+          <button mat-stroked-button color="primary" (click)="openRespond(rfq.id)">
+            <mat-icon>reply</mat-icon> Respond
+          </button>
+        }
+        @if (rfq.status === RfqStatus.RESPONDED) {
+          <button mat-stroked-button color="warn"
+                  [disabled]="closingId() === rfq.id"
+                  (click)="close(rfq)">
+            <mat-icon>lock</mat-icon>
+            {{ closingId() === rfq.id ? 'Closing...' : 'Close' }}
+          </button>
+        }
+        @if (respondingId() === rfq.id) {
+          <div class="respond-form">
+            <mat-form-field appearance="outline" style="width:100%">
+              <mat-label>Your response *</mat-label>
+              <textarea matInput rows="3" [(ngModel)]="responseMessage"
+                        placeholder="Describe your proposal..."></textarea>
+            </mat-form-field>
+            <div class="respond-actions">
+              <button mat-button (click)="cancelRespond()">Cancel</button>
+              <button mat-raised-button color="primary"
+                      [disabled]="!responseMessage.trim()" (click)="submitRespond(rfq)">
+                <mat-icon>send</mat-icon> Send
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

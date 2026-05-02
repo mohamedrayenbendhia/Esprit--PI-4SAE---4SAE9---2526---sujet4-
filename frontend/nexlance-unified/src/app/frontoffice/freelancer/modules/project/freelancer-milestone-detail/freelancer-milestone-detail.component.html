@@ -1,0 +1,171 @@
+<div class="milestone-container">
+  @if (loading) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading milestone...</p>
+    </div>
+  } @else if (milestone) {
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-left">
+        <button class="back-btn" [routerLink]="['/frontoffice/freelancer/my-projects', projectId]">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h1>{{ milestone.title }}</h1>
+      </div>
+      <span class="status-badge" [attr.data-status]="milestone.status.toLowerCase()">
+        <mat-icon>{{ milestone.status === 'APPROVED' ? 'check_circle' : milestone.status === 'REJECTED' ? 'cancel' : milestone.status === 'SUBMITTED' ? 'send' : 'pending' }}</mat-icon>
+        {{ milestone.status }}
+      </span>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="info-section">
+          <div class="section-label">
+            <mat-icon>description</mat-icon>
+            <h2>Description &amp; Objectives</h2>
+          </div>
+          <p class="description-text">{{ milestone.description }}</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="info-section">
+          <div class="section-label">
+            <mat-icon>checklist</mat-icon>
+            <h2>Acceptance Criteria</h2>
+          </div>
+          @if (milestone.acceptanceCriteria) {
+            <div class="criteria-box">
+              <p>{{ milestone.acceptanceCriteria }}</p>
+            </div>
+          } @else {
+            <p class="empty-text">No acceptance criteria specified</p>
+          }
+        </div>
+
+        <div class="deadline-banner">
+          <mat-icon>calendar_today</mat-icon>
+          <div class="deadline-content">
+            <span class="deadline-label">Deadline</span>
+            <span class="deadline-date">{{ milestone.dueDate | date:'dd MMMM yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rejection Card -->
+    @if (milestone.status === 'REJECTED' && milestone.rejectionReason) {
+      <div class="rejection-card">
+        <div class="rejection-header">
+          <div class="rejection-icon">
+            <mat-icon>cancel</mat-icon>
+          </div>
+          <div>
+            <h2>Revisions Requested</h2>
+            <p class="rejection-subtitle">The client has requested changes to this milestone</p>
+          </div>
+        </div>
+        <div class="rejection-body">
+          <span class="reason-label">Rejection Reason</span>
+          <p class="rejection-reason">{{ milestone.rejectionReason }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- Submission Card -->
+    @if (canSubmit()) {
+      <div class="submission-card">
+        <div class="card-accent submit"></div>
+        <div class="card-body">
+          <div class="section-label">
+            <mat-icon>cloud_upload</mat-icon>
+            <h2>Submit Deliverables</h2>
+          </div>
+
+          <form [formGroup]="submissionForm" (ngSubmit)="submitMilestone()">
+            <div class="upload-zone">
+              <mat-icon>cloud_upload</mat-icon>
+              <p>Drag and drop your files here or click to select</p>
+              <input type="file" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.webp,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" (change)="onFileSelected($event)" #fileInput hidden>
+              <button mat-raised-button type="button" class="upload-btn" (click)="fileInput.click()" [disabled]="isUploading">
+                <mat-icon>{{ isUploading ? 'hourglass_top' : 'attachment' }}</mat-icon>
+                {{ isUploading ? 'Uploading...' : 'Select Files' }}
+              </button>
+            </div>
+
+            @if (cloudinaryFiles.length > 0) {
+              <div class="uploaded-files-list">
+                <h4><mat-icon>cloud_done</mat-icon> Uploaded Deliverables ({{ cloudinaryFiles.length }})</h4>
+                @for (file of cloudinaryFiles; track file.publicId; let i = $index) {
+                  <div class="uploaded-file-item">
+                    <mat-icon>{{ getFileIcon(file.fileName) }}</mat-icon>
+                    <a [href]="file.url" target="_blank" rel="noopener noreferrer">{{ file.fileName }}</a>
+                    <span class="file-size">{{ (file.size / 1024).toFixed(1) }} KB</span>
+                    <span class="file-version">v{{ file.version }}</span>
+                    <button mat-icon-button type="button" (click)="removeCloudinaryFile(i)" color="warn">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Comment for the client</mat-label>
+              <textarea matInput formControlName="comment" rows="4" placeholder="Describe what you have done..."></textarea>
+            </mat-form-field>
+
+            <mat-checkbox formControlName="confirmCriteria" color="primary">
+              I confirm that all acceptance criteria have been met
+            </mat-checkbox>
+            @if (submissionForm.get('confirmCriteria')?.touched && submissionForm.get('confirmCriteria')?.hasError('required')) {
+              <small class="error-hint">You must confirm that all acceptance criteria have been met</small>
+            }
+
+            <div class="submit-actions">
+              <button mat-raised-button type="button" class="cancel-btn" [routerLink]="['/frontoffice/freelancer/my-projects', projectId]">
+                Cancel
+              </button>
+              <button mat-raised-button color="primary" type="submit" class="submit-btn" [disabled]="!submissionForm.valid || submitting">
+                <mat-icon>send</mat-icon>
+                {{ submitting ? 'Submitting...' : 'Submit Milestone' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+    <!-- Status Cards -->
+    @if (milestone.status === 'SUBMITTED') {
+      <div class="status-card submitted">
+        <div class="status-icon">
+          <mat-icon>send</mat-icon>
+        </div>
+        <h2>Milestone Submitted</h2>
+        <p>Your deliverables are being reviewed by the client</p>
+        <span class="status-date">Submitted on {{ milestone.submittedAt | date:'dd MMM yyyy' }}</span>
+      </div>
+    }
+
+    @if (milestone.status === 'APPROVED') {
+      <div class="status-card approved">
+        <div class="status-icon">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <h2>Milestone Approved</h2>
+        <p>This milestone has been validated by the client</p>
+        <span class="status-date">Approved on {{ milestone.approvedAt | date:'dd MMM yyyy' }}</span>
+      </div>
+    }
+  } @else {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <h3>Milestone not found</h3>
+    </div>
+  }
+</div>

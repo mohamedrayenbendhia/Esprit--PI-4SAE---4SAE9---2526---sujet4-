@@ -1,0 +1,267 @@
+<div class="admin-detail-container">
+
+  <div *ngIf="isLoading()" class="state-box"><div class="spinner"></div></div>
+
+  <ng-container *ngIf="!isLoading() && complaint()">
+
+    <!-- Header -->
+    <div class="page-header">
+      <button class="btn-back" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon> All complaints
+      </button>
+      <div class="header-main">
+        <div class="ticket-row">
+          <span class="ticket">{{ complaint()!.ticketNumber }}</span>
+          <span class="status-badge"
+            [style.background]="getStatusColor(complaint()!.status)+'20'"
+            [style.color]="getStatusColor(complaint()!.status)">
+            {{ getStatusLabel(complaint()!.status) }}
+          </span>
+        </div>
+        <h1>{{ complaint()!.subject }}</h1>
+      </div>
+
+      <!-- Actions admin dans le header -->
+      <div class="header-admin-actions">
+
+        <!-- ── Bouton Export PDF ── -->
+        <button
+          class="btn-admin export-btn"
+          (click)="exportPdf()"
+          [disabled]="isExporting()"
+          title="Export as PDF">
+          <div class="btn-spinner-sm" *ngIf="isExporting()"></div>
+          <mat-icon *ngIf="!isExporting()">picture_as_pdf</mat-icon>
+          {{ isExporting() ? 'Export...' : 'Export PDF' }}
+        </button>
+
+        <button class="btn-admin close-btn" (click)="showCloseConfirm.set(true)" *ngIf="canClose()">
+          <mat-icon>lock</mat-icon> Close
+        </button>
+        <button class="btn-admin assign-btn" (click)="showAssignModal.set(true)">
+          <mat-icon>swap_horiz</mat-icon> Reassign
+        </button>
+        <button class="btn-admin delete-btn" (click)="showDeleteConfirm.set(true)">
+          <mat-icon>delete</mat-icon> Delete
+        </button>
+      </div>
+    </div>
+
+    <div class="layout">
+
+      <!-- Colonne principale -->
+      <div class="main-col">
+
+        <div class="card">
+          <h3 class="card-title"><mat-icon>info_outline</mat-icon> Details</h3>
+          <div class="info-grid">
+            <div class="info-item"><span class="lbl">Category</span><span class="val">{{ getCategoryLabel(complaint()!.category) }}</span></div>
+            <div class="info-item"><span class="lbl">Priority</span><span class="val" [style.color]="getPriorityColor(complaint()!.priority)">{{ getPriorityLabel(complaint()!.priority) }}</span></div>
+            <div class="info-item">
+              <span class="lbl">Reporter</span>
+              <span class="val">{{ userName(reporterInfo()) }}</span>
+              <span class="val-sub" *ngIf="reporterInfo()?.email">{{ reporterInfo().email }}</span>
+            </div>
+            <div class="info-item" *ngIf="complaint()!.reportedUserId">
+              <span class="lbl">Reported party</span>
+              <span class="val">{{ userName(reportedInfo()) }}</span>
+              <span class="val-sub" *ngIf="reportedInfo()?.email">{{ reportedInfo().email }}</span>
+            </div>
+            <div class="info-item">
+              <span class="lbl">Assigned to</span>
+              <span class="val" *ngIf="complaint()!.assignedToId; else notAssigned">
+                {{ userName(assignedInfo()) }}
+              </span>
+              <ng-template #notAssigned><span class="val muted">— Unassigned</span></ng-template>
+            </div>
+            <div class="info-item"><span class="lbl">Created on</span><span class="val">{{ formatDate(complaint()!.createdAt) }}</span></div>
+            <div class="info-item" *ngIf="complaint()!.resolvedAt"><span class="lbl">Resolved on</span><span class="val">{{ formatDate(complaint()!.resolvedAt!) }}</span></div>
+            <div class="info-item" *ngIf="complaint()!.satisfactionRating">
+              <span class="lbl">Satisfaction</span>
+              <span class="val">⭐ {{ complaint()!.satisfactionRating }}/5</span>
+            </div>
+          </div>
+          <div class="desc-block">
+            <span class="lbl">Description</span>
+            <p>{{ complaint()!.description }}</p>
+          </div>
+          <div *ngIf="complaint()!.resolution" class="resolution-block">
+            <mat-icon>check_circle</mat-icon>
+            <div>
+              <strong>Resolution</strong>
+              <p>{{ complaint()!.resolution }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modifier statut / priorité -->
+        <div class="card actions-card">
+          <h3 class="card-title"><mat-icon>tune</mat-icon> Edit</h3>
+          <div class="actions-row">
+            <div class="action-group">
+              <button class="action-btn" (click)="showStatusPanel.set(!showStatusPanel())">
+                <mat-icon>swap_horiz</mat-icon> Status
+              </button>
+              <div *ngIf="showStatusPanel()" class="dropdown">
+                <button *ngFor="let s of changeableStatuses" class="dropdown-item" [class.current]="s === complaint()!.status" (click)="changeStatus(s)">
+                  <span class="dot" [style.background]="getStatusColor(s)"></span>
+                  {{ getStatusLabel(s) }}
+                  <mat-icon *ngIf="s === complaint()!.status" class="check">check</mat-icon>
+                </button>
+              </div>
+            </div>
+            <div class="action-group">
+              <button class="action-btn" (click)="showPriorityPanel.set(!showPriorityPanel())">
+                <mat-icon>flag</mat-icon> Priority
+              </button>
+              <div *ngIf="showPriorityPanel()" class="dropdown">
+                <button *ngFor="let p of priorities" class="dropdown-item" [class.current]="p === complaint()!.priority" (click)="changePriority(p)">
+                  <span class="dot" [style.background]="getPriorityColor(p)"></span>
+                  {{ getPriorityLabel(p) }}
+                  <mat-icon *ngIf="p === complaint()!.priority" class="check">check</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clôture — uniquement après RESOLVED -->
+          <div class="close-action-row">
+            <button class="btn-action close"
+                    *ngIf="complaint()?.status === ComplaintStatus.RESOLVED"
+                    (click)="showCloseConfirm.set(true)">
+              <mat-icon>lock</mat-icon> Close permanently
+            </button>
+            <div class="close-hint"
+                 *ngIf="complaint()?.status !== ComplaintStatus.RESOLVED
+                        && complaint()?.status !== ComplaintStatus.CLOSED">
+              <mat-icon>info_outline</mat-icon>
+              Closing will be available once the complaint is resolved by the agent.
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversation dual-fil -->
+          @if (complaint()) {
+             <app-complaint-conversation [complaint]="complaint()!" />
+        } 
+
+      </div>
+
+      <!-- Sidebar -->
+      <div class="side-col">
+        <div class="card info-side">
+          <h3 class="card-title"><mat-icon>admin_panel_settings</mat-icon> Admin View</h3>
+          <div class="side-item"><span class="lbl">Status</span>
+            <span class="status-badge sm"
+              [style.background]="getStatusColor(complaint()!.status)+'20'"
+              [style.color]="getStatusColor(complaint()!.status)">
+              {{ getStatusLabel(complaint()!.status) }}
+            </span>
+          </div>
+          <div class="side-item"><span class="lbl">Priority</span>
+            <span [style.color]="getPriorityColor(complaint()!.priority)" style="font-weight:600;font-size:13px">
+              {{ getPriorityLabel(complaint()!.priority) }}
+            </span>
+          </div>
+          <div class="side-item"><span class="lbl">Category</span><span>{{ getCategoryLabel(complaint()!.category) }}</span></div>
+          <div class="side-item">
+            <span class="lbl">SLA</span>
+            <app-sla-tracker [complaintId]="complaint()!.id"></app-sla-tracker>
+          </div>
+          <div class="side-item" *ngIf="complaint()!.assignedToId">
+            <span class="lbl">Agent</span>
+            <span>{{ userName(assignedInfo()) }}</span>
+          </div>
+          <div class="side-item" *ngIf="complaint()!.satisfactionRating">
+            <span class="lbl">Client rating</span>
+            <span style="color:#f59e0b;font-weight:600">⭐ {{ complaint()!.satisfactionRating }}/5</span>
+          </div>
+
+          <!-- Export PDF dans la sidebar aussi -->
+          <div class="export-block">
+            <button
+              class="btn-export-sidebar"
+              (click)="exportPdf()"
+              [disabled]="isExporting()">
+              <div class="btn-spinner-sm" *ngIf="isExporting()"></div>
+              <mat-icon *ngIf="!isExporting()">picture_as_pdf</mat-icon>
+              {{ isExporting() ? 'Generating...' : 'Export as PDF' }}
+            </button>
+          </div>
+
+          <div *ngIf="canClose()" class="close-block">
+            <p class="close-hint">This complaint is resolved and can be closed.</p>
+            <button class="btn-close-full" (click)="showCloseConfirm.set(true)">
+              <mat-icon>lock</mat-icon> Close now
+            </button>
+          </div>
+          <div *ngIf="!canClose() && complaint()?.status !== 'CLOSED'" class="close-hint-info">
+            <mat-icon>info_outline</mat-icon>
+            Closing will be available after the agent resolves it.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Clôture -->
+    <div class="modal-overlay" *ngIf="showCloseConfirm()" (click)="showCloseConfirm.set(false)">
+      <div class="modal confirm" (click)="$event.stopPropagation()">
+        <mat-icon class="confirm-icon close-icon">lock</mat-icon>
+        <h2>Close the complaint?</h2>
+        <p>Once closed, the client will be able to rate the service. This action is irreversible.</p>
+        <div class="confirm-actions">
+          <button class="btn-cancel" (click)="showCloseConfirm.set(false)">Cancel</button>
+          <button class="btn-confirm close" (click)="closeComplaint()"><mat-icon>lock</mat-icon> Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Suppression -->
+    <div class="modal-overlay" *ngIf="showDeleteConfirm()" (click)="showDeleteConfirm.set(false)">
+      <div class="modal confirm danger" (click)="$event.stopPropagation()">
+        <mat-icon class="confirm-icon delete-icon">delete_forever</mat-icon>
+        <h2>Delete the complaint?</h2>
+        <p>This action is <strong>irreversible</strong>. All associated messages will also be deleted.</p>
+        <div class="confirm-actions">
+          <button class="btn-cancel" (click)="showDeleteConfirm.set(false)">Cancel</button>
+          <button class="btn-confirm delete" (click)="deleteComplaint()" [disabled]="isDeleting()">
+            <mat-icon>delete</mat-icon> {{ isDeleting() ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Réassignation -->
+    <div class="modal-overlay" *ngIf="showAssignModal()" (click)="showAssignModal.set(false)">
+      <div class="modal assign" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2><mat-icon>swap_horiz</mat-icon> Reassign the complaint</h2>
+          <button class="modal-close" (click)="showAssignModal.set(false)"><mat-icon>close</mat-icon></button>
+        </div>
+        <div class="modal-body">
+          <div class="agents-list">
+            <div *ngFor="let agent of agents()" class="agent-item"
+              [class.current]="agent.id === complaint()!.assignedToId"
+              (click)="assignTo(agent.id)">
+              <div class="agent-avatar">{{ agent.firstName?.[0] || '?' }}{{ agent.lastName?.[0] || '?' }}</div>
+              <div class="agent-info">
+                <span class="agent-name">{{ agent.firstName }} {{ agent.lastName }}</span>
+                <div *ngIf="agent.specialties?.length > 0" class="agent-specs">
+                  <span *ngFor="let s of agent.specialties | slice:0:2" class="spec-chip">{{ getCategoryLabel(s) }}</span>
+                </div>
+              </div>
+              <mat-icon *ngIf="agent.id === complaint()!.assignedToId" class="check-icon">check_circle</mat-icon>
+            </div>
+            <div *ngIf="agents().length === 0" class="no-agents"><p>No agents available</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Timeline des événements ──────────────────────────────────────── -->
+    <div class="detail-section timeline-section">
+      <app-complaint-timeline [complaintId]="complaint()!.id" />
+    </div>
+
+  </ng-container>
+</div>

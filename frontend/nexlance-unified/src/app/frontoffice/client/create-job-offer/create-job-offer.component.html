@@ -1,0 +1,235 @@
+<div class="create-job-offer-container">
+  <div class="header">
+    <h1>{{ isEditMode ? 'Edit Job Offer' : 'Create Job Offer' }}</h1>
+    <p>{{ isEditMode ? 'Update your job offer details' : 'Post your project and find the ideal freelancer' }}</p>
+  </div>
+
+  <form [formGroup]="jobOfferForm" class="job-offer-form">
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Section 1: Basic Information -->
+    <div class="form-section">
+      <h2>Basic Information</h2>
+      
+      <div class="form-group">
+        <label for="title">Job Title *</label>
+        <input 
+          type="text" 
+          id="title" 
+          formControlName="title" 
+          class="form-control"
+          placeholder="Ex: E-commerce Web Application Development"
+        />
+        <div *ngIf="jobOfferForm.get('title')?.invalid && jobOfferForm.get('title')?.touched" class="error-text">
+          <span *ngIf="jobOfferForm.get('title')?.hasError('required')">Title is required</span>
+          <span *ngIf="jobOfferForm.get('title')?.hasError('minlength')">Title must be at least 10 characters</span>
+          <span *ngIf="jobOfferForm.get('title')?.hasError('maxlength')">Title must be less than 100 characters</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="category">Category *</label>
+          <select id="category" formControlName="category" class="form-control">
+            <option value="">Select a category</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat | titlecase }}</option>
+          </select>
+          <div *ngIf="jobOfferForm.get('category')?.invalid && jobOfferForm.get('category')?.touched" class="error-text">
+            Category is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="experienceLevel">Experience Level *</label>
+          <select id="experienceLevel" formControlName="experienceLevel" class="form-control">
+            <option *ngFor="let level of experienceLevels" [value]="level">
+              {{ level | titlecase }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Project Description *</label>
+        <textarea 
+          id="description" 
+          formControlName="description" 
+          class="form-control" 
+          rows="6"
+          placeholder="Describe your project in detail, your expectations and requirements..."
+        ></textarea>
+        <div *ngIf="jobOfferForm.get('description')?.invalid && jobOfferForm.get('description')?.touched" class="error-text">
+          <span *ngIf="jobOfferForm.get('description')?.hasError('required')">Description is required</span>
+          <span *ngIf="jobOfferForm.get('description')?.hasError('minlength')">Description must be at least 50 characters</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Budget and Timeline -->
+    <div class="form-section">
+      <h2>Budget and Timeline</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="budget">Budget *</label>
+          <input 
+            type="number" 
+            id="budget" 
+            formControlName="budget" 
+            class="form-control"
+            placeholder="Amount in DT"
+          />
+          <div *ngIf="jobOfferForm.get('budget')?.invalid && jobOfferForm.get('budget')?.touched" class="error-text">
+            <span *ngIf="jobOfferForm.get('budget')?.hasError('required')">Budget is required</span>
+            <span *ngIf="jobOfferForm.get('budget')?.hasError('min')">Budget must be a positive number</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="budgetType">Budget Type *</label>
+          <select id="budgetType" formControlName="budgetType" class="form-control">
+            <option *ngFor="let type of budgetTypes" [value]="type">
+              {{ type === 'FIXED' ? 'Fixed Budget' : 'Hourly Rate' }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="estimatedDuration">Estimated Duration (days) *</label>
+          <input 
+            type="number" 
+            id="estimatedDuration" 
+            formControlName="estimatedDuration" 
+            class="form-control"
+            placeholder="Ex: 30"
+          />
+          <div *ngIf="jobOfferForm.get('estimatedDuration')?.invalid && jobOfferForm.get('estimatedDuration')?.touched" class="error-text">
+            <span *ngIf="jobOfferForm.get('estimatedDuration')?.hasError('required')">Duration is required</span>
+            <span *ngIf="jobOfferForm.get('estimatedDuration')?.hasError('min')">Duration must be at least 1 day</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="deadline">Deadline *</label>
+          <input 
+            type="date" 
+            id="deadline" 
+            formControlName="deadline" 
+            class="form-control"
+          />
+          <div *ngIf="jobOfferForm.get('deadline')?.invalid && jobOfferForm.get('deadline')?.touched" class="error-text">
+            Deadline is required
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Required Skills -->
+    <div class="form-section">
+      <h2>Required Skills</h2>
+      <p class="section-description">Select the skills needed for this project</p>
+      
+      <div class="skills-container">
+        <button 
+          type="button"
+          *ngFor="let skill of availableSkills" 
+          class="skill-tag"
+          [class.selected]="isSkillSelected(skill)"
+          (click)="toggleSkill(skill)"
+        >
+          {{ skill }}
+        </button>
+      </div>
+      
+      <!-- Add Custom Skill -->
+      <div class="add-skill-section">
+        <input 
+          type="text" 
+          [(ngModel)]="newSkillInput"
+          [ngModelOptions]="{standalone: true}"
+          class="form-control"
+          placeholder="Add a custom skill"
+          (keyup.enter)="addCustomSkill()"
+        />
+        <button type="button" class="btn-add-skill" (click)="addCustomSkill()" [disabled]="!newSkillInput.trim()">
+          <span class="icon">+</span> Add
+        </button>
+      </div>
+      
+      <div *ngIf="selectedSkills.length > 0" class="selected-skills-info">
+        {{ selectedSkills.length }} skill(s) selected
+      </div>
+    </div>
+
+    <!-- Section 4: Location -->
+    <div class="form-section">
+      <h2>Location</h2>
+      
+      <div class="form-group">
+        <label for="location">Location *</label>
+        <input 
+          type="text" 
+          id="location" 
+          formControlName="location" 
+          class="form-control"
+          placeholder="Ex: Tunis, Tunisia"
+        />
+        <div *ngIf="jobOfferForm.get('location')?.invalid && jobOfferForm.get('location')?.touched" class="error-text">
+          Location is required
+        </div>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input type="checkbox" formControlName="isRemote" />
+          Remote work possible
+        </label>
+      </div>
+    </div>
+
+    <!-- Section 5: Attachments -->
+    <div class="form-section">
+      <h2>Attachments (optional)</h2>
+      <p class="section-description">Add documents, images or files related to the project</p>
+      
+      <div class="file-upload">
+        <input 
+          type="file" 
+          id="fileUpload" 
+          multiple 
+          (change)="onFileSelected($event)"
+          style="display: none;"
+        />
+        <button type="button" class="btn-upload" (click)="fileUpload.click()">
+          <span class="icon">📎</span> Add files
+        </button>
+        <input #fileUpload type="file" multiple (change)="onFileSelected($event)" style="display: none;" />
+      </div>
+
+      <div *ngIf="uploadedFiles.length > 0" class="uploaded-files">
+        <div *ngFor="let file of uploadedFiles; let i = index" class="file-item">
+          <span class="file-name">{{ file.name }}</span>
+          <button type="button" class="btn-remove" (click)="removeFile(i)">×</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isSubmitting">
+        Cancel
+      </button>
+      <button *ngIf="!isEditMode" type="button" class="btn btn-outline" (click)="saveDraft()" [disabled]="isSubmitting || jobOfferForm.invalid">
+        Save as Draft
+      </button>
+      <button type="button" class="btn btn-primary" (click)="publish()" [disabled]="isSubmitting || jobOfferForm.invalid || selectedSkills.length === 0">
+        {{ isSubmitting ? (isEditMode ? 'Updating...' : 'Publishing...') : (isEditMode ? 'Update Offer' : 'Publish Offer') }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,146 @@
+<div class="stats-container" [class.new-eval-flash]="isNewEval">
+
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="title-group">
+        <h1>Performance & Evaluations</h1>
+        <p class="subtitle">Real-time analysis of your skills</p>
+      </div>
+      <div class="actions-group">
+        <div class="status-indicator" [class.online]="isLive">
+          <span class="status-dot"></span>
+          <span class="status-text">{{ isLive ? 'Live Feed' : 'Offline' }}</span>
+          <small class="update-time" *ngIf="lastUpdated">({{ lastUpdated }})</small>
+        </div>
+        <button class="btn-primary" [routerLink]="['/frontoffice/freelancer/evaluations']">
+          <i class="icon-list"></i> Full List
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY METRICS - 2 CARDS ONLY -->
+  <div class="summary-grid two-cards">
+    <div class="summary-card total">
+      <div class="card-icon"></div>
+      <div class="card-data">
+        <span class="value">{{ stats.totalEvaluations }}</span>
+        <span class="label">Reviews Received</span>
+      </div>
+    </div>
+    <div class="summary-card rating">
+      <div class="card-icon"></div>
+      <div class="card-data">
+        <span class="value">{{ (stats.averageRating || 0).toFixed(1) }}</span>
+        <span class="label">Average Rating</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-stats-grid">
+    
+    <!-- SKILLS SECTION -->
+    <div class="stats-card skills-card">
+      <div class="card-header">
+        <h3>Skills Profile</h3>
+        <p class="card-desc">Based on client evaluation criteria</p>
+      </div>
+      
+      <div class="skills-layout">
+        <div class="chart-box">
+          <canvas #radarCanvas></canvas>
+        </div>
+        <div class="skills-data">
+          <div class="skill-item">
+            <div class="skill-info">
+              <span class="skill-name">Quality</span>
+              <span class="skill-val">{{ (averageQuality || 0).toFixed(1) }}</span>
+            </div>
+            <div class="skill-bar"><div class="fill quality" [style.width.%]="getRatingPercent(averageQuality)"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-info">
+              <span class="skill-name">Deadline</span>
+              <span class="skill-val">{{ (averageDeadline || 0).toFixed(1) }}</span>
+            </div>
+            <div class="skill-bar"><div class="fill deadline" [style.width.%]="getRatingPercent(averageDeadline)"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-info">
+              <span class="skill-name">Communication</span>
+              <span class="skill-val">{{ (averageCommunication || 0).toFixed(1) }}</span>
+            </div>
+            <div class="skill-bar"><div class="fill communication" [style.width.%]="getRatingPercent(averageCommunication)"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-info">
+              <span class="skill-name">Professionalism</span>
+              <span class="skill-val">{{ (averageProfessionalism || 0).toFixed(1) }}</span>
+            </div>
+            <div class="skill-bar"><div class="fill professionalism" [style.width.%]="getRatingPercent(averageProfessionalism)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RATING DISTRIBUTION -->
+    <div class="stats-card distribution-card">
+      <div class="card-header">
+        <h3>Rating Distribution</h3>
+        <p class="card-desc">Score by star rating</p>
+      </div>
+      <div class="dist-layout">
+        <div class="doughnut-box">
+          <canvas #doughnutCanvas></canvas>
+        </div>
+        <div class="dist-bars">
+          <div class="dist-row" *ngFor="let s of [5,4,3,2,1]">
+            <span class="star-count">{{s}}★</span>
+            <div class="progress-track">
+              <div class="progress-fill" [class]="'star-'+s"
+                [style.width.%]="safeDiv(
+                  s === 5 ? fiveStars : 
+                  s === 4 ? fourStars : 
+                  s === 3 ? threeStars : 
+                  s === 2 ? twoStars : 
+                  oneStar, stats.totalEvaluations)">
+              </div>
+            </div>
+            <span class="count-val">{{
+              s === 5 ? fiveStars : 
+              s === 4 ? fourStars : 
+              s === 3 ? threeStars : 
+              s === 2 ? twoStars : 
+              oneStar
+            }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT COMMENTS -->
+    <div class="stats-card comments-card">
+      <div class="card-header">
+        <h3>Recent Client Feedback</h3>
+      </div>
+      <div class="comments-grid">
+        <div *ngFor="let ev of evaluations.slice(0, 3)" class="comment-item">
+          <div class="comment-top">
+            <div class="stars-row">
+              <span *ngFor="let s of [1,2,3,4,5]" class="star" [class.filled]="s <= Math.round(ev.ratingGlobal || 0)">★</span>
+            </div>
+            <span class="comment-date">{{ ev.createdAt | date:'dd MMM yyyy' }}</span>
+          </div>
+          <p class="comment-body">"{{ ev.comment || 'No comment' }}"</p>
+          <div class="comment-footer">
+            <span class="votes">  {{ ev.helpfulCount || 0 }}</span>
+            <span *ngIf="ev.responseText" class="reply-badge">Replied</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

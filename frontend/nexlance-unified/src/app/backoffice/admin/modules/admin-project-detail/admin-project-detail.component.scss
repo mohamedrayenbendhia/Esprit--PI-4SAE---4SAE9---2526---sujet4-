@@ -1,0 +1,332 @@
+.admin-project-detail-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a237e;
+        margin: 0;
+      }
+    }
+  }
+
+  // Stats row
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+
+    @media (max-width: 968px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    @media (max-width: 600px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+
+      .stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon { color: white; }
+
+        &.pending { background: #ff9800; }
+        &.in-progress { background: #2196f3; }
+        &.submitted { background: #9c27b0; }
+        &.approved { background: #4caf50; }
+        &.rejected { background: #f44336; }
+      }
+
+      .stat-info {
+        display: flex;
+        flex-direction: column;
+        .stat-value { font-size: 24px; font-weight: 700; color: #333; }
+        .stat-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+      }
+    }
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+
+    @media (max-width: 968px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // Info card
+  .info-card {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      mat-icon { color: #1976d2; }
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 14px 0;
+
+      .label {
+        font-weight: 600;
+        color: #666;
+        min-width: 100px;
+      }
+
+      .value {
+        color: #333;
+        text-align: right;
+
+        &.mono { font-family: monospace; font-size: 12px; color: #888; }
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .user-avatar {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: #1976d2;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 13px;
+          font-weight: 600;
+
+          &.freelancer { background: #4caf50; }
+        }
+
+        .user-name { font-weight: 600; display: block; }
+        .user-email { font-size: 12px; color: #888; display: block; }
+      }
+    }
+  }
+
+  // Progress card
+  .progress-card {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      mat-icon { color: #4caf50; }
+    }
+
+    .progress-section {
+      margin-bottom: 24px;
+
+      .progress-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+
+        .progress-label { font-weight: 600; color: #555; }
+        .progress-value {
+          font-weight: 700;
+          font-size: 18px;
+          color: #1976d2;
+          &.complete { color: #4caf50; }
+          &.overdue { color: #f44336; }
+        }
+      }
+
+      .main-progress { height: 8px; border-radius: 4px; }
+      .timeline-progress { height: 6px; border-radius: 3px; }
+
+      .progress-detail, .timeline-info {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #888;
+      }
+
+      .timeline-info {
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+
+    .duration-info {
+      .duration-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #555;
+        mat-icon { font-size: 20px; width: 20px; height: 20px; color: #888; }
+      }
+    }
+  }
+
+  // Details grid
+  .details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-card {
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 16px;
+        mat-icon { color: #1976d2; }
+      }
+
+      .detail-text {
+        color: #555;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        margin: 0;
+      }
+    }
+  }
+
+  // Alert card
+  .alert-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+
+    &.warning {
+      background: #fff3e0;
+      border-left: 4px solid #ff9800;
+      mat-icon { color: #ff9800; font-size: 28px; width: 28px; height: 28px; }
+    }
+
+    .alert-content {
+      strong { color: #333; }
+      p { margin: 4px 0 0; color: #666; font-size: 13px; }
+    }
+  }
+
+  // Milestones card
+  .milestones-card {
+    margin-bottom: 24px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      mat-icon { color: #1976d2; }
+      .milestone-count { color: #888; font-weight: 400; }
+    }
+
+    .milestones-table {
+      width: 100%;
+
+      .milestone-title-cell {
+        display: flex;
+        flex-direction: column;
+        .milestone-name { font-weight: 500; }
+        .milestone-desc { font-size: 12px; color: #888; max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      }
+
+      .chip-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 4px; }
+
+      .chip-pending { background: #fff3e0 !important; color: #e65100 !important; }
+      .chip-in_progress { background: #e3f2fd !important; color: #1565c0 !important; }
+      .chip-submitted { background: #f3e5f5 !important; color: #7b1fa2 !important; }
+      .chip-approved { background: #e8f5e9 !important; color: #2e7d32 !important; }
+      .chip-rejected { background: #ffebee !important; color: #c62828 !important; }
+
+      .overdue-text { color: #f44336; font-weight: 500; }
+      .overdue-icon { font-size: 16px; width: 16px; height: 16px; color: #f44336; vertical-align: middle; margin-left: 4px; }
+      .not-submitted { color: #ccc; }
+      .alert { color: #f44336; font-weight: 600; }
+      .has-revisions { color: #ff9800; font-weight: 600; }
+
+      .submitted-row { background: rgba(156, 39, 176, 0.04); }
+      .overdue-row { background: rgba(244, 67, 54, 0.04); }
+    }
+
+    .empty-state {
+      padding: 48px;
+      text-align: center;
+      color: #999;
+      mat-icon { font-size: 48px; width: 48px; height: 48px; color: #ddd; }
+    }
+  }
+
+  // Actions card
+  .actions-card {
+    margin-bottom: 24px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      mat-icon { color: #1976d2; }
+    }
+
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+
+      button {
+        mat-icon { margin-right: 4px; }
+      }
+    }
+  }
+
+  // Status chips
+  .status-active { background: #e8f5e9 !important; color: #2e7d32 !important; }
+  .status-on_hold { background: #fff3e0 !important; color: #e65100 !important; }
+  .status-completed { background: #e3f2fd !important; color: #1565c0 !important; }
+  .status-cancelled { background: #ffebee !important; color: #c62828 !important; }
+
+  .loading-container,
+  .error-state {
+    padding: 80px 20px;
+    text-align: center;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: #ccc;
+      margin-bottom: 16px;
+    }
+
+    h3 { color: #666; }
+  }
+}

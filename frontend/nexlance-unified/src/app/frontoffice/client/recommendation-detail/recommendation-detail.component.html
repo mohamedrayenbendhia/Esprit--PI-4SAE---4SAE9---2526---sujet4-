@@ -1,0 +1,224 @@
+<div class="recommendation-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>{{ 'common.loading' | translate }}</p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading && recommendation" class="content">
+    <!-- Header -->
+    <div class="page-header">
+      <button mat-icon-button (click)="goBack()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-content">
+        <h1>{{ 'recommendations.detail.title' | translate }}</h1>
+        <p class="subtitle">{{ 'recommendations.detail.subtitle' | translate }}</p>
+      </div>
+    </div>
+
+    <div class="detail-content">
+      <!-- Status Card -->
+      <mat-card class="status-card">
+        <mat-card-content>
+          <div class="status-header">
+            <div class="status-info">
+              <mat-icon [class]="'status-icon ' + getStatusColor(recommendation.status)">
+                {{ getStatusIcon(recommendation.status) }}
+              </mat-icon>
+              <div>
+                <h3>{{ 'recommendations.status.' + recommendation.status | translate }}</h3>
+                <p class="date">{{ 'recommendations.sentOn' | translate }}: {{ recommendation.sentDate | date:'medium' }}</p>
+              </div>
+            </div>
+            <div class="actions">
+              <button 
+                mat-raised-button 
+                color="warn" 
+                *ngIf="canCancel()"
+                [disabled]="isProcessing"
+                (click)="cancelRecommendation()">
+                <mat-icon>cancel</mat-icon>
+                {{ 'recommendations.actions.cancel' | translate }}
+              </button>
+              <button 
+                mat-raised-button 
+                color="primary" 
+                *ngIf="canSendReminder()"
+                [disabled]="isProcessing"
+                (click)="sendReminder()">
+                <mat-icon>notification_important</mat-icon>
+                {{ 'recommendations.actions.sendReminder' | translate }}
+              </button>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="stats-row">
+            <div class="stat-item">
+              <mat-icon>visibility</mat-icon>
+              <span class="value">{{ recommendation.viewCount || 0 }}</span>
+              <span class="label">{{ 'recommendations.detail.views' | translate }}</span>
+            </div>
+            <div class="stat-item" *ngIf="recommendation.responseDate">
+              <mat-icon>event</mat-icon>
+              <span class="value">{{ recommendation.responseDate | date:'short' }}</span>
+              <span class="label">{{ 'recommendations.detail.responseDate' | translate }}</span>
+            </div>
+            <div class="stat-item" *ngIf="recommendation.expirationDate">
+              <mat-icon>schedule</mat-icon>
+              <span class="value">{{ recommendation.expirationDate | date:'short' }}</span>
+              <span class="label">{{ 'recommendations.detail.expiresOn' | translate }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Job Offer Card -->
+      <mat-card class="info-card" *ngIf="jobOffer">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>work</mat-icon>
+          <mat-card-title>{{ 'recommendations.detail.jobOffer' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <h2>{{ jobOffer.title }}</h2>
+          <p class="description">{{ jobOffer.description }}</p>
+          
+          <div class="details-grid">
+            <div class="detail-item">
+              <mat-icon>attach_money</mat-icon>
+              <span class="label">{{ 'jobs.budget' | translate }}:</span>
+              <span class="value">{{ jobOffer.budget }} DT</span>
+            </div>
+            <div class="detail-item">
+              <mat-icon>category</mat-icon>
+              <span class="label">{{ 'jobs.category' | translate }}:</span>
+              <span class="value">{{ jobOffer.category }}</span>
+            </div>
+            <div class="detail-item">
+              <mat-icon>event</mat-icon>
+              <span class="label">{{ 'jobs.deadline' | translate }}:</span>
+              <span class="value">{{ jobOffer.deadline | date:'short' }}</span>
+            </div>
+            <div class="detail-item">
+              <mat-icon>people</mat-icon>
+              <span class="label">{{ 'jobs.applicants' | translate }}:</span>
+              <span class="value">{{ jobOffer.applicantCount || 0 }}</span>
+            </div>
+          </div>
+
+          <div class="skills" *ngIf="jobOffer.requiredSkills.length">
+            <mat-chip-set>
+              <mat-chip *ngFor="let skill of jobOffer.requiredSkills">
+                {{ skill }}
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button color="primary" (click)="viewJobOffer()">
+            <mat-icon>open_in_new</mat-icon>
+            {{ 'recommendations.actions.viewJob' | translate }}
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Freelancer Card -->
+      <mat-card class="info-card" *ngIf="freelancer">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>person</mat-icon>
+          <mat-card-title>{{ 'recommendations.detail.freelancer' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="freelancer-info">
+            <div class="avatar">
+              <mat-icon>account_circle</mat-icon>
+            </div>
+            <div class="info">
+              <h2>{{ freelancer.firstName }} {{ freelancer.lastName }}</h2>
+              <p class="email"><mat-icon class="inline-icon">email</mat-icon> {{ freelancer.email }}</p>
+              <p class="phone" *ngIf="freelancer.phoneNumber"><mat-icon class="inline-icon">phone</mat-icon> {{ freelancer.phoneNumber }}</p>
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button color="primary" (click)="viewFreelancerProfile()">
+            <mat-icon>person</mat-icon>
+            {{ 'recommendations.actions.viewProfile' | translate }}
+          </button>
+          <button 
+            mat-raised-button 
+            color="primary" 
+            *ngIf="recommendation.status === RecommendationStatus.ACCEPTED"
+            (click)="openCreateProjectDialog()"
+            class="btn-create-project">
+            <mat-icon>rocket_launch</mat-icon>
+            Create Project
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Message Card -->
+      <mat-card class="message-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>message</mat-icon>
+          <mat-card-title>{{ 'recommendations.detail.yourMessage' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="message-text">{{ recommendation.message }}</p>
+          
+          <div class="budget-info" *ngIf="recommendation.proposedBudget">
+            <mat-icon>payments</mat-icon>
+            <span class="label">{{ 'recommendations.proposedBudget' | translate }}:</span>
+            <span class="value">{{ recommendation.proposedBudget }} DT</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- History Card -->
+      <mat-card class="history-card" *ngIf="recommendation.isReminderSent || recommendation.cancellationReason">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>history</mat-icon>
+          <mat-card-title>{{ 'recommendations.detail.history' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="timeline">
+            <div class="timeline-item">
+              <mat-icon>send</mat-icon>
+              <div class="content">
+                <span class="action">{{ 'recommendations.detail.sent' | translate }}</span>
+                <span class="date">{{ recommendation.sentDate | date:'medium' }}</span>
+              </div>
+            </div>
+            
+            <div class="timeline-item" *ngIf="recommendation.isReminderSent && recommendation.reminderSentDate">
+              <mat-icon>notification_important</mat-icon>
+              <div class="content">
+                <span class="action">{{ 'recommendations.detail.reminderSent' | translate }}</span>
+                <span class="date">{{ recommendation.reminderSentDate | date:'medium' }}</span>
+              </div>
+            </div>
+
+            <div class="timeline-item" *ngIf="recommendation.responseDate">
+              <mat-icon>{{ recommendation.status === 'ACCEPTED' ? 'check_circle' : 'cancel' }}</mat-icon>
+              <div class="content">
+                <span class="action">{{ 'recommendations.detail.' + recommendation.status.toLowerCase() | translate }}</span>
+                <span class="date">{{ recommendation.responseDate | date:'medium' }}</span>
+              </div>
+            </div>
+
+            <div class="timeline-item error" *ngIf="recommendation.cancellationReason">
+              <mat-icon>block</mat-icon>
+              <div class="content">
+                <span class="action">{{ 'recommendations.detail.cancelled' | translate }}</span>
+                <p class="reason">{{ recommendation.cancellationReason }}</p>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

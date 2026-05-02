@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendation-ai
+  namespace: nexlance
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recommendation-ai
+  template:
+    metadata:
+      labels:
+        app: recommendation-ai
+    spec:
+      containers:
+        - name: recommendation-ai
+          image: img-recommendation
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9000
+          env:
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: http://eureka-server:8761/eureka/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendation-ai
+  namespace: nexlance
+spec:
+  selector:
+    app: recommendation-ai
+  ports:
+    - port: 9000
+      targetPort: 9000
+  type: ClusterIP

@@ -1,0 +1,118 @@
+<div class="create-offer-page">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <button mat-icon-button (click)="cancel()"><mat-icon>arrow_back</mat-icon></button>
+    <div>
+      <h2>New Collaboration Offer</h2>
+      <p>Post a one-off mission to recruit external freelancers.</p>
+    </div>
+  </div>
+
+  @if (success()) {
+    <div class="success-banner">
+      <mat-icon>check_circle</mat-icon>
+      Offer published successfully! Redirecting…
+    </div>
+  } @else {
+
+    <!-- Barre de progression -->
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" [style.width.%]="completionPct"></div>
+    </div>
+    <p class="progress-label">{{ completionPct }}% complete</p>
+
+    <div class="form-grid">
+
+      <!-- Titre -->
+      <div class="field full">
+        <label>Offer title *</label>
+        <input type="text" [(ngModel)]="form.title"
+               placeholder="E.g. React developer for front-end redesign"
+               maxlength="150" />
+        <span class="hint">{{ form.title?.length ?? 0 }}/150</span>
+      </div>
+
+      <!-- Description -->
+      <div class="field full">
+        <label>Description *</label>
+        <textarea [(ngModel)]="form.description"
+                  rows="5"
+                  placeholder="Describe the mission: context, objectives, expected deliverables, working conditions..."></textarea>
+      </div>
+
+      <!-- Compétences requises -->
+      <div class="field full">
+        <label>Required skills</label>
+        <div class="skill-input-row">
+          <input type="text" [(ngModel)]="skillInput"
+                 placeholder="Ex: React, TypeScript, Node.js..."
+                 (keydown.enter)="addSkill()" />
+          <button mat-icon-button (click)="addSkill()" type="button">
+            <mat-icon>add_circle</mat-icon>
+          </button>
+        </div>
+        @if (form.requiredSkills?.length) {
+          <div class="skills-chips">
+            @for (skill of form.requiredSkills!; track skill) {
+              <span class="skill-chip">
+                {{ skill }}
+                <button type="button" (click)="removeSkill(skill)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Durée estimée -->
+      <div class="field">
+        <label>Estimated duration</label>
+        <input type="text" [(ngModel)]="form.durationLabel"
+               placeholder="E.g.: 3 weeks, 2 months" maxlength="100" />
+      </div>
+
+      <!-- Budget estimé -->
+      <div class="field">
+        <label>Indicative budget (€)</label>
+        <input type="number" [(ngModel)]="form.budgetEstimate"
+               placeholder="Ex: 2500" min="0" />
+      </div>
+
+      <!-- Nombre max de collaborateurs -->
+      <div class="field">
+        <label>Maximum number of collaborators</label>
+        <input type="number" [(ngModel)]="form.maxApplicants"
+               placeholder="Leave empty = unlimited" min="1" />
+      </div>
+
+      <!-- Date limite -->
+      <div class="field">
+        <label>Application deadline</label>
+        <input type="date" [(ngModel)]="form.deadlineDate" />
+      </div>
+
+    </div>
+
+    <!-- Erreur -->
+    @if (error()) {
+      <div class="error-banner">
+        <mat-icon>error</mat-icon> {{ error() }}
+      </div>
+    }
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button mat-button (click)="cancel()">Cancel</button>
+      <button mat-raised-button color="primary"
+              [disabled]="isSubmitting()"
+              (click)="submit()">
+        <mat-icon>publish</mat-icon>
+        {{ isSubmitting() ? 'Publishing...' : 'Publish Offer' }}
+      </button>
+    </div>
+
+  }
+
+</div>

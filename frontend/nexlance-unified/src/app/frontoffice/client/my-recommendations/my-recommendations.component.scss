@@ -1,0 +1,504 @@
+@use 'sass:color';
+@use '../../../../styles/nexlance-theme.scss' as *;
+
+.my-recommendations-container {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 2rem 1.5rem;
+
+  .page-header {
+    max-width: 1400px;
+    margin: 0 auto 2.5rem;
+
+    .header-content {
+      background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+      padding: 3rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 15px rgba(14, 165, 233, 0.2);
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      p {
+        font-size: 1.125rem;
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+  }
+
+  .controls-section {
+    max-width: 1400px;
+    margin: 0 auto 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    .status-filters {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+
+      .filter-btn {
+        padding: 0.625rem 1.25rem;
+        background: #f1f5f9;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        color: #475569;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+          background: #e0e7ff;
+          color: #0EA5E9;
+          border-color: #a5b4fc;
+        }
+
+        &.active {
+          background: linear-gradient(135deg, #0EA5E9, #0284C7);
+          border-color: #0EA5E9;
+          color: white;
+          box-shadow: 0 4px 6px rgba(14, 165, 233, 0.3);
+        }
+      }
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 300px;
+      max-width: 400px;
+
+      mat-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 20px;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 3rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+
+        &:focus {
+          outline: none;
+          border-color: #0EA5E9;
+          box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+      }
+    }
+  }
+
+  .loading-state {
+    text-align: center;
+    padding: 5rem;
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #0EA5E9;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    p {
+      color: #64748b;
+      font-size: 1.125rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  }
+
+  .recommendations-list {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    gap: 1.5rem;
+
+    .recommendation-card {
+      background: white;
+      padding: 1.75rem;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s;
+
+      &:hover {
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        border-color: #0EA5E9;
+        transform: translateY(-2px);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f1f5f9;
+
+        .freelancer-info {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+
+          .avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0EA5E9, #0284C7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 6px rgba(14, 165, 233, 0.3);
+
+            mat-icon {
+              font-size: 32px;
+              width: 32px;
+              height: 32px;
+              color: white;
+            }
+          }
+
+          .info {
+            h3 {
+              font-size: 1.25rem;
+              font-weight: 700;
+              color: #0f172a;
+              margin-bottom: 0.25rem;
+            }
+
+            .freelancer-contact {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 1rem;
+              margin-bottom: 0.25rem;
+              font-size: 0.85rem;
+              color: #334155;
+
+              span {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+              }
+
+              .contact-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+                color: #0EA5E9;
+              }
+            }
+
+            .job-title {
+              font-size: 0.875rem;
+              color: #64748b;
+            }
+          }
+        }
+
+        .status-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.375rem;
+          padding: 0.5rem 1rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          border-radius: 20px;
+          background: #f1f5f9;
+          color: #475569;
+
+          .status-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+
+          &.status-pending {
+            background: #fef3c7;
+            color: #92400e;
+          }
+
+          &.status-accepted {
+            background: #d1fae5;
+            color: #065f46;
+          }
+
+          &.status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+          }
+
+          &.status-cancelled {
+            background: #e2e8f0;
+            color: #475569;
+          }
+        }
+      }
+
+      .card-body {
+        .info-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+          font-size: 0.875rem;
+          color: #64748b;
+
+          .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+
+            .info-icon {
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+              color: #94a3b8;
+            }
+
+            &.budget {
+              font-size: 1.125rem;
+              font-weight: 700;
+              color: #0EA5E9;
+
+              .info-icon {
+                color: #0EA5E9;
+              }
+            }
+          }
+
+          &.stats {
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+          }
+        }
+
+        .response-box {
+          display: flex;
+          gap: 1rem;
+          padding: 1rem;
+          background: #fef9c3;
+          border-left: 4px solid #eab308;
+          border-radius: 8px;
+          margin-top: 1rem;
+
+          mat-icon {
+            color: #eab308;
+            font-size: 28px;
+            width: 28px;
+            height: 28px;
+          }
+
+          .response-content {
+            flex: 1;
+
+            .response-label {
+              font-size: $text-sm;
+              font-weight: $font-semibold;
+              color: $nexlance-gray-700;
+              margin-bottom: $space-2;
+            }
+
+            .response-text {
+              font-size: $text-base;
+              color: $nexlance-gray-600;
+              font-style: italic;
+              line-height: 1.6;
+            }
+          }
+        }
+      }
+
+      .card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $space-3;
+        padding-top: $space-5;
+        border-top: 2px solid $nexlance-gray-100;
+
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          gap: $space-2;
+          padding: $space-3 $space-5;
+          border-radius: $radius-md;
+          font-size: $text-sm;
+          font-weight: $font-semibold;
+          cursor: pointer;
+          transition: all $transition-fast;
+          border: none;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+
+          &.btn-primary {
+            @include btn-primary;
+          }
+
+          &.btn-secondary {
+            background: $nexlance-gray-200;
+            color: $nexlance-gray-700;
+
+            &:hover {
+              background: $nexlance-gray-300;
+            }
+          }
+
+          &.btn-info {
+            background: $nexlance-info;
+            color: white;
+
+            &:hover {
+              background: color.adjust($nexlance-info, $lightness: -10%);
+            }
+          }
+
+          &.btn-success {
+            background: $nexlance-success;
+            color: white;
+
+            &:hover {
+              background: color.adjust($nexlance-success, $lightness: -10%);
+            }
+
+            &.btn-create-project {
+              background: linear-gradient(135deg, #22c55e, #16a34a);
+              font-weight: 700;
+              font-size: 0.9rem;
+              padding: 0.6rem 1.5rem;
+              box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+              animation: pulseGreen 2s ease-in-out infinite;
+
+              &:hover {
+                box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5);
+                transform: translateY(-2px);
+              }
+            }
+          }
+
+          @keyframes pulseGreen {
+            0%, 100% { box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35); }
+            50% { box-shadow: 0 4px 20px rgba(34, 197, 94, 0.6); }
+          }
+
+          &.btn-danger {
+            background: $nexlance-error;
+            color: white;
+
+            &:hover {
+              background: color.adjust($nexlance-error, $lightness: -10%);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    @include container;
+    text-align: center;
+    padding: $space-20;
+
+    mat-icon {
+      font-size: 100px;
+      width: 100px;
+      height: 100px;
+      color: $nexlance-gray-300;
+      margin-bottom: $space-6;
+    }
+
+    h3 {
+      font-size: $text-2xl;
+      font-weight: $font-bold;
+      color: $nexlance-gray-700;
+      margin-bottom: $space-3;
+    }
+
+    p {
+      font-size: $text-lg;
+      color: $nexlance-gray-600;
+      margin-bottom: $space-8;
+    }
+
+    .btn {
+      @include btn-primary;
+      display: inline-flex;
+      align-items: center;
+      gap: $space-2;
+
+      mat-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+        color: white;
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: $breakpoint-md) {
+  .my-recommendations-container {
+    padding: $space-6 $space-4;
+
+    .controls-section {
+      flex-direction: column;
+      align-items: stretch;
+
+      .status-filters {
+        justify-content: center;
+      }
+
+      .search-box {
+        max-width: 100%;
+      }
+    }
+
+    .recommendations-list {
+      .recommendation-card {
+        .card-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: $space-4;
+        }
+
+        .card-actions {
+          flex-direction: column;
+
+          .btn {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      }
+    }
+  }
+}

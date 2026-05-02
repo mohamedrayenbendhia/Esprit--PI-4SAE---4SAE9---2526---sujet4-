@@ -1,0 +1,27 @@
+.backoffice-layout {
+  min-height: 100vh;
+  background: #f8fafc;
+  display: flex;
+}
+
+.main-content {
+  margin-left: 280px;
+  padding: 0;
+  flex: 1;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+  box-sizing: border-box;
+  background: white;
+
+  @media (max-width: 768px) {
+    margin-left: 280px;
+  }
+}
+
+.backoffice-layout {
+  &.sidebar-collapsed {
+    .main-content {
+      margin-left: 70px;
+    }
+  }
+}

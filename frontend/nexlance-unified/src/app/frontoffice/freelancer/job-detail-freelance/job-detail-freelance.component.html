@@ -1,0 +1,343 @@
+<!-- Notification Toast -->
+<div *ngIf="notification" class="notification-toast" [ngClass]="'notification-' + notification.type">
+  <div class="notification-content">
+    <mat-icon>{{ notification.type === 'success' ? 'check_circle' : 'error' }}</mat-icon>
+    <span>{{ notification.message }}</span>
+  </div>
+  <button class="notification-close" (click)="notification = null">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div *ngIf="!isLoading && job" class="job-detail-container">
+  <!-- Header Actions -->
+  <div class="page-header">
+    <button class="btn-back" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      {{ 'jobDetail.backToJobs' | translate }}
+    </button>
+    <div class="header-actions">
+      <button class="btn-save" (click)="saveJob()">
+        <mat-icon>favorite_border</mat-icon>
+        {{ 'jobDetail.saveJob' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Job Main Card -->
+  <div class="job-main-card">
+    <div class="job-header">
+      <div class="title-section">
+        <div class="category-badge">
+          <mat-icon>{{ getCategoryIcon(job.category) }}</mat-icon>
+          {{ (job.category || '') | titlecase }}
+        </div>
+        <h1 class="job-title">{{ job.title }}</h1>
+        <p class="post-date">{{ 'jobDetail.publishedOn' | translate }} {{ formatDate(job.publishedAt || job.createdAt) }}</p>
+      </div>
+      
+      <div class="action-section">
+        <button 
+          class="btn-apply-main" 
+          (click)="openApplicationModal()"
+          [disabled]="hasApplied"
+        >
+          <mat-icon>{{ hasApplied ? 'check_circle' : 'send' }}</mat-icon>
+          {{ hasApplied ? ('jobDetail.applicationSent' | translate) : ('jobDetail.applyNow' | translate) }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Client Info -->
+    <div class="client-info-section">
+      <div class="client-profile">
+        <div class="client-avatar">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+        <div class="client-details">
+          <h3>{{ job.client?.firstName }} {{ job.client?.lastName }}</h3>
+          <div class="client-meta">
+            <span class="rating">
+              <mat-icon>star</mat-icon> 
+              {{ job.client?.rating || 'N/A' }}
+            </span>
+            <span class="separator">•</span>
+            <span>{{ job.client?.jobsPosted || 0 }} {{ 'jobDetail.jobsPosted' | translate }}</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn-view-profile" (click)="viewClientProfile()">
+        <mat-icon>person</mat-icon>
+        {{ 'jobDetail.viewProfile' | translate }}
+      </button>
+    </div>
+
+    <!-- Job Details Grid -->
+    <div class="job-details-grid">
+      <div class="detail-card">
+        <span class="detail-icon"><mat-icon>attach_money</mat-icon></span>
+        <div class="detail-content">
+          <span class="detail-label">{{ 'jobDetail.budget' | translate }}</span>
+          <span class="detail-value">{{ job.budget }} DT</span>
+          <span class="detail-sub">{{ job.budgetType === 'FIXED' ? ('jobDetail.fixedBudget' | translate) : ('jobDetail.hourlyRate' | translate) }}</span>
+          <!-- Currency Converter (ExchangeRate API) -->
+          <button class="btn-currency-toggle" (click)="toggleCurrencyConverter()">
+            <mat-icon>currency_exchange</mat-icon>
+            {{ showCurrencyConverter ? 'Hide' : 'Convert' }}
+          </button>
+          <div *ngIf="showCurrencyConverter && convertedBudgets.length > 0" class="currency-conversions">
+            <span *ngFor="let conv of convertedBudgets" class="currency-item">
+              {{ conv.symbol }}{{ conv.amount }} {{ conv.currency }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <span class="detail-icon"><mat-icon>schedule</mat-icon></span>
+        <div class="detail-content">
+          <span class="detail-label">{{ 'jobDetail.estimatedDuration' | translate }}</span>
+          <span class="detail-value">{{ job.estimatedDuration }} {{ 'jobDetail.days' | translate }}</span>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <span class="detail-icon"><mat-icon>event</mat-icon></span>
+        <div class="detail-content">
+          <span class="detail-label">{{ 'jobDetail.deadline' | translate }}</span>
+          <span class="detail-value">{{ formatDate(job.deadline) }}</span>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <span class="detail-icon"><mat-icon>location_on</mat-icon></span>
+        <div class="detail-content">
+          <span class="detail-label">{{ 'jobDetail.location' | translate }}</span>
+          <span class="detail-value">{{ job.location }}</span>
+          <span *ngIf="job.isRemote" class="remote-badge">
+            <mat-icon>home</mat-icon>
+            {{ 'jobDetail.remoteOk' | translate }}
+          </span>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <span class="detail-icon"><mat-icon>school</mat-icon></span>
+        <div class="detail-content">
+          <span class="detail-label">{{ 'jobDetail.experienceLevel' | translate }}</span>
+          <span class="detail-value">{{ (job.experienceLevel || '') | titlecase }}</span>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <span class="detail-icon"><mat-icon>groups</mat-icon></span>
+        <div class="detail-content">
+          <span class="detail-label">{{ 'jobDetail.applicants' | translate }}</span>
+          <span class="detail-value">{{ job.applicantCount || 0 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="description-section">
+      <h2>
+        <mat-icon>description</mat-icon>
+        {{ 'jobDetail.projectDescription' | translate }}
+      </h2>
+      <p>{{ job.description }}</p>
+    </div>
+
+    <!-- Required Skills -->
+    <div class="skills-section">
+      <h2>
+        <mat-icon>build</mat-icon>
+        {{ 'jobDetail.requiredSkills' | translate }}
+      </h2>
+      <div class="skills-grid">
+        <span *ngFor="let skill of job.requiredSkills" class="skill-tag">
+          <mat-icon>check_circle</mat-icon>
+          {{ skill }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Attachments -->
+    <div *ngIf="job.attachments && job.attachments.length > 0" class="attachments-section">
+      <h2>
+        <mat-icon>attach_file</mat-icon>
+        {{ 'jobDetail.attachments' | translate }}
+      </h2>
+      <div class="attachments-list">
+        <div *ngFor="let attachment of job.attachments" class="attachment-item" (click)="downloadAttachment(attachment)">
+          <mat-icon>insert_drive_file</mat-icon>
+          <span class="attachment-name">{{ getFileName(attachment) }}</span>
+          <mat-icon class="download-icon">download</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Apply Button Bottom -->
+    <div class="bottom-action">
+      <button 
+        class="btn-apply-large" 
+        (click)="openApplicationModal()"
+        [disabled]="hasApplied"
+      >
+        <mat-icon>{{ hasApplied ? 'check_circle' : 'send' }}</mat-icon>
+        {{ hasApplied ? ('jobDetail.applicationSent' | translate) : ('jobDetail.applyNow' | translate) }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isLoading" class="loading-state">
+  <div class="spinner"></div>
+  <p>{{ 'jobDetail.loadingDetails' | translate }}</p>
+</div>
+
+<!-- Application Modal -->
+<div *ngIf="showApplicationModal" class="modal-overlay" (click)="closeApplicationModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ 'jobDetail.applyForJob' | translate }} "{{ job.title }}"</h2>
+      <button class="btn-close" (click)="closeApplicationModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>
+          <mat-icon>edit_note</mat-icon>
+          {{ 'jobDetail.coverLetterLabel' | translate }} *
+        </label>
+        <textarea 
+          [(ngModel)]="applicationForm.coverLetter"
+          #coverLetterField="ngModel"
+          rows="6"
+          [placeholder]="'jobDetail.coverLetterPlaceholder' | translate"
+          class="form-control"
+          required
+          minlength="50"
+          [class.invalid]="coverLetterField.invalid && coverLetterField.touched"
+        ></textarea>
+        <small class="helper-text">{{ 'jobDetail.coverLetterHelper' | translate }}</small>
+        @if (coverLetterField.invalid && coverLetterField.touched) {
+          <small class="error-text">
+            @if (coverLetterField.errors?.['required']) {
+              Cover letter is required
+            } @else if (coverLetterField.errors?.['minlength']) {
+              Cover letter must be at least 50 characters ({{ applicationForm.coverLetter.length }}/50)
+            }
+          </small>
+        }
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            <mat-icon>attach_money</mat-icon>
+            {{ 'jobDetail.proposedRateLabel' | translate }} *
+          </label>
+          <input 
+            type="number" 
+            [(ngModel)]="applicationForm.proposedRate"
+            #proposedRateField="ngModel"
+            class="form-control"
+            [placeholder]="'jobDetail.proposedRatePlaceholder' | translate"
+            required
+            min="1"
+            [class.invalid]="proposedRateField.invalid && proposedRateField.touched"
+          />
+          @if (proposedRateField.invalid && proposedRateField.touched) {
+            <small class="error-text">
+              @if (proposedRateField.errors?.['required']) {
+                Proposed rate is required
+              } @else if (proposedRateField.errors?.['min']) {
+                Rate must be greater than 0
+              }
+            </small>
+          }
+        </div>
+
+        <div class="form-group">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>
+              <mat-icon>event</mat-icon>
+              {{ 'jobDetail.estimatedDeliveryLabel' | translate }} *
+            </mat-label>
+            <input 
+              matInput
+              [matDatepicker]="deliveryPicker"
+              [(ngModel)]="applicationForm.estimatedDelivery"
+              #estimatedDeliveryField="ngModel"
+              required
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="deliveryPicker"></mat-datepicker-toggle>
+            <mat-datepicker #deliveryPicker></mat-datepicker>
+            <mat-error *ngIf="estimatedDeliveryField.invalid">
+              Estimated delivery date is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>
+            <mat-icon>schedule</mat-icon>
+            {{ 'jobDetail.availableFromLabel' | translate }} *
+          </mat-label>
+          <input 
+            matInput
+            [matDatepicker]="availablePicker"
+            [(ngModel)]="applicationForm.availableFrom"
+            #availableFromField="ngModel"
+            required
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="availablePicker"></mat-datepicker-toggle>
+          <mat-datepicker #availablePicker></mat-datepicker>
+          <mat-error *ngIf="availableFromField.invalid">
+            Available from date is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <mat-icon>work</mat-icon>
+          {{ 'jobDetail.portfolioLabel' | translate }}
+        </label>
+        <div *ngIf="availablePortfolioItems.length === 0" class="no-portfolio">
+          <mat-icon>folder_off</mat-icon>
+          <p>{{ 'jobDetail.noPortfolio' | translate }}</p>
+        </div>
+        <div *ngIf="availablePortfolioItems.length > 0" class="portfolio-selection">
+          <div 
+            *ngFor="let item of availablePortfolioItems"
+            class="portfolio-item"
+            [class.selected]="isPortfolioSelected(item.id)"
+            (click)="togglePortfolioItem(item.id)"
+          >
+            <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.title" class="portfolio-thumbnail">
+            <mat-icon *ngIf="!item.imageUrl">image</mat-icon>
+            <span class="portfolio-title">{{ item.title }}</span>
+            <mat-icon *ngIf="isPortfolioSelected(item.id)" class="check-icon">check_circle</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeApplicationModal()" [disabled]="isSubmitting">
+        <mat-icon>close</mat-icon>
+        {{ 'jobDetail.cancel' | translate }}
+      </button>
+      <button class="btn btn-primary" (click)="submitApplication()" 
+              [disabled]="isSubmitting || !applicationForm.coverLetter || applicationForm.coverLetter.length < 50 || !applicationForm.proposedRate || applicationForm.proposedRate <= 0 || !applicationForm.estimatedDelivery">
+        <mat-icon>{{ isSubmitting ? 'hourglass_empty' : 'send' }}</mat-icon>
+        {{ isSubmitting ? ('jobDetail.submitting' | translate) : ('jobDetail.submitApplication' | translate) }}
+      </button>
+    </div>
+  </div>
+</div>

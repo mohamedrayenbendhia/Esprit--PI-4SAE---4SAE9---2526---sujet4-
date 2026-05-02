@@ -1,0 +1,161 @@
+<div class="ai-recommendations-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="ai-icon">psychology</mat-icon>
+        <div>
+          <h1>IA Recommandation</h1>
+          <p class="subtitle">Offres d'emploi recommandées par notre moteur d'intelligence artificielle (TF-IDF Cosine Similarity)</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="service-status" [class.online]="isServiceOnline" [class.offline]="!isServiceOnline && !serviceChecking">
+          @if (serviceChecking) {
+            <mat-spinner diameter="16"></mat-spinner>
+            <span>Vérification...</span>
+          } @else if (isServiceOnline) {
+            <mat-icon>cloud_done</mat-icon>
+            <span>Service IA actif</span>
+          } @else {
+            <mat-icon>cloud_off</mat-icon>
+            <span>Service IA hors ligne</span>
+          }
+        </div>
+        <button mat-raised-button color="primary" (click)="refreshRecommendations()" [disabled]="isLoading">
+          <mat-icon>refresh</mat-icon>
+          Actualiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-section">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Analyse IA en cours... Le moteur calcule les meilleures correspondances pour votre profil.</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (errorMessage && !isLoading) {
+    <div class="error-section">
+      <mat-icon>info</mat-icon>
+      <p>{{ errorMessage }}</p>
+      <button mat-stroked-button color="primary" (click)="refreshRecommendations()">
+        <mat-icon>refresh</mat-icon>
+        Réessayer
+      </button>
+    </div>
+  }
+
+  <!-- Recommendations Grid -->
+  @if (!isLoading && recommendations.length > 0) {
+    <div class="recommendations-grid">
+      @for (rec of recommendations; track rec.job_offer_id) {
+        <mat-card class="recommendation-card">
+          <!-- Score Badge -->
+          <div class="score-badge" [style.background-color]="getScoreColor(rec.score)">
+            <span class="score-value">{{ getScorePercent(rec.score) }}%</span>
+            <span class="score-label">{{ getScoreLabel(rec.score) }}</span>
+          </div>
+
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="job-icon">work_outline</mat-icon>
+            <mat-card-title>Offre #{{ rec.job_offer_id }}</mat-card-title>
+            <mat-card-subtitle>Score de compatibilité IA</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Score Bar -->
+            <div class="score-bar-section">
+              <div class="score-bar-label">
+                <span>Score global</span>
+                <span class="score-percent" [style.color]="getScoreColor(rec.score)">{{ getScorePercent(rec.score) }}%</span>
+              </div>
+              <mat-progress-bar
+                mode="determinate"
+                [value]="getScorePercent(rec.score)"
+                [color]="rec.score >= 0.6 ? 'primary' : 'warn'"
+              ></mat-progress-bar>
+            </div>
+
+            <!-- Match Details -->
+            @if (rec.match_details) {
+              <div class="match-details">
+                <h4>Détails du matching IA</h4>
+                <div class="detail-row">
+                  <div class="detail-item">
+                    <mat-icon matTooltip="Similarité des compétences (TF-IDF)">code</mat-icon>
+                    <span class="detail-label">Compétences</span>
+                    <span class="detail-value">{{ getScorePercent(rec.match_details.skill_similarity) }}%</span>
+                  </div>
+                  <div class="detail-item">
+                    <mat-icon matTooltip="Score d'expérience">trending_up</mat-icon>
+                    <span class="detail-label">Expérience</span>
+                    <span class="detail-value">{{ getScorePercent(rec.match_details.experience_score) }}%</span>
+                  </div>
+                  <div class="detail-item">
+                    <mat-icon matTooltip="Correspondance budget">attach_money</mat-icon>
+                    <span class="detail-label">Budget</span>
+                    <span class="detail-value">{{ getScorePercent(rec.match_details.budget_match) }}%</span>
+                  </div>
+                  @if (rec.match_details.rating_score !== undefined) {
+                    <div class="detail-item">
+                      <mat-icon matTooltip="Score de notation">star</mat-icon>
+                      <span class="detail-label">Rating</span>
+                      <span class="detail-value">{{ getScorePercent(rec.match_details.rating_score!) }}%</span>
+                    </div>
+                  }
+                  @if (rec.match_details.projects_score !== undefined) {
+                    <div class="detail-item">
+                      <mat-icon matTooltip="Projets complétés">folder_open</mat-icon>
+                      <span class="detail-label">Projets</span>
+                      <span class="detail-value">{{ getScorePercent(rec.match_details.projects_score!) }}%</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-button color="primary" routerLink="/frontoffice/freelancer/jobs/{{ rec.job_offer_id }}">
+              <mat-icon>visibility</mat-icon>
+              Voir l'offre
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+
+  <!-- How It Works Section -->
+  <div class="how-it-works">
+    <h3><mat-icon>lightbulb</mat-icon> Comment fonctionne la recommandation IA ?</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Analyse des compétences</h4>
+          <p>L'algorithme TF-IDF analyse vos compétences et les compare avec les exigences des offres.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Calcul de similarité</h4>
+          <p>La similarité cosinus mesure la correspondance entre votre profil et chaque offre.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Score multi-critères</h4>
+          <p>Compétences (40%), expérience (20%), budget (15%), notation (15%), projets (10%).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,130 @@
+<div class="badges-progress-container">
+  <div class="header">
+    <h2>All Badges</h2>
+    <button class="btn-secondary" [routerLink]="['/frontoffice/freelancer/my-badges']">
+      View My Badges
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    Loading badges...
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && badges.length === 0" class="no-data">
+    <p>No badges available at the moment.</p>
+  </div>
+
+  <!-- Summary statistics -->
+  <div *ngIf="!isLoading && badges.length > 0" class="summary-card">
+    <div class="summary-item">
+      <span class="summary-value">{{ currentScore.toFixed(1) }}/5</span>
+      <span class="summary-label">Average Score</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-value">{{ currentProjects }}</span>
+      <span class="summary-label">Projects Completed</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-value">{{ userBadges.length }}</span>
+      <span class="summary-label">Badges Earned</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-value">{{ badges.length - userBadges.length }}</span>
+      <span class="summary-label">Remaining Badges</span>
+    </div>
+  </div>
+
+  <!-- Badges list -->
+  <div class="badges-grid" *ngIf="!isLoading && badges.length > 0">
+    <div class="badge-card" *ngFor="let badge of badges" 
+         [routerLink]="['/frontoffice/freelancer/badge-progress', badge.id]">
+      
+      <div class="badge-header">
+        <div class="badge-icon" [style.background]="'linear-gradient(135deg, #667eea, #764ba2)'">
+          {{ getBadgeIcon(badge.name) }}
+        </div>
+        <div class="badge-status" [class]="getStatusClass(badge)">
+          {{ getStatusText(badge) }}
+        </div>
+      </div>
+
+      <div class="badge-info">
+        <h3>{{ badge.name }}</h3>
+        <p class="badge-description">{{ badge.description }}</p>
+        
+        <div class="requirements">
+          <div class="requirement">
+            <span class="req-label">⭐ Minimum Score:</span>
+            <span class="req-value">{{ badge.minScore }}/5</span>
+          </div>
+          <div class="requirement">
+            <span class="req-label">📋 Minimum Projects:</span>
+            <span class="req-value">{{ badge.minProjects }}</span>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-item">
+            <div class="progress-header">
+              <span>Score</span>
+              <span>{{ currentScore.toFixed(1) }}/{{ badge.minScore }}</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar" 
+                   [style.width.%]="getScoreProgress(badge)"
+                   [style.background]="getProgressColor(getScoreProgress(badge))">
+              </div>
+            </div>
+          </div>
+
+          <div class="progress-item">
+            <div class="progress-header">
+              <span>Projects</span>
+              <span>{{ currentProjects }}/{{ badge.minProjects }}</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar" 
+                   [style.width.%]="getProjectsProgress(badge)"
+                   [style.background]="getProgressColor(getProjectsProgress(badge))">
+              </div>
+            </div>
+          </div>
+
+          <div class="overall-progress">
+            <div class="progress-circle">
+              <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg"
+                      d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="#eee"
+                      stroke-width="3"/>
+                <path class="circle"
+                      [attr.stroke-dasharray]="getOverallProgress(badge) + ', 100'"
+                      d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      [attr.stroke]="getProgressColor(getOverallProgress(badge))"
+                      stroke-width="3"
+                      stroke-linecap="round"/>
+                <text x="18" y="20.35" class="percentage">
+                  {{ getOverallProgress(badge).toFixed(0) }}%
+                </text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="badge-footer">
+        <button class="btn-view">View details →</button>
+      </div>
+    </div>
+  </div>
+</div>

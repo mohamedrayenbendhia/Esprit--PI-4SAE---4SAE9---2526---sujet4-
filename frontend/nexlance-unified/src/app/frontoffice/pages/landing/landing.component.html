@@ -1,0 +1,206 @@
+<div class="landing-page">
+  <!-- Header / Navbar -->
+  <header class="navbar">
+    <div class="container">
+      <div class="logo">
+        <div class="logo-icon">
+          <div class="dots">
+            <span class="dot blue"></span>
+            <span class="dot blue"></span>
+            <span class="dot orange"></span>
+            <span class="dot blue"></span>
+          </div>
+        </div>
+        <span class="logo-text">NexLance</span>
+        <span class="logo-tagline">SMART MATCHING</span>
+      </div>
+      <nav class="nav-links">
+        <app-language-switcher></app-language-switcher>
+        <a (click)="navigateToLogin()" class="nav-link">{{ 'landing.navbar.login' | translate }}</a>
+        <button mat-raised-button color="primary" (click)="navigateToRegister('client')">
+          {{ 'landing.navbar.register' | translate }}
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">
+            {{ 'landing.hero.title' | translate }} <span class="highlight">{{ 'landing.hero.titleHighlight' | translate }}</span> {{ 'landing.hero.titleEnd' | translate }}
+          </h1>
+          <p class="hero-description">
+            {{ 'landing.hero.description' | translate }}
+          </p>
+          <div class="hero-actions">
+            <button mat-raised-button color="primary" class="cta-button" (click)="navigateToRegister('freelancer')">
+              {{ 'landing.hero.becomeFreelancer' | translate }}
+            </button>
+            <button mat-stroked-button class="secondary-button" (click)="navigateToRegister('client')">
+              {{ 'landing.hero.findFreelancer' | translate }}
+            </button>
+          </div>
+        </div>
+        <div class="hero-image">
+          <div class="profile-card">
+            <div class="profile-avatar">
+              <mat-icon class="avatar-icon">person</mat-icon>
+            </div>
+            <div class="profile-info">
+              <div class="profile-name">Sarah M.</div>
+              <div class="profile-rating">
+                <mat-icon class="star">star</mat-icon>
+                <span>5.0</span>
+              </div>
+            </div>
+            <div class="profile-skills">
+              <span class="skill-tag">React</span>
+              <span class="skill-tag">Angular</span>
+              <span class="skill-tag">Node.js</span>
+            </div>
+          </div>
+          <div class="badge top-rated">
+            <mat-icon>workspace_premium</mat-icon>
+            <div>
+              <div class="badge-title">{{ 'landing.hero.topRated' | translate }}</div>
+              <div class="badge-subtitle">{{ 'landing.hero.freelance' | translate }}</div>
+              <div class="badge-year">Q3/24</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-wave"></div>
+  </section>
+
+  <!-- Trusted By Section -->
+  <section class="trusted-by">
+    <div class="container">
+      <p class="trusted-title">{{ 'landing.trusted.title' | translate }}</p>
+      <div class="trusted-logos">
+        <div *ngFor="let company of trustedBy" class="company-logo">
+          {{ company }}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="categories">
+    <div class="container">
+      <h2 class="section-title">{{ 'landing.categories.title' | translate }}</h2>
+      <div class="categories-grid">
+        <div *ngFor="let category of categories" class="category-card" [style.background]="category.color">
+          <mat-icon class="category-icon">{{ category.icon }}</mat-icon>
+          <h3 class="category-name">{{ 'landing.categories.' + category.key | translate }}</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">{{ 'landing.features.title' | translate }}</h2>
+      <div class="features-grid">
+        <mat-card *ngFor="let feature of features" class="feature-card">
+          <div class="feature-icon">
+            <mat-icon>{{ feature.icon }}</mat-icon>
+          </div>
+          <mat-card-header>
+            <mat-card-title>{{ 'landing.features.' + feature.key | translate }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ 'landing.features.' + feature.key + 'Desc' | translate }}</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div *ngFor="let stat of stats" class="stat-item">
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-label">{{ 'landing.stats.' + stat.key | translate }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2 class="cta-title">{{ 'landing.cta.title' | translate }}</h2>
+        <p class="cta-description">
+          {{ 'landing.cta.description' | translate }}
+        </p>
+        <div class="cta-buttons">
+          <button mat-raised-button color="primary" class="large-button" (click)="navigateToRegister('freelancer')">
+            <mat-icon>rocket_launch</mat-icon>
+            {{ 'landing.cta.becomeFreelancer' | translate }}
+          </button>
+          <button mat-raised-button color="accent" class="large-button" (click)="navigateToRegister('client')">
+            <mat-icon>search</mat-icon>
+            {{ 'landing.cta.hireTalent' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <div class="footer-logo">
+            <div class="logo-icon small">
+              <div class="dots">
+                <span class="dot blue"></span>
+                <span class="dot blue"></span>
+                <span class="dot orange"></span>
+                <span class="dot blue"></span>
+              </div>
+            </div>
+            <span class="logo-text">NexLance</span>
+          </div>
+          <p class="footer-tagline">{{ 'landing.footer.tagline' | translate }}</p>
+        </div>
+        <div class="footer-section">
+          <h4>{{ 'landing.footer.forFreelancers' | translate }}</h4>
+          <ul>
+            <li><a routerLink="/register/freelancer">{{ 'landing.footer.register' | translate }}</a></li>
+            <li><a>{{ 'landing.footer.findMissions' | translate }}</a></li>
+            <li><a>{{ 'landing.footer.howItWorks' | translate }}</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>{{ 'landing.footer.forClients' | translate }}</h4>
+          <ul>
+            <li><a routerLink="/register/client">{{ 'landing.footer.register' | translate }}</a></li>
+            <li><a>{{ 'landing.footer.hire' | translate }}</a></li>
+            <li><a>{{ 'landing.footer.pricing' | translate }}</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>{{ 'landing.footer.about' | translate }}</h4>
+          <ul>
+            <li><a>{{ 'landing.footer.whoWeAre' | translate }}</a></li>
+            <li><a>{{ 'landing.footer.terms' | translate }}</a></li>
+            <li><a>{{ 'landing.footer.privacy' | translate }}</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 {{ 'landing.footer.copyright' | translate }}</p>
+      </div>
+    </div>
+  </footer>
+</div>

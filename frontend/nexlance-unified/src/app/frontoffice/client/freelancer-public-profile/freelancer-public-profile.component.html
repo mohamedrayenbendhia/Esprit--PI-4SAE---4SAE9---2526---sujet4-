@@ -1,0 +1,189 @@
+<div class="public-profile-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-icon class="spinner">refresh</mat-icon>
+    <p>Loading profile...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon>error_outline</mat-icon>
+    <h2>Profile Not Found</h2>
+    <p>The freelancer profile you're looking for doesn't exist or has been removed.</p>
+    <button mat-raised-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Search
+    </button>
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="profile && !loading" class="profile-content">
+    <!-- Header -->
+    <div class="profile-header">
+      <button mat-icon-button class="back-button" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="header-content">
+        <div class="avatar-section">
+          <div class="avatar">
+            <mat-icon>person</mat-icon>
+          </div>
+          <div class="availability-badge" [class.available]="profile.availability === Availability.AVAILABLE">
+            {{ profile.availability }}
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h1>{{ profile.firstName && profile.lastName ? profile.firstName + ' ' + profile.lastName : 'Freelancer Profile' }}</h1>
+          <p class="title">{{ profile.title }}</p>
+          <div class="meta-info">
+            <span *ngIf="profile.location">
+              <mat-icon>location_on</mat-icon>
+              {{ profile.location }}
+            </span>
+            <span *ngIf="profile.experienceYears">
+              <mat-icon>work</mat-icon>
+              {{ profile.experienceYears }} years experience
+            </span>
+            <span *ngIf="profile.hourlyRate">
+              <mat-icon>attach_money</mat-icon>
+              {{ profile.hourlyRate }} DT/hour
+            </span>
+          </div>
+
+          <!-- Evaluation Rating -->
+          <div class="evaluation-rating" *ngIf="averageRating > 0">
+            <mat-icon class="star-icon">star</mat-icon>
+            <span class="rating-value">{{ averageRating | number:'1.1-1' }}</span>
+            <span class="review-count">({{ evaluationCount }} evaluations)</span>
+          </div>
+          <div class="evaluation-rating no-rating" *ngIf="averageRating === 0">
+            <mat-icon>star_border</mat-icon>
+            <span>No evaluations yet</span>
+          </div>
+
+          <!-- Contact Info -->
+          <div class="contact-info">
+            <span *ngIf="userEmail">
+              <mat-icon>email</mat-icon>
+              {{ userEmail }}
+            </span>
+            <span *ngIf="userPhone">
+              <mat-icon>phone</mat-icon>
+              {{ userPhone }}
+            </span>
+          </div>
+        </div>
+
+        <div class="actions-section">
+          <button mat-stroked-button (click)="contactFreelancer()">
+            <mat-icon>message</mat-icon>
+            Contact
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bio Section -->
+    <!-- Reputation Score -->
+    <app-reputation-badge [freelancerId]="profile.userId || profile.id"></app-reputation-badge>
+
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-icon>description</mat-icon>
+        <mat-card-title>About</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="bio">{{ profile.bio || 'No bio available' }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Skills Section -->
+    <mat-card class="section-card" *ngIf="profile.skills && profile.skills.length > 0">
+      <mat-card-header>
+        <mat-icon>stars</mat-icon>
+        <mat-card-title>Skills</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-chip-set>
+          <mat-chip *ngFor="let skill of profile.skills">{{ skill }}</mat-chip>
+        </mat-chip-set>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Languages Section -->
+    <mat-card class="section-card" *ngIf="profile.languages && profile.languages.length > 0">
+      <mat-card-header>
+        <mat-icon>language</mat-icon>
+        <mat-card-title>Languages</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-chip-set>
+          <mat-chip *ngFor="let lang of profile.languages">{{ lang }}</mat-chip>
+        </mat-chip-set>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Certifications Section -->
+    <mat-card class="section-card" *ngIf="profile.certifications && profile.certifications.length > 0">
+      <mat-card-header>
+        <mat-icon>verified</mat-icon>
+        <mat-card-title>Certifications</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul class="certifications-list">
+          <li *ngFor="let cert of profile.certifications">{{ cert }}</li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Links Section -->
+    <mat-card class="section-card" *ngIf="profile.portfolioUrl || profile.linkedInUrl || profile.githubUrl">
+      <mat-card-header>
+        <mat-icon>link</mat-icon>
+        <mat-card-title>Links</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="links-list">
+          <a *ngIf="profile.portfolioUrl" [href]="profile.portfolioUrl" target="_blank" class="link-item">
+            <mat-icon>work</mat-icon>
+            Portfolio
+          </a>
+          <a *ngIf="profile.linkedInUrl" [href]="profile.linkedInUrl" target="_blank" class="link-item">
+            <mat-icon>business</mat-icon>
+            LinkedIn
+          </a>
+          <a *ngIf="profile.githubUrl" [href]="profile.githubUrl" target="_blank" class="link-item">
+            <mat-icon>code</mat-icon>
+            GitHub
+          </a>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Stats Section -->
+    <mat-card class="section-card stats-card">
+      <mat-card-header>
+        <mat-icon>assessment</mat-icon>
+        <mat-card-title>Statistics</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value">{{ profile.completionRate || 0 }}%</div>
+            <div class="stat-label">Completion Rate</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ profile.responseTime || 'N/A' }}</div>
+            <div class="stat-label">Avg Response Time</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ profile.timezone || 'N/A' }}</div>
+            <div class="stat-label">Timezone</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

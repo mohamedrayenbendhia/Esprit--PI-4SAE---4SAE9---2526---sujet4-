@@ -1,0 +1,172 @@
+<div *ngIf="!isLoading && job" class="job-detail-container">
+  <!-- Header -->
+  <div class="page-header">
+    <button class="btn-back" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon> Back to My Jobs
+    </button>
+    <button class="btn-edit" (click)="editJob()">
+      <mat-icon>edit</mat-icon> Edit Offer
+    </button>
+  </div>
+
+  <!-- Job Information Section -->
+  <div class="job-info-card">
+    <div class="job-header">
+      <div>
+        <h1 class="job-title">{{ job.title }}</h1>
+        <div class="job-meta-row">
+          <span class="category-badge">{{ job.category }}</span>
+          <span class="meta-text">Published on {{ formatDate(job.publishedAt || job.createdAt) }}</span>
+        </div>
+      </div>
+      <div class="job-stats">
+        <div class="stat-box">
+          <span class="stat-value">{{ job.viewCount }}</span>
+          <span class="stat-label">Views</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-value">{{ job.applicantCount }}</span>
+          <span class="stat-label">Applications</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="job-details">
+      <div class="detail-row">
+        <span class="detail-label"><mat-icon>attach_money</mat-icon> Budget:</span>
+        <span class="detail-value">{{ job.budget }} DT ({{ job.budgetType === 'FIXED' ? 'Fixed' : 'Hourly' }})</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label"><mat-icon>schedule</mat-icon> Estimated Duration:</span>
+        <span class="detail-value">{{ job.estimatedDuration }} days</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label"><mat-icon>calendar_today</mat-icon> Deadline:</span>
+        <span class="detail-value">{{ formatDate(job.deadline) }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label"><mat-icon>location_on</mat-icon> Location:</span>
+        <span class="detail-value">{{ job.location }} <span *ngIf="job.isRemote" class="remote-badge">Remote OK</span></span>
+      </div>
+    </div>
+
+    <div class="job-description">
+      <h3>Description</h3>
+      <p>{{ job.description }}</p>
+    </div>
+
+    <div class="job-skills">
+      <h3>Required Skills</h3>
+      <div class="skills-list">
+        <span *ngFor="let skill of job.requiredSkills" class="skill-tag">{{ skill }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Applications Section -->
+  <div class="applications-section">
+    <h2 class="section-title">Applications Received</h2>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+      <button 
+        *ngFor="let tab of tabs"
+        class="tab-btn"
+        [class.active]="activeTab === tab.id"
+        (click)="changeTab(tab.id)"
+      >
+        {{ tab.label }}
+        <span class="tab-count">{{ getTabCount(tab.id) }}</span>
+      </button>
+    </div>
+
+    <!-- Applications List -->
+    <div *ngIf="filteredApplications.length === 0" class="empty-applications">
+      <p>No applications in this category</p>
+    </div>
+
+    <div *ngIf="filteredApplications.length > 0" class="applications-list">
+      <div 
+        *ngFor="let application of filteredApplications"
+        class="application-card"
+        [class.unread]="!application.isRead"
+        (click)="viewApplicationDetail(application.id); markAsRead(application.id)"
+      >
+        <div class="application-header">
+          <div class="freelancer-info">
+            <div class="avatar">
+              <img [src]="application.freelance?.avatar || 'assets/default-avatar.png'" alt="Avatar">
+            </div>
+            <div class="freelancer-details">
+              <h4>{{ application.freelance?.firstName }} {{ application.freelance?.lastName }}</h4>
+              <div class="freelancer-meta">
+                <span class="rating"><mat-icon>star</mat-icon> {{ application.freelance?.rating || 'N/A' }}</span>
+                <span class="projects">{{ application.freelance?.completedProjects || 0 }} projects</span>
+              </div>
+            </div>
+          </div>
+          <span class="status-badge" [ngClass]="getStatusBadgeClass(application.status)">
+            {{ getStatusLabel(application.status) }}
+          </span>
+        </div>
+
+        <div class="application-body">
+          <div class="cover-letter-preview">
+            <p>{{ application.coverLetter | slice:0:150 }}...</p>
+          </div>
+
+          <div class="application-details">
+            <div class="detail-item">
+              <span class="detail-icon"><mat-icon>attach_money</mat-icon></span>
+              <span class="detail-text">{{ application.proposedRate }} DT</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon"><mat-icon>calendar_today</mat-icon></span>
+              <span class="detail-text">Available on {{ formatDate(application.availableFrom) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon"><mat-icon>schedule</mat-icon></span>
+              <span class="detail-text">Delivery: {{ formatDate(application.estimatedDelivery) }}</span>
+            </div>
+          </div>
+
+          <div class="submission-date">
+            Application submitted on {{ formatDate(application.submittedAt) }}
+          </div>
+        </div>
+
+        <div class="application-footer">
+          <button class="btn-action btn-profile" (click)="viewFreelancerProfile(application.freelanceId); $event.stopPropagation()">
+            View Profile
+          </button>
+          <button 
+            *ngIf="application.status === 'PENDING'"
+            class="btn-action btn-shortlist" 
+            (click)="shortlistApplication(application.id, $event)"
+          >
+            Shortlist
+          </button>
+          <button 
+            *ngIf="application.status === 'PENDING' || application.status === 'SHORTLISTED'"
+            class="btn-action btn-accept" 
+            (click)="acceptApplication(application.id, $event)"
+          >
+            Accept
+          </button>
+          <button 
+            *ngIf="application.status !== 'REJECTED' && application.status !== 'ACCEPTED'"
+            class="btn-action btn-reject" 
+            (click)="rejectApplication(application.id, $event)"
+          >
+            Reject
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isLoading" class="loading-state">
+  <div class="spinner"></div>
+  <p>Loading...</p>
+</div>

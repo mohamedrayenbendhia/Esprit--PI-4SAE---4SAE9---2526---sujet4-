@@ -1,0 +1,79 @@
+<div class="respond-container">
+  <div class="header">
+    <h2>Respond to Evaluation</h2>
+    <button class="btn-secondary" (click)="cancel()">Back</button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    Loading evaluation...
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="evaluation && !isLoading" class="evaluation-details">
+    <div class="evaluation-card">
+      <div class="evaluation-header">
+        <!-- ✅ Email au lieu de l'ID -->
+        <span class="client-id">Client: {{ evaluatorEmail }}</span>
+        <span class="date">{{ evaluation.createdAt | date:'dd/MM/yyyy' }}</span>
+      </div>
+
+      <div class="global-rating">
+        Overall Rating: <strong>{{ evaluation.ratingGlobal?.toFixed(1) }}/5</strong>
+      </div>
+
+      <div class="scores">
+        <div class="score-item">
+          <span class="label">Quality:</span>
+          <span class="score">{{ evaluation.qualityScore }}/5</span>
+        </div>
+        <div class="score-item">
+          <span class="label">Deadline:</span>
+          <span class="score">{{ evaluation.deadlineScore }}/5</span>
+        </div>
+        <div class="score-item">
+          <span class="label">Communication:</span>
+          <span class="score">{{ evaluation.communicationScore }}/5</span>
+        </div>
+        <div class="score-item">
+          <span class="label">Professionalism:</span>
+          <span class="score">{{ evaluation.professionalismScore }}/5</span>
+        </div>
+      </div>
+
+      <div class="comment" *ngIf="evaluation.comment">
+        <strong>Client's comment:</strong>
+        <p>"{{ evaluation.comment }}"</p>
+      </div>
+
+      <div class="response-section">
+        <h3>Your Response</h3>
+        <textarea
+          [(ngModel)]="responseText"
+          placeholder="Type your response here..."
+          rows="5"
+          [disabled]="isSubmitting"
+        ></textarea>
+
+        <div class="actions">
+          <button
+            class="btn-primary"
+            (click)="submitResponse()"
+            [disabled]="isSubmitting"
+          >
+            {{ isSubmitting ? 'Sending...' : 'Send Response' }}
+          </button>
+          <button class="btn-secondary" (click)="cancel()" [disabled]="isSubmitting">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

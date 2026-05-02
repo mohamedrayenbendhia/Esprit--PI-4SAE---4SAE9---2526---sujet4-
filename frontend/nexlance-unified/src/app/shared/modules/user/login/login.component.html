@@ -1,0 +1,66 @@
+<div class="login-container">
+  <!-- Top Navigation -->
+  <div class="top-nav">
+    <button mat-icon-button routerLink="/landing" class="home-button" [matTooltip]="'auth.backToHome' | translate">
+      <mat-icon>home</mat-icon>
+    </button>
+    <app-language-switcher></app-language-switcher>
+  </div>
+
+  <mat-card class="login-card">
+    <mat-card-header>
+      <div class="login-header">
+        <img src="assets/images/nexlance-logo-colored.svg" alt="NexLance" class="login-logo">
+        <h1>{{ 'auth.login.title' | translate }}</h1>
+        <p class="subtitle">{{ 'auth.login.subtitle' | translate }}</p>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'auth.login.email' | translate }}</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="your@email.com">
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+            {{ 'auth.login.errors.emailRequired' | translate }}
+          </mat-error>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+            {{ 'auth.login.errors.emailInvalid' | translate }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'auth.login.password' | translate }}</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+          <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+            {{ 'auth.login.errors.passwordRequired' | translate }}
+          </mat-error>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">
+            {{ 'auth.login.errors.passwordMinLength' | translate }}
+          </mat-error>
+        </mat-form-field>
+
+        <div class="forgot-password-link">
+          <a routerLink="/forgot-password">{{ 'auth.login.forgotPassword' | translate }}</a>
+        </div>
+
+        <button mat-raised-button color="primary" type="submit" 
+                [disabled]="loginForm.invalid || isLoading" class="full-width submit-btn">
+          {{ isLoading ? ('auth.login.loggingIn' | translate) : ('auth.login.submit' | translate) }}
+        </button>
+      </form>
+
+      <div class="register-links">
+        <p>{{ 'auth.login.noAccount' | translate }}</p>
+        <div class="link-buttons">
+          <a mat-button routerLink="/register/client">{{ 'auth.login.registerAsClient' | translate }}</a>
+          <a mat-button routerLink="/register/freelancer">{{ 'auth.login.registerAsFreelancer' | translate }}</a>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

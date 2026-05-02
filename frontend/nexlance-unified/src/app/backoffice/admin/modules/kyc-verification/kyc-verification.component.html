@@ -1,0 +1,167 @@
+<div class="kyc-verification">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>{{ 'admin.kyc.title' | translate }}</h1>
+      <p class="subtitle">{{ 'admin.kyc.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Statistiques KYC -->
+  @if (stats()) {
+    <div class="stats-grid">
+      <mat-card class="stat-card pending">
+        <mat-icon>schedule</mat-icon>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats()!.totalPending }}</div>
+          <div class="stat-label">{{ 'admin.kyc.stats.pending' | translate }}</div>
+        </div>
+      </mat-card>
+      <mat-card class="stat-card approved">
+        <mat-icon>check_circle</mat-icon>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats()!.totalApproved }}</div>
+          <div class="stat-label">{{ 'admin.kyc.stats.approved' | translate }}</div>
+        </div>
+      </mat-card>
+      <mat-card class="stat-card rejected">
+        <mat-icon>cancel</mat-icon>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats()!.totalRejected }}</div>
+          <div class="stat-label">{{ 'admin.kyc.stats.rejected' | translate }}</div>
+        </div>
+      </mat-card>
+      <mat-card class="stat-card time">
+        <mat-icon>timer</mat-icon>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats()!.averageReviewTime }}h</div>
+          <div class="stat-label">{{ 'admin.kyc.stats.avgReviewTime' | translate }}</div>
+        </div>
+      </mat-card>
+    </div>
+  }
+
+  <!-- Filtres et recherche -->
+  <mat-card class="filters-card">
+    <div class="filters-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>{{ 'admin.kyc.filters.search' | translate }}</mat-label>
+        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applyFilters()" [placeholder]="'admin.kyc.filters.searchPlaceholder' | translate">
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'admin.kyc.filters.status' | translate }}</mat-label>
+        <mat-select [(ngModel)]="filterStatus" (selectionChange)="applyFilters()">
+          <mat-option value="all">{{ 'admin.kyc.filters.all' | translate }}</mat-option>
+          <mat-option [value]="KYCStatus.PENDING">{{ 'admin.kyc.stats.pending' | translate }}</mat-option>
+          <mat-option [value]="KYCStatus.APPROVED">{{ 'admin.kyc.stats.approved' | translate }}</mat-option>
+          <mat-option [value]="KYCStatus.REJECTED">{{ 'admin.kyc.stats.rejected' | translate }}</mat-option>
+        </mat-select>
+        <mat-icon matPrefix>filter_list</mat-icon>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" (click)="loadPendingVerifications()">
+        <mat-icon>refresh</mat-icon>
+        {{ 'admin.kyc.filters.refresh' | translate }}
+      </button>
+    </div>
+
+    <div class="results-count">
+      <mat-icon>description</mat-icon>
+      <span>{{ filteredVerifications().length }} {{ 'admin.kyc.resultsCount' | translate }}</span>
+    </div>
+  </mat-card>
+
+  <!-- Pending verifications list -->
+  <div class="verifications-container">
+    @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+        <p>{{ 'admin.kyc.loading' | translate }}</p>
+      </div>
+    } @else {
+      <div class="verifications-list">
+        @for (verification of filteredVerifications(); track verification.id) {
+          <mat-card class="verification-card" (click)="reviewDocument(verification)">
+            <div class="card-header">
+              <div class="user-info">
+                <mat-icon class="user-icon">account_circle</mat-icon>
+                <div>
+                  <h3>{{ 'admin.kyc.card.userId' | translate }} {{ getUserName(verification.userId) }}</h3>
+                  <div class="chips-row">
+                    <mat-chip class="document-chip">
+                      <mat-icon>description</mat-icon>
+                      {{ getDocumentTypeLabel(verification.documentType) }}
+                    </mat-chip>
+                    <mat-chip 
+                      [class]="'status-chip status-' + verification.status.toLowerCase()"
+                      class="status-chip">
+                      <mat-icon>{{ getStatusIcon(verification.status) }}</mat-icon>
+                      {{ getStatusLabel(verification.status) }}
+                    </mat-chip>
+                  </div>
+                </div>
+              </div>
+              <div class="submission-info">
+                <span class="date">
+                  <mat-icon>calendar_today</mat-icon>
+                  {{ verification.submittedAt | date:'dd/MM/yyyy HH:mm' }}
+                </span>
+                <mat-chip class="waiting-chip">
+                  <mat-icon>schedule</mat-icon>
+                  {{ getWaitingTime(verification.submittedAt) }}
+                </mat-chip>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="document-preview">
+                <img [src]="verification.documentUrl" alt="Document preview" />
+                <div class="preview-overlay">
+                  <mat-icon>zoom_in</mat-icon>
+                  <span>{{ 'admin.kyc.card.clickToEnlarge' | translate }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="reviewDocument(verification); $event.stopPropagation()">
+                <mat-icon>visibility</mat-icon>
+                {{ 'admin.kyc.actions.reviewDetail' | translate }}
+              </button>
+              @if (verification.status === 'PENDING') {
+                <button 
+                  mat-raised-button 
+                  class="btn-success" 
+                  (click)="quickApprove(verification, $event)">
+                  <mat-icon>check</mat-icon>
+                  {{ 'admin.kyc.actions.approve' | translate }}
+                </button>
+                <button 
+                  mat-raised-button 
+                  color="warn" 
+                  (click)="quickReject(verification, $event)">
+                  <mat-icon>close</mat-icon>
+                  {{ 'admin.kyc.actions.reject' | translate }}
+                </button>
+              }
+            </div>
+          </mat-card>
+        } @empty {
+          <mat-card class="empty-state">
+            <mat-icon class="empty-icon">check_circle_outline</mat-icon>
+            <h3>{{ 'admin.kyc.empty.title' | translate }}</h3>
+            <p>{{ 'admin.kyc.empty.description' | translate }}</p>
+            <button mat-raised-button color="primary" (click)="loadPendingVerifications()">
+              <mat-icon>refresh</mat-icon>
+              {{ 'admin.kyc.filters.refresh' | translate }}
+            </button>
+          </mat-card>
+        }
+      </div>
+    }
+  </div>
+</div>

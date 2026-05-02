@@ -1,0 +1,35 @@
+<div class="container">
+  <div class="header">
+    <h2>Badges Management</h2>
+    <button class="btn-add" [routerLink]="['/backoffice/admin/badges/new']">
+      + New Badge
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">Loading...</div>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+  <div *ngIf="!isLoading && badges.length === 0" class="empty">
+    No badges found
+  </div>
+
+  <div class="badges-grid" *ngIf="!isLoading && badges.length > 0">
+    <div class="badge-card" *ngFor="let badge of badges">
+      <div class="badge-icon">{{ badge.icon }}</div>
+      <div class="badge-info">
+        <h3>{{ badge.name }}</h3>
+        <p>{{ badge.description }}</p>
+        <div class="badge-requirements">
+          <span>⭐ {{ badge.minScore }}/5</span>
+          <span>📋 {{ badge.minProjects }} projects</span>
+        </div>
+        <div class="badge-actions">
+          <button class="btn-edit" [routerLink]="['/backoffice/admin/badges/edit', badge.id]">
+            Edit
+          </button>
+          <button class="btn-delete" (click)="deleteBadge(badge.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

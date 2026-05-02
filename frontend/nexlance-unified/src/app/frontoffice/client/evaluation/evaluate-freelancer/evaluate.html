@@ -1,0 +1,107 @@
+<div class="evaluate-container">
+  <div class="evaluate-card">
+    <h2>Evaluate a Freelancer</h2>
+    
+    <div *ngIf="errorMessage" class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+    
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #evaluationForm="ngForm">
+      
+      <!-- Freelancer EMAIL field -->
+      <div class="form-group">
+        <label for="freelancerId">Freelancer EMAIL *</label>
+        <input 
+          type="email" 
+          id="freelancerId"
+          [(ngModel)]="freelancerId" 
+          name="freelancerId"
+          class="form-control big-input"
+          placeholder="example@email.com"
+          required
+          email
+        >
+        <small class="text-muted">Enter the freelancer's email to evaluate</small>
+      </div>
+
+      <!-- RATINGS -->
+      <h3>Ratings (1 to 5)</h3>
+
+      <div class="rating-group">
+        <label>Work Quality *</label>
+        <div class="stars">
+          <button type="button" *ngFor="let star of [1,2,3,4,5]" 
+                  (click)="setScore('quality', star)"
+                  [class.active]="evaluation.qualityScore! >= star">
+            ★
+          </button>
+        </div>
+        <small>Rating: {{ evaluation.qualityScore }}/5</small>
+      </div>
+
+      <div class="rating-group">
+        <label>Deadline Respect *</label>
+        <div class="stars">
+          <button type="button" *ngFor="let star of [1,2,3,4,5]" 
+                  (click)="setScore('deadline', star)"
+                  [class.active]="evaluation.deadlineScore! >= star">
+            ★
+          </button>
+        </div>
+        <small>Rating: {{ evaluation.deadlineScore }}/5</small>
+      </div>
+
+      <div class="rating-group">
+        <label>Communication *</label>
+        <div class="stars">
+          <button type="button" *ngFor="let star of [1,2,3,4,5]" 
+                  (click)="setScore('communication', star)"
+                  [class.active]="evaluation.communicationScore! >= star">
+            ★
+          </button>
+        </div>
+        <small>Rating: {{ evaluation.communicationScore }}/5</small>
+      </div>
+
+      <div class="rating-group">
+        <label>Professionalism *</label>
+        <div class="stars">
+          <button type="button" *ngFor="let star of [1,2,3,4,5]" 
+                  (click)="setScore('professionalism', star)"
+                  [class.active]="evaluation.professionalismScore! >= star">
+            ★
+          </button>
+        </div>
+        <small>Rating: {{ evaluation.professionalismScore }}/5</small>
+      </div>
+
+      <!-- Comment -->
+      <div class="form-group">
+        <label>Comment (optional)</label>
+        <textarea 
+          [(ngModel)]="evaluation.comment" 
+          name="comment"
+          class="form-control"
+          rows="4"
+          placeholder="Write your comment here...">
+        </textarea>
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="button-group">
+        <button type="button" class="btn-cancel" (click)="cancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn-submit" 
+                [disabled]="isLoading || !freelancerId">
+          <span *ngIf="isLoading"> Sending...</span>
+          <span *ngIf="!isLoading"> Evaluate</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

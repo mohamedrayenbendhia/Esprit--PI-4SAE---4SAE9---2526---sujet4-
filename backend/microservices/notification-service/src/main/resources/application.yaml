@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: notification-service
+  cloud:
+    config:
+      enabled: true
+      uri: http://localhost:8888
+      fail-fast: true
+  config:
+    import: configserver:http://localhost:8888
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

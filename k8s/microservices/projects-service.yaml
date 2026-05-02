@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: projects-service
+  namespace: nexlance
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: projects-service
+  template:
+    metadata:
+      labels:
+        app: projects-service
+    spec:
+      containers:
+        - name: projects-service
+          image: img-projects
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9091
+          env:
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: http://eureka-server:8761/eureka/
+            - name: SPRING_CLOUD_CONFIG_URI
+              value: http://config-server:8888
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: projects-service
+  namespace: nexlance
+spec:
+  selector:
+    app: projects-service
+  ports:
+    - port: 9091
+      targetPort: 9091
+  type: ClusterIP

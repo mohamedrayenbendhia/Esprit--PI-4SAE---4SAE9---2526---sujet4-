@@ -1,0 +1,184 @@
+<div class="user-management">
+  <!-- Header avec statistiques -->
+  <div class="page-header">
+    <h1>{{ 'admin.userManagement.title' | translate }}</h1>
+    <button class="btn btn-primary" (click)="exportUsers()">
+      <i class="icon-download"></i> {{ 'admin.userManagement.exportCsv' | translate }}
+    </button>
+  </div>
+
+  <!-- Statistiques -->
+  @if (stats()) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats()!.totalUsers }}</div>
+        <div class="stat-label">{{ 'admin.userManagement.stats.totalUsers' | translate }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats()!.newUsersThisWeek }}</div>
+        <div class="stat-label">{{ 'admin.userManagement.stats.newUsersThisWeek' | translate }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats()!.kycVerificationRate }}%</div>
+        <div class="stat-label">{{ 'admin.userManagement.stats.kycVerificationRate' | translate }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats()!.activeUsers }}</div>
+        <div class="stat-label">{{ 'admin.userManagement.stats.activeUsers' | translate }}</div>
+      </div>
+    </div>
+  }
+
+  <!-- Filtres -->
+  <div class="filters-section">
+    <div class="filters-grid">
+      <div class="filter-item">
+        <label>{{ 'admin.userManagement.filters.search' | translate }}</label>
+        <input 
+          type="text" 
+          [(ngModel)]="filters.searchTerm" 
+          (ngModelChange)="onFilterChange()"
+          [placeholder]="'admin.userManagement.filters.searchPlaceholder' | translate"
+          class="form-control">
+      </div>
+
+      <div class="filter-item">
+        <label>{{ 'admin.userManagement.filters.type' | translate }}</label>
+        <select [(ngModel)]="filters.type" (ngModelChange)="onFilterChange()" class="form-control">
+          <option [value]="undefined">{{ 'admin.userManagement.filters.all' | translate }}</option>
+          <option value="freelance">{{ 'admin.userManagement.types.freelance' | translate }}</option>
+          <option value="client">{{ 'admin.userManagement.types.client' | translate }}</option>
+          <option value="admin">{{ 'admin.userManagement.types.admin' | translate }}</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label>{{ 'admin.userManagement.filters.status' | translate }}</label>
+        <select [(ngModel)]="filters.status" (ngModelChange)="onFilterChange()" class="form-control">
+          <option [value]="undefined">{{ 'admin.userManagement.filters.all' | translate }}</option>
+          <option [value]="UserStatus.ACTIVE">{{ 'admin.userManagement.statuses.active' | translate }}</option>
+          <option [value]="UserStatus.SUSPENDED">{{ 'admin.userManagement.statuses.suspended' | translate }}</option>
+          <option [value]="UserStatus.PENDING_VERIFICATION">{{ 'admin.userManagement.statuses.pending' | translate }}</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label>{{ 'admin.userManagement.filters.subscription' | translate }}</label>
+        <select [(ngModel)]="filters.subscriptionType" (ngModelChange)="onFilterChange()" class="form-control">
+          <option [value]="undefined">{{ 'admin.userManagement.filters.all' | translate }}</option>
+          <option [value]="SubscriptionType.FREE">{{ 'admin.userManagement.subscriptions.free' | translate }}</option>
+          <option [value]="SubscriptionType.PREMIUM">{{ 'admin.userManagement.subscriptions.premium' | translate }}</option>
+          <option [value]="SubscriptionType.ENTERPRISE">{{ 'admin.userManagement.subscriptions.enterprise' | translate }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau des utilisateurs -->
+  <div class="table-container">
+    @if (loading()) {
+      <div class="loading-spinner">{{ 'admin.userManagement.loading' | translate }}</div>
+    } @else {
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>{{ 'admin.userManagement.table.user' | translate }}</th>
+            <th>{{ 'admin.userManagement.table.email' | translate }}</th>
+            <th>{{ 'admin.userManagement.table.type' | translate }}</th>
+            <th>{{ 'admin.userManagement.table.status' | translate }}</th>
+            <th>{{ 'admin.userManagement.table.subscription' | translate }}</th>
+            <th>{{ 'admin.userManagement.table.registrationDate' | translate }}</th>
+            <th>{{ 'admin.userManagement.table.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td>
+                <div class="user-info">
+                  @if (user.avatar) {
+                    <img [src]="user.avatar" [alt]="user.firstName" class="avatar">
+                  } @else {
+                    <div class="avatar-placeholder">
+                      {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                    </div>
+                  }
+                  <span>{{ user.firstName }} {{ user.lastName }}</span>
+                </div>
+              </td>
+              <td>{{ user.email }}</td>
+              <td>
+                <span class="badge" [ngClass]="getRoleBadgeClass(user.type)">
+                  {{ user.type }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadgeClass(user.status)">
+                  {{ user.status }}
+                </span>
+              </td>
+              <td>{{ user.subscriptionType }}</td>
+              <td>{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <div class="actions">
+                  <button 
+                    class="btn btn-sm btn-info" 
+                    (click)="viewUser(user.id)"
+                    [title]="'admin.userManagement.actions.viewDetails' | translate">
+                    <i class="icon-eye"></i>
+                  </button>
+                  
+                  @if (user.status === UserStatus.ACTIVE) {
+                    <button 
+                      class="btn btn-sm btn-warning" 
+                      (click)="suspendUser(user)"
+                      [title]="'admin.userManagement.actions.suspend' | translate">
+                      <i class="icon-ban"></i>
+                    </button>
+                  } @else if (user.status === UserStatus.SUSPENDED) {
+                    <button 
+                      class="btn btn-sm btn-success" 
+                      (click)="activateUser(user)"
+                      [title]="'admin.userManagement.actions.activate' | translate">
+                      <i class="icon-check"></i>
+                    </button>
+                  }
+                  
+                  <button 
+                    class="btn btn-sm btn-danger" 
+                    (click)="deleteUser(user)"
+                    [title]="'admin.userManagement.actions.delete' | translate">
+                    <i class="icon-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center">{{ 'admin.userManagement.noUsers' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button 
+          [disabled]="currentPage === 0" 
+          (click)="onPageChange(currentPage - 1)"
+          class="btn btn-sm">
+          {{ 'admin.userManagement.pagination.previous' | translate }}
+        </button>
+        <span class="page-info">
+          {{ 'admin.userManagement.pagination.page' | translate }} {{ currentPage + 1 }} {{ 'admin.userManagement.pagination.of' | translate }} {{ totalPages }}
+        </span>
+        <button 
+          [disabled]="currentPage >= totalPages - 1" 
+          (click)="onPageChange(currentPage + 1)"
+          class="btn btn-sm">
+          {{ 'admin.userManagement.pagination.next' | translate }}
+        </button>
+      </div>
+    }
+  </div>
+</div>

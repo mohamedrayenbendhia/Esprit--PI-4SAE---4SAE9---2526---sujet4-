@@ -1,0 +1,194 @@
+<app-header></app-header>
+
+<div class="freelancer-profile-container">
+  <div class="profile-header">
+    <h1>{{ 'freelancerProfile.title' | translate }}</h1>
+    <p class="subtitle">{{ 'freelancerProfile.subtitle' | translate }}</p>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <mat-icon>check_circle</mat-icon>
+      <div>
+        <span class="stat-value">{{ completionRate() }}%</span>
+        <span class="stat-label">{{ 'freelancerProfile.stats.completion' | translate }}</span>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-icon>schedule</mat-icon>
+      <div>
+        <span class="stat-value">{{ averageResponseTime() }}h</span>
+        <span class="stat-label">{{ 'freelancerProfile.stats.responseTime' | translate }}</span>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-icon>work</mat-icon>
+      <div>
+        <span class="stat-value">{{ totalProjects() }}</span>
+        <span class="stat-label">{{ 'freelancerProfile.stats.completed' | translate }}</span>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-icon>star</mat-icon>
+      <div>
+        <span class="stat-value">{{ rating() }}/5</span>
+        <span class="stat-label">{{ 'freelancerProfile.stats.rating' | translate }}</span>
+      </div>
+    </mat-card>
+  </div>
+
+  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+    <!-- Informations Professionnelles -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>work</mat-icon>
+          {{ 'freelancerProfile.professionalInfo' | translate }}
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'freelancerProfile.title_field' | translate }}</mat-label>
+          <input matInput formControlName="title" [placeholder]="'freelancerProfile.titlePlaceholder' | translate">
+          <mat-icon matSuffix>badge</mat-icon>
+          <mat-error *ngIf="profileForm.get('title')?.hasError('required')">
+            {{ 'freelancerProfile.errors.titleRequired' | translate }}
+          </mat-error>
+          <mat-error *ngIf="profileForm.get('title')?.hasError('minlength')">
+            {{ 'freelancerProfile.errors.titleMinLength' | translate }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'freelancerProfile.bio' | translate }}</mat-label>
+          <textarea 
+            matInput 
+            formControlName="bio" 
+            [placeholder]="'freelancerProfile.bioPlaceholder' | translate"
+            rows="6">
+          </textarea>
+          <mat-icon matSuffix>description</mat-icon>
+          <mat-hint align="end">
+            {{ profileForm.get('bio')?.value?.length || 0 }} / 500
+          </mat-hint>
+          <mat-error *ngIf="profileForm.get('bio')?.hasError('required')">
+            {{ 'freelancerProfile.errors.bioRequired' | translate }}
+          </mat-error>
+          <mat-error *ngIf="profileForm.get('bio')?.hasError('minlength')">
+            Minimum 50 characters
+          </mat-error>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Hourly Rate (DT)</mat-label>
+            <input matInput type="number" formControlName="hourlyRate" min="1">
+            <mat-icon matPrefix>payments</mat-icon>
+            <mat-hint>Your rate per hour</mat-hint>
+            <mat-error *ngIf="profileForm.get('hourlyRate')?.hasError('required')">
+              Rate is required
+            </mat-error>
+            <mat-error *ngIf="profileForm.get('hourlyRate')?.hasError('min')">
+              Rate must be greater than 0
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Availability</mat-label>
+            <mat-select formControlName="availability">
+              @for (status of [Availability.AVAILABLE, Availability.BUSY, Availability.UNAVAILABLE]; track status) {
+                <mat-option [value]="status">
+                  <div class="availability-option">
+                    <span 
+                      class="status-dot" 
+                      [style.background-color]="getAvailabilityColor(status)">
+                    </span>
+                    {{ getAvailabilityLabel(status) }}
+                  </div>
+                </mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>event_available</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Years of Experience</mat-label>
+          <input matInput type="number" formControlName="experienceYears" min="0" max="50">
+          <mat-icon matSuffix>history</mat-icon>
+          <mat-error *ngIf="profileForm.get('experienceYears')?.hasError('required')">
+            Experience is required
+          </mat-error>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Location and Languages -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>public</mat-icon>
+          Location and Languages
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Location</mat-label>
+            <input matInput formControlName="location" placeholder="Ex: Paris, France">
+            <mat-icon matSuffix>place</mat-icon>
+            <mat-error *ngIf="profileForm.get('location')?.hasError('required')">
+              Location is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Timezone</mat-label>
+            <mat-select formControlName="timezone">
+              @for (tz of availableTimezones; track tz) {
+                <mat-option [value]="tz">{{ tz }}</mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>schedule</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Spoken Languages</mat-label>
+          <mat-select formControlName="languages" multiple>
+            @for (lang of availableLanguages; track lang) {
+              <mat-option [value]="lang">{{ lang }}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matSuffix>translate</mat-icon>
+          <mat-error *ngIf="profileForm.get('languages')?.hasError('required')">
+            Select at least one language
+          </mat-error>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="profileForm.invalid || isLoading()">
+        @if (isLoading()) {
+          <ng-container>
+            <mat-icon class="spinner">refresh</mat-icon>
+            Saving...
+          </ng-container>
+        } @else {
+          <ng-container>
+            <mat-icon>save</mat-icon>
+            Save profile
+          </ng-container>
+        }
+      </button>
+    </div>
+  </form>
+</div>

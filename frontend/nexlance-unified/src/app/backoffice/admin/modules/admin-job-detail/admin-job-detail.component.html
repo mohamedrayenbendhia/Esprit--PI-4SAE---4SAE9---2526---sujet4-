@@ -1,0 +1,356 @@
+<div class="admin-job-detail-container">
+  <!-- Loading -->
+  <div *ngIf="loading()" class="loading-container">
+    <div class="loading-card">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Chargement des détails...</p>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading() && jobOffer()" class="job-detail-content">
+    
+    <!-- Hero Header -->
+    <div class="hero-header">
+      <div class="hero-overlay"></div>
+      <div class="hero-inner">
+        <button mat-icon-button (click)="goBack()" class="back-btn">
+          <mat-icon>arrow_back_ios_new</mat-icon>
+        </button>
+        <div class="hero-info">
+          <div class="hero-meta">
+            <span class="category-badge">
+              <mat-icon>{{ getCategoryIcon(jobOffer()!.category) }}</mat-icon>
+              {{ jobOffer()?.category }}
+            </span>
+            <span class="id-badge">
+              <mat-icon>fingerprint</mat-icon>
+              {{ jobOffer()?.id?.slice(0, 8) }}...
+            </span>
+          </div>
+          <h1>{{ jobOffer()?.title }}</h1>
+          <div class="hero-tags">
+            <mat-chip [class]="'status-pill status-' + (jobOffer()?.status || '').toLowerCase()">
+              <mat-icon>{{ getStatusIcon(jobOffer()!.status) }}</mat-icon>
+              {{ getStatusLabel(jobOffer()!.status) }}
+            </mat-chip>
+            <mat-chip *ngIf="jobOffer()?.isRemote" class="remote-pill">
+              <mat-icon>wifi</mat-icon>
+              Remote
+            </mat-chip>
+            <mat-chip class="level-pill">
+              <mat-icon>trending_up</mat-icon>
+              {{ getExperienceLevelLabel(jobOffer()!.experienceLevel) }}
+            </mat-chip>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button mat-fab extended [matMenuTriggerFor]="actionsMenu" [disabled]="processing()" class="action-fab">
+            <mat-icon>settings</mat-icon>
+            Actions
+          </button>
+          <mat-menu #actionsMenu="matMenu" class="actions-dropdown">
+            <button mat-menu-item (click)="reopenOffer()" *ngIf="jobOffer()?.status !== JobOfferStatus.OPEN">
+              <mat-icon class="menu-icon reopen">restart_alt</mat-icon>
+              <span>Réouvrir l'offre</span>
+            </button>
+            <button mat-menu-item (click)="archiveOffer()" *ngIf="jobOffer()?.status !== JobOfferStatus.ARCHIVED">
+              <mat-icon class="menu-icon archive">inventory_2</mat-icon>
+              <span>Archiver</span>
+            </button>
+            <button mat-menu-item (click)="cancelOffer()" *ngIf="jobOffer()?.status === JobOfferStatus.OPEN">
+              <mat-icon class="menu-icon cancel">block</mat-icon>
+              <span>Annuler l'offre</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="deleteOffer()" class="delete-action">
+              <mat-icon class="menu-icon delete">delete_forever</mat-icon>
+              <span>Supprimer</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics Strip -->
+    <div class="metrics-strip">
+      <div class="metric-card" style="--accent: #0EA5E9;">
+        <div class="metric-icon-wrap">
+          <mat-icon>visibility</mat-icon>
+        </div>
+        <div class="metric-data">
+          <span class="metric-value">{{ jobOffer()?.viewCount || 0 }}</span>
+          <span class="metric-label">Vues</span>
+        </div>
+      </div>
+
+      <div class="metric-card" style="--accent: #0284C7;">
+        <div class="metric-icon-wrap">
+          <mat-icon>group</mat-icon>
+        </div>
+        <div class="metric-data">
+          <span class="metric-value">{{ jobOffer()?.applicantCount || 0 }}</span>
+          <span class="metric-label">Candidatures</span>
+        </div>
+      </div>
+
+      <div class="metric-card" style="--accent: #10B981;">
+        <div class="metric-icon-wrap">
+          <mat-icon>euro</mat-icon>
+        </div>
+        <div class="metric-data">
+          <span class="metric-value">{{ formatBudget(jobOffer()!.budget, jobOffer()!.budgetType) }}</span>
+          <span class="metric-label">{{ getBudgetTypeLabel(jobOffer()!.budgetType) }}</span>
+        </div>
+      </div>
+
+      <div class="metric-card" style="--accent: #F97316;">
+        <div class="metric-icon-wrap">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <div class="metric-data">
+          <span class="metric-value">{{ jobOffer()?.estimatedDuration }}j</span>
+          <span class="metric-label">Durée estimée</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body Grid -->
+    <div class="body-grid">
+      
+      <!-- Left Column -->
+      <div class="col-left">
+        
+        <!-- Description -->
+        <div class="card glass-card">
+          <div class="card-title-row">
+            <div class="card-icon-badge blue">
+              <mat-icon>article</mat-icon>
+            </div>
+            <h2>Description</h2>
+          </div>
+          <div class="card-body">
+            <p class="description-text">{{ jobOffer()?.description }}</p>
+          </div>
+        </div>
+
+        <!-- Job Details -->
+        <div class="card glass-card">
+          <div class="card-title-row">
+            <div class="card-icon-badge indigo">
+              <mat-icon>info</mat-icon>
+            </div>
+            <h2>Détails de l'offre</h2>
+          </div>
+          <div class="card-body">
+            <div class="detail-tiles">
+              <div class="detail-tile">
+                <div class="tile-icon blue">
+                  <mat-icon>{{ getCategoryIcon(jobOffer()!.category) }}</mat-icon>
+                </div>
+                <span class="tile-label">Catégorie</span>
+                <span class="tile-value">{{ jobOffer()?.category }}</span>
+              </div>
+
+              <div class="detail-tile">
+                <div class="tile-icon purple">
+                  <mat-icon>school</mat-icon>
+                </div>
+                <span class="tile-label">Niveau</span>
+                <span class="tile-value">{{ getExperienceLevelLabel(jobOffer()!.experienceLevel) }}</span>
+              </div>
+
+              <div class="detail-tile">
+                <div class="tile-icon pink">
+                  <mat-icon>location_on</mat-icon>
+                </div>
+                <span class="tile-label">Localisation</span>
+                <span class="tile-value">{{ jobOffer()?.location || 'Non spécifié' }}</span>
+              </div>
+
+              <div class="detail-tile">
+                <div class="tile-icon red">
+                  <mat-icon>event</mat-icon>
+                </div>
+                <span class="tile-label">Deadline</span>
+                <span class="tile-value">{{ formatDate(jobOffer()?.deadline) }}</span>
+              </div>
+
+              <div class="detail-tile">
+                <div class="tile-icon green">
+                  <mat-icon>publish</mat-icon>
+                </div>
+                <span class="tile-label">Publié le</span>
+                <span class="tile-value">{{ formatDate(jobOffer()?.publishedAt) }}</span>
+              </div>
+
+              <div class="detail-tile">
+                <div class="tile-icon orange">
+                  <mat-icon>update</mat-icon>
+                </div>
+                <span class="tile-label">Mis à jour</span>
+                <span class="tile-value">{{ formatDate(jobOffer()?.updatedAt) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="card glass-card" *ngIf="jobOffer()?.requiredSkills && jobOffer()!.requiredSkills.length > 0">
+          <div class="card-title-row">
+            <div class="card-icon-badge purple">
+              <mat-icon>psychology</mat-icon>
+            </div>
+            <h2>Compétences requises</h2>
+          </div>
+          <div class="card-body">
+            <div class="skills-grid">
+              <span *ngFor="let skill of jobOffer()?.requiredSkills" class="skill-tag">
+                {{ skill }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attachments -->
+        <div class="card glass-card" *ngIf="jobOffer()?.attachments && jobOffer()!.attachments.length > 0">
+          <div class="card-title-row">
+            <div class="card-icon-badge orange">
+              <mat-icon>attach_file</mat-icon>
+            </div>
+            <h2>Fichiers joints</h2>
+          </div>
+          <div class="card-body">
+            <div class="files-list">
+              <a *ngFor="let attachment of jobOffer()?.attachments" 
+                 [href]="attachment" target="_blank" class="file-row">
+                <div class="file-icon">
+                  <mat-icon>insert_drive_file</mat-icon>
+                </div>
+                <span class="file-name">{{ attachment.split('/').pop() }}</span>
+                <mat-icon class="file-dl">download</mat-icon>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column -->
+      <div class="col-right">
+        
+        <!-- Client -->
+        <div class="card glass-card client-card" *ngIf="client()">
+          <div class="client-banner"></div>
+          <div class="client-body">
+            <div class="client-avatar-wrap">
+              <div class="client-avatar">
+                <img *ngIf="client()?.avatar" [src]="client()?.avatar" alt="">
+                <mat-icon *ngIf="!client()?.avatar">person</mat-icon>
+              </div>
+              <div class="online-dot"></div>
+            </div>
+            <h3 class="client-name">{{ client()?.firstName }} {{ client()?.lastName }}</h3>
+            <span class="client-role">Client</span>
+            <div class="client-contacts">
+              <div class="contact-row">
+                <mat-icon>mail_outline</mat-icon>
+                <span>{{ client()?.email }}</span>
+              </div>
+              <div class="contact-row" *ngIf="client()?.phoneNumber">
+                <mat-icon>phone_iphone</mat-icon>
+                <span>{{ client()?.phoneNumber }}</span>
+              </div>
+            </div>
+            <button mat-flat-button color="primary" (click)="viewClientProfile()" class="profile-btn">
+              <mat-icon>open_in_new</mat-icon>
+              Voir le profil
+            </button>
+          </div>
+        </div>
+
+        <!-- Applications -->
+        <div class="card glass-card applications-card">
+          <div class="card-title-row">
+            <div class="card-icon-badge green">
+              <mat-icon>assignment</mat-icon>
+            </div>
+            <h2>Candidatures</h2>
+            <span class="count-badge">{{ applications().length }}</span>
+          </div>
+          <div class="card-body">
+            <div *ngIf="applications().length === 0" class="empty-state">
+              <div class="empty-icon">
+                <mat-icon>how_to_reg</mat-icon>
+              </div>
+              <p>Aucune candidature pour le moment</p>
+              <span>Les candidatures apparaîtront ici</span>
+            </div>
+
+            <div *ngIf="applications().length > 0" class="app-list">
+              <div *ngFor="let application of applications(); let i = index" 
+                   class="app-row"
+                   (click)="viewApplication(application)"
+                   [style.animation-delay]="i * 60 + 'ms'">
+                <div class="app-avatar">
+                  <mat-icon>person_outline</mat-icon>
+                </div>
+                <div class="app-info">
+                  <span class="app-name">Freelancer #{{ application.freelanceId.slice(0, 6) }}</span>
+                  <span class="app-date">{{ formatDate(application.submittedAt) }}</span>
+                </div>
+                <span [class]="'app-status ' + getApplicationStatusClass(application.status)">
+                  {{ getApplicationStatusLabel(application.status) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="card glass-card">
+          <div class="card-title-row">
+            <div class="card-icon-badge teal">
+              <mat-icon>timeline</mat-icon>
+            </div>
+            <h2>Chronologie</h2>
+          </div>
+          <div class="card-body">
+            <div class="timeline">
+              <div class="timeline-item" *ngIf="jobOffer()?.createdAt">
+                <div class="tl-dot created"></div>
+                <div class="tl-content">
+                  <span class="tl-title">Créée</span>
+                  <span class="tl-date">{{ formatDate(jobOffer()?.createdAt) }}</span>
+                </div>
+              </div>
+              <div class="timeline-item" *ngIf="jobOffer()?.publishedAt">
+                <div class="tl-dot published"></div>
+                <div class="tl-content">
+                  <span class="tl-title">Publiée</span>
+                  <span class="tl-date">{{ formatDate(jobOffer()?.publishedAt) }}</span>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="tl-dot updated"></div>
+                <div class="tl-content">
+                  <span class="tl-title">Dernière mise à jour</span>
+                  <span class="tl-date">{{ formatDate(jobOffer()?.updatedAt) }}</span>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="tl-dot deadline"></div>
+                <div class="tl-content">
+                  <span class="tl-title">Deadline</span>
+                  <span class="tl-date">{{ formatDate(jobOffer()?.deadline) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

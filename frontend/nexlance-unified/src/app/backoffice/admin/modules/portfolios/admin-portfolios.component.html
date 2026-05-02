@@ -1,0 +1,85 @@
+<div class="admin-portfolios">
+
+  <div class="header-content">
+    <div class="header-text">
+      <h1><mat-icon>work</mat-icon> Portfolios Management</h1>
+      <p>View and manage all freelancer portfolios</p>
+    </div>
+    <div class="stat-chip">
+      <mat-icon>people</mat-icon>
+      <span>{{ portfolios().length }} Portfolios</span>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading()">
+    <mat-icon>autorenew</mat-icon>
+    <p>Loading portfolios...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading() && portfolios().length === 0">
+    <mat-icon>work_off</mat-icon>
+    <h3>No portfolios yet</h3>
+    <p>Freelancers have not created any portfolios</p>
+  </div>
+
+  <div class="portfolios-grid" *ngIf="!loading() && portfolios().length > 0">
+    <mat-card class="portfolio-card" *ngFor="let p of portfolios()">
+
+      <div class="card-header-content">
+        <div class="user-avatar">{{ getName(p.userId).substring(0, 2).toUpperCase() }}</div>
+        <div class="header-info">
+          <h3>{{ getName(p.userId) }} — {{ p.headline }}</h3>
+        </div>
+      </div>
+
+      <mat-card-content>
+        <div class="info-links">
+          <span *ngIf="p.location" class="info-item">
+            <mat-icon>location_on</mat-icon> {{ p.location }}
+          </span>
+          <a *ngIf="p.githubUrl" [href]="p.githubUrl" target="_blank" class="info-item link">
+            <mat-icon>code</mat-icon> GitHub
+          </a>
+          <a *ngIf="p.linkedinUrl" [href]="p.linkedinUrl" target="_blank" class="info-item link">
+            <mat-icon>link</mat-icon> LinkedIn
+          </a>
+        </div>
+
+        <div class="projects-section">
+          <div class="projects-header">
+            <mat-icon>folder</mat-icon>
+            <span>{{ p.projects.length || 0 }} Projects</span>
+          </div>
+
+          <div *ngIf="p.projects.length">
+            <div class="project-item" *ngFor="let proj of p.projects">
+              <div class="project-title">{{ proj.title }}</div>
+              <div class="project-meta" *ngIf="proj.techStack">
+                <mat-icon>build</mat-icon> {{ proj.techStack }}
+              </div>
+            </div>
+          </div>
+
+          <div class="no-projects" *ngIf="!p.projects.length">
+            No projects added yet
+          </div>
+        </div>
+
+        <div class="views-count">
+          <mat-icon>visibility</mat-icon>
+          {{ p.viewsCount }} views
+        </div>
+        <div class="project-badge-admin"
+     [style.background]="getProjectBadge(p.projects.length || 0).color + '22'"
+     [style.color]="getProjectBadge(p.projects.length || 0).color"
+     [style.border]="'1px solid ' + getProjectBadge(p.projects.length || 0).color">
+  <mat-icon>folder</mat-icon>
+  {{ getProjectBadge(p.projects.length || 0).label }}
+</div>
+
+      </mat-card-content>
+
+    </mat-card>
+  </div>
+
+</div>

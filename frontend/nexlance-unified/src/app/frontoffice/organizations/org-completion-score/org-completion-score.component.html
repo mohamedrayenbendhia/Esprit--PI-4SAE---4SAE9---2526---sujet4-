@@ -1,0 +1,98 @@
+<!-- Loading state -->
+@if (isLoading()) {
+  <div class="cs-loading">
+    <mat-spinner diameter="32" />
+  </div>
+}
+
+<!-- Error state -->
+@if (error() && !isLoading()) {
+  <p class="cs-error">{{ error() }}</p>
+}
+
+<!-- Score widget -->
+@if (data(); as d) {
+  <div class="cs-card">
+
+    <!-- Header row -->
+    <div class="cs-header">
+
+      <!-- SVG gauge -->
+      <div class="cs-gauge-wrap">
+        <svg viewBox="0 0 88 88" class="cs-gauge">
+          <!-- Track -->
+          <circle class="cs-gauge-track"
+                  cx="44" cy="44" [attr.r]="RADIUS"
+                  fill="none" stroke-width="8"/>
+          <!-- Progress -->
+          <circle class="cs-gauge-fill"
+                  cx="44" cy="44" [attr.r]="RADIUS"
+                  fill="none" stroke-width="8"
+                  [attr.stroke]="gaugeColor()"
+                  [attr.stroke-dasharray]="CIRCUMFERENCE"
+                  [attr.stroke-dashoffset]="dashOffset()"
+                  stroke-linecap="round"
+                  transform="rotate(-90 44 44)"/>
+        </svg>
+        <span class="cs-gauge-label" [style.color]="gaugeColor()">{{ d.score }}</span>
+      </div>
+
+      <!-- Title + badge -->
+      <div class="cs-meta">
+        <h3 class="cs-title">Profile Completeness</h3>
+        <div class="cs-sub">{{ completedCount() }} / 8 criteria completed</div>
+
+        @if (d.visibleInSearch) {
+          <span class="cs-badge cs-badge--visible">
+            <mat-icon>visibility</mat-icon> Visible en recherche
+          </span>
+        } @else {
+          <span class="cs-badge cs-badge--hidden"
+                matTooltip="Reach 40 pts to appear in public search">
+            <mat-icon>visibility_off</mat-icon> Profil incomplet
+          </span>
+        }
+      </div>
+
+      <!-- Toggle button -->
+      <button mat-icon-button class="cs-toggle" (click)="toggle()"
+              [matTooltip]="expanded() ? 'Collapse' : 'View details'">
+        <mat-icon>{{ expanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- Progress bar -->
+    <mat-progress-bar
+      mode="determinate"
+      [value]="d.score"
+      [color]="d.score >= 40 ? 'primary' : 'warn'"
+      class="cs-bar"/>
+
+    <!-- Expandable criteria list -->
+    @if (expanded()) {
+      <ul class="cs-criteria">
+        @for (c of criteria(); track c.label) {
+          <li class="cs-criterion" [class.cs-criterion--done]="c.done">
+            <mat-icon class="cs-icon">{{ c.done ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            <span class="cs-criterion-label">{{ c.label }}</span>
+            <span class="cs-criterion-pts">{{ c.pts }} pts</span>
+          </li>
+        }
+      </ul>
+
+      @if (d.breakdown.missingItems.length > 0) {
+        <div class="cs-tips">
+          <h4 class="cs-tips-title">
+            <mat-icon>lightbulb</mat-icon> Recommended actions
+          </h4>
+          <ul class="cs-tips-list">
+            @for (tip of d.breakdown.missingItems; track tip) {
+              <li>{{ tip }}</li>
+            }
+          </ul>
+        </div>
+      }
+    }
+
+  </div>
+}

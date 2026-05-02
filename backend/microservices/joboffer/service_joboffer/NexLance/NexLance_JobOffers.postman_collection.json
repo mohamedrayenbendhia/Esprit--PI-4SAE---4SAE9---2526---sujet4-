@@ -1,0 +1,278 @@
+{
+	"info": {
+		"_postman_id": "nexlance-job-offers",
+		"name": "NexLance Job Offers API",
+		"description": "API endpoints for managing job offers in NexLance platform",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Job Offer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"clientId\": \"11111111-1111-1111-1111-111111111111\",\n  \"title\": \"Full Stack Developer\",\n  \"description\": \"We are looking for an experienced Full Stack Developer to join our team.\",\n  \"category\": \"DEVELOPMENT\",\n  \"budget\": 2500.00,\n  \"budgetType\": \"FIXED\",\n  \"estimatedDuration\": 30,\n  \"deadline\": \"2026-03-15T23:59:59\",\n  \"status\": \"DRAFT\",\n  \"requiredSkills\": [\"Java\", \"Spring Boot\", \"React\", \"MySQL\"],\n  \"experienceLevel\": \"INTERMEDIATE\",\n  \"location\": \"Remote\",\n  \"isRemote\": true,\n  \"attachments\": [\"https://example.com/job-spec.pdf\"]\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Job Offers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Job Offer by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers/:id",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers", ":id"],
+					"variable": [
+						{
+							"key": "id",
+							"value": "11111111-1111-1111-1111-111111111111",
+							"description": "Job Offer UUID"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Job Offers by Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers/status/PUBLISHED",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers", "status", "PUBLISHED"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Job Offers by Client ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers/client/:clientId",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers", "client", ":clientId"],
+					"variable": [
+						{
+							"key": "clientId",
+							"value": "11111111-1111-1111-1111-111111111111",
+							"description": "Client UUID"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Active Job Offers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers/active",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers", "active"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Job Offers by Category",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers/category/DEVELOPMENT",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers", "category", "DEVELOPMENT"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Remote Job Offers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers/remote",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers", "remote"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Job Offers by Experience Level",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers/experience-level/INTERMEDIATE",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers", "experience-level", "INTERMEDIATE"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Job Offer",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"clientId\": \"11111111-1111-1111-1111-111111111111\",\n  \"title\": \"Senior Full Stack Developer\",\n  \"description\": \"Updated description for Senior Full Stack Developer position.\",\n  \"category\": \"DEVELOPMENT\",\n  \"budget\": 3500.00,\n  \"budgetType\": \"FIXED\",\n  \"estimatedDuration\": 45,\n  \"deadline\": \"2026-04-15T23:59:59\",\n  \"status\": \"PUBLISHED\",\n  \"requiredSkills\": [\"Java\", \"Spring Boot\", \"React\", \"MySQL\", \"Docker\"],\n  \"experienceLevel\": \"SENIOR\",\n  \"location\": \"Remote\",\n  \"isRemote\": true,\n  \"attachments\": [\"https://example.com/job-spec.pdf\"]\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers/:id",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers", ":id"],
+					"variable": [
+						{
+							"key": "id",
+							"value": "11111111-1111-1111-1111-111111111111",
+							"description": "Job Offer UUID"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Job Offer Status",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers/:id/status?status=PUBLISHED",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers", ":id", "status"],
+					"query": [
+						{
+							"key": "status",
+							"value": "PUBLISHED",
+							"description": "DRAFT, PUBLISHED, CLOSED, ARCHIVED"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "11111111-1111-1111-1111-111111111111",
+							"description": "Job Offer UUID"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Archive Job Offer",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers/:id/archive",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers", ":id", "archive"],
+					"variable": [
+						{
+							"key": "id",
+							"value": "11111111-1111-1111-1111-111111111111",
+							"description": "Job Offer UUID"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Job Offer",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/job-offers/:id",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "9090",
+					"path": ["api", "job-offers", ":id"],
+					"variable": [
+						{
+							"key": "id",
+							"value": "11111111-1111-1111-1111-111111111111",
+							"description": "Job Offer UUID"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:9090/api/job-offers"
+		}
+	]
+}

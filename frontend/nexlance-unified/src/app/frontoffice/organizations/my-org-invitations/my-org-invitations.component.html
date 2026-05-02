@@ -1,0 +1,79 @@
+<div class="invitations-page">
+  <h2>My Pending Invitations</h2>
+  <p class="subtitle">Invitations awaiting your response</p>
+
+  @if (isLoading()) {
+    <div class="loading-center">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
+
+  @if (!isLoading() && loadError()) {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ loadError() }}</p>
+    </div>
+  }
+
+  @if (!isLoading() && !loadError() && invitations().length === 0) {
+    <div class="empty-state">
+      <mat-icon>mail_outline</mat-icon>
+      <p>No pending invitations.</p>
+    </div>
+  }
+
+  @if (respondError()) {
+    <div class="error-msg"><mat-icon>error</mat-icon> {{ respondError() }}</div>
+  }
+
+  <div class="inv-list">
+    @for (inv of invitations(); track inv.id) {
+      <mat-card class="inv-card">
+        <mat-card-content>
+          <div class="inv-header">
+            <div class="org-info">
+              <div class="org-logo-placeholder"><mat-icon>domain</mat-icon></div>
+              <div>
+                <!-- On affiche l'ID de l'organisation en attendant une résolution côté user-service -->
+                <h3>Organization <code>{{ inv.organizationId.slice(0, 8) }}…</code></h3>
+                <!-- inv.role (corrigé — était inv.proposedRole) -->
+                <p>
+                  Proposed role:
+                  <span class="role-badge role-{{ inv.role.toLowerCase() }}">
+                    {{ roleLabel(inv.role) }}
+                  </span>
+                </p>
+                @if (inv.message) {
+                  <p class="inv-message">"{{ inv.message }}"</p>
+                }
+                <p class="expires">
+                  <mat-icon>schedule</mat-icon>
+                  Expires on {{ inv.expiresAt | date:'MM/dd/yyyy' }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <mat-divider style="margin:12px 0"></mat-divider>
+
+          <div class="inv-actions">
+            <button mat-raised-button color="primary"
+                    [disabled]="responding() === inv.id"
+                    (click)="respond(inv, true)">
+              @if (responding() === inv.id) {
+                <mat-spinner diameter="18"></mat-spinner>
+              } @else {
+                <span><mat-icon>check</mat-icon> Accept</span>
+              }
+            </button>
+            <button mat-stroked-button color="warn"
+                    [disabled]="responding() === inv.id"
+                    (click)="respond(inv, false)">
+              <mat-icon>close</mat-icon> Decline
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</div>

@@ -1,0 +1,126 @@
+<div class="client-portfolios">
+
+  <!-- Hero -->
+  <div class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <mat-icon>work</mat-icon>
+          {{ selectedPortfolio() ? selectedPortfolio()!.headline : 'Freelancer Portfolios' }}
+        </h1>
+        <p class="hero-description">
+          {{ selectedPortfolio() ? 'Portfolio details' : 'Browse all freelancer portfolios and projects' }}
+        </p>
+        <button mat-raised-button class="cta-button" (click)="back()" *ngIf="selectedPortfolio()">
+          <mat-icon>arrow_back</mat-icon> Back to Portfolios
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-box">
+          <div class="stat-value">{{ selectedPortfolio() ? selectedPortfolio()!.projects.length || 0 : portfolios().length }}</div>
+          <div class="stat-label">{{ selectedPortfolio() ? 'Projects' : 'Portfolios' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <div class="loading-state" *ngIf="loading()">
+      <mat-icon>autorenew</mat-icon>
+      <p>Loading...</p>
+    </div>
+
+    <!-- Portfolios Grid -->
+    <div class="portfolios-grid" *ngIf="!loading() && !selectedPortfolio()">
+      <div class="empty-state" *ngIf="portfolios().length === 0">
+        <mat-icon>work_off</mat-icon>
+        <h3>No portfolios yet</h3>
+      </div>
+
+      <mat-card class="portfolio-card" *ngFor="let p of portfolios()" (click)="selectPortfolio(p)">
+        <mat-card-content>
+          <div class="portfolio-header">
+            <div class="portfolio-avatar">{{ getName(p.userId).substring(0,2).toUpperCase() }}</div>
+<div class="portfolio-info">
+  <h3>{{ getName(p.userId) }} — {{ p.headline }}</h3>
+              <span *ngIf="p.location" class="location"><mat-icon>location_on</mat-icon>{{ p.location }}</span>
+            </div>
+            <mat-icon class="arrow">arrow_forward</mat-icon>
+          </div>
+          <div class="portfolio-links">
+            <a *ngIf="p.githubUrl" [href]="p.githubUrl" target="_blank" class="link-chip" (click)="$event.stopPropagation()">
+              <mat-icon>code</mat-icon> GitHub
+            </a>
+            <a *ngIf="p.linkedinUrl" [href]="p.linkedinUrl" target="_blank" class="link-chip" (click)="$event.stopPropagation()">
+              <mat-icon>link</mat-icon> LinkedIn
+            </a>
+          </div>
+          <div class="project-count">
+  <mat-icon>folder</mat-icon> {{ p.projects.length || 0 }} projects
+  <span class="project-badge"
+        [style.background]="getProjectBadge(p.projects.length || 0).color + '22'"
+        [style.color]="getProjectBadge(p.projects.length || 0).color"
+        [style.border]="'1px solid ' + getProjectBadge(p.projects.length || 0).color">
+    {{ getProjectBadge(p.projects.length || 0).label }}
+  </span>
+</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Portfolio Detail -->
+    <div class="portfolio-detail" *ngIf="selectedPortfolio()">
+      <mat-card class="info-card">
+        <mat-card-content>
+          <div class="detail-header">
+            <div class="detail-avatar">{{ getName(selectedPortfolio()!.userId).substring(0,2).toUpperCase() }}</div>
+<div class="detail-info">
+  <h2>{{ getName(selectedPortfolio()!.userId) }} — {{ selectedPortfolio()!.headline }}</h2>
+              <div class="detail-links">
+                <span *ngIf="selectedPortfolio()!.location" class="info-chip">
+                  <mat-icon>location_on</mat-icon> {{ selectedPortfolio()!.location }}
+                </span>
+                <a *ngIf="selectedPortfolio()!.githubUrl" [href]="selectedPortfolio()!.githubUrl" target="_blank" class="info-chip link">
+                  <mat-icon>code</mat-icon> GitHub
+                </a>
+                <a *ngIf="selectedPortfolio()!.linkedinUrl" [href]="selectedPortfolio()!.linkedinUrl" target="_blank" class="info-chip link">
+                  <mat-icon>link</mat-icon> LinkedIn
+                </a>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <h2 class="projects-title">Projects ({{ selectedPortfolio()!.projects.length || 0 }})</h2>
+
+      <div class="empty-state" *ngIf="!selectedPortfolio()!.projects.length">
+        <mat-icon>folder_open</mat-icon>
+        <p>No projects added yet</p>
+      </div>
+
+      <div class="projects-grid" *ngIf="selectedPortfolio()!.projects.length">
+        <mat-card class="project-card" *ngFor="let proj of selectedPortfolio()!.projects">
+          <mat-card-content>
+            <div class="project-icon"><mat-icon>folder</mat-icon></div>
+            <h3>{{ proj.title }}</h3>
+            <p *ngIf="proj.description">{{ proj.description }}</p>
+            <div class="tech-badge" *ngIf="proj.techStack">
+              <mat-icon>build</mat-icon> {{ proj.techStack }}
+            </div>
+            <div class="project-links">
+              <a *ngIf="proj.githubUrl" [href]="proj.githubUrl" target="_blank" class="proj-link">
+                <mat-icon>code</mat-icon> GitHub
+              </a>
+              <a *ngIf="proj.demoUrl" [href]="proj.demoUrl" target="_blank" class="proj-link">
+                <mat-icon>open_in_new</mat-icon> Demo
+              </a>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+  </div>
+</div>

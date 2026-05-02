@@ -1,0 +1,249 @@
+// ── Variables (charte NexLance) ───────────────────────────────────────────────
+$primary:      #0EA5E9;
+$gray-50:      #F8FAFC;
+$gray-100:     #F1F5F9;
+$gray-200:     #E2E8F0;
+$gray-300:     #CBD5E1;
+$gray-400:     #94A3B8;
+$gray-500:     #64748B;
+$gray-600:     #475569;
+$gray-700:     #334155;
+$gray-800:     #1E293B;
+$gray-900:     #0F172A;
+
+$shadow-sm: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+$shadow-md: 0 4px 12px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.04);
+$radius:    12px;
+$radius-sm: 8px;
+
+$nps-green:  #16A34A;
+$nps-amber:  #D97706;
+$nps-red:    #DC2626;
+$nps-purple: #7C3AED;
+
+// ── Page wrapper ──────────────────────────────────────────────────────────────
+.page-wrapper {
+  min-height: calc(100vh - 64px);
+  background: $gray-50;
+  padding: 40px 32px;
+  box-sizing: border-box;
+  @media (max-width: 768px) { padding: 24px 16px; }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.page-header {
+  max-width: 920px;
+  margin: 0 auto 32px;
+
+  .header-left h1 {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: $gray-900;
+    margin: 0 0 4px;
+  }
+  .header-left p { font-size: 14px; color: $gray-500; margin: 0; }
+}
+
+// ── Contenu principal ─────────────────────────────────────────────────────────
+.main-content {
+  max-width: 920px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ── Card générique ────────────────────────────────────────────────────────────
+.card {
+  background: white;
+  border: 1px solid $gray-200;
+  border-radius: $radius;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+}
+
+// ── KPI row ───────────────────────────────────────────────────────────────────
+.kpi-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 700px) { grid-template-columns: 1fr; }
+}
+
+.kpi-card {
+  padding: 28px 24px;
+  text-align: center;
+  transition: box-shadow 200ms, transform 200ms;
+
+  &:hover { box-shadow: $shadow-md; transform: translateY(-1px); }
+}
+
+.nps-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.nps-score {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
+.nps-label { font-size: 14px; color: $gray-500; margin-top: 4px; }
+.nps-qual  { font-size: 15px; font-weight: 700; }
+.nps-scale { font-size: 11px; color: $gray-300; margin-top: 2px; }
+
+.kpi-icon-wrap {
+  width: 42px;
+  height: 42px;
+  background: $gray-50;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+
+  mat-icon { font-size: 22px; width: 22px; height: 22px; color: $primary; }
+}
+
+.kpi-number {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: $gray-800;
+  line-height: 1;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
+.kpi-unit  { font-size: 1.2rem; font-weight: 400; color: $gray-400; }
+.kpi-label { font-size: 13px; color: $gray-500; margin-top: 6px; }
+.kpi-sub   { font-size: 12px; color: $gray-300; margin-top: 2px; }
+
+// ── Segments ──────────────────────────────────────────────────────────────────
+.segments-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+.segment-card {
+  padding: 24px;
+  text-align: center;
+  border-top: 4px solid transparent;
+  transition: box-shadow 200ms, transform 200ms;
+
+  &:hover { box-shadow: $shadow-md; transform: translateY(-1px); }
+
+  &.promoter  { border-top-color: $nps-green; }
+  &.passive   { border-top-color: $nps-amber; }
+  &.detractor { border-top-color: $nps-red; }
+}
+
+.segment-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  background: $gray-100;
+
+  mat-icon { font-size: 24px; width: 24px; height: 24px; color: $gray-500; }
+}
+
+.promoter  .segment-icon { background: #f0fdf4; mat-icon { color: $nps-green; } }
+.passive   .segment-icon { background: #fffbeb; mat-icon { color: $nps-amber; } }
+.detractor .segment-icon { background: #fef2f2; mat-icon { color: $nps-red; } }
+
+.seg-number {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: $gray-800;
+  line-height: 1;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
+.promoter  .seg-number { color: $nps-green; }
+.passive   .seg-number { color: $nps-amber; }
+.detractor .seg-number { color: $nps-red; }
+
+.seg-label { font-size: 14px; font-weight: 600; color: $gray-700; margin-top: 4px; }
+.seg-range { font-size: 12px; color: $gray-400; }
+.seg-pct   { font-size: 16px; font-weight: 700; color: $gray-500; margin-top: 8px; }
+
+// ── Distribution ──────────────────────────────────────────────────────────────
+.dist-header {
+  padding: 20px 24px 0;
+
+  h2 { font-size: 16px; font-weight: 700; color: $gray-900; margin: 0 0 2px; }
+  p  { font-size: 13px; color: $gray-400; margin: 0; }
+}
+
+.dist-body {
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dist-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dist-score {
+  width: 22px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.dist-track {
+  flex: 1;
+  background: $gray-100;
+  border-radius: 6px;
+  height: 22px;
+  overflow: hidden;
+}
+
+.dist-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width .6s ease;
+  min-width: 2px;
+}
+
+.dist-count {
+  width: 30px;
+  font-size: 13px;
+  color: $gray-500;
+  font-weight: 600;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty-state {
+  text-align: center;
+  padding: 72px 24px;
+  color: $gray-400;
+
+  .empty-icon { font-size: 56px; width: 56px; height: 56px; display: block; margin: 0 auto 16px; color: $gray-300; }
+  h3 { font-size: 18px; font-weight: 600; color: $gray-600; margin: 0 0 6px; }
+  p  { font-size: 14px; margin: 0; }
+}
+
+// ── Loading ───────────────────────────────────────────────────────────────────
+.loading-center { display: flex; justify-content: center; padding: 80px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }

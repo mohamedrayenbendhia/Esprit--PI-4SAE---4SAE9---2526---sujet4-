@@ -1,0 +1,148 @@
+<div class="create-project-container">
+  <div class="page-header">
+    <h1>Create a Project with Milestones</h1>
+    <button mat-icon-button routerLink="/frontoffice/client/dashboard">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+    <mat-card class="project-info-card">
+      <mat-card-header>
+        <mat-card-title>Project Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Project Title</mat-label>
+          <input matInput formControlName="title" required placeholder="E.g.: E-commerce website development">
+          <mat-error *ngIf="projectForm.get('title')?.hasError('required')">
+            Title is required
+          </mat-error>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Freelancer Email</mat-label>
+            <input matInput type="email" formControlName="freelanceEmail" required>
+            <mat-error *ngIf="projectForm.get('freelanceEmail')?.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="projectForm.get('freelanceEmail')?.hasError('email')">
+              Invalid email format
+            </mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Client Email</mat-label>
+            <input matInput type="email" formControlName="clientEmail" required>
+            <mat-error *ngIf="projectForm.get('clientEmail')?.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="projectForm.get('clientEmail')?.hasError('email')">
+              Invalid email format
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="startPicker" formControlName="startDate" required>
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+            <mat-error *ngIf="projectForm.get('startDate')?.hasError('required')">
+              Start date is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endPicker" formControlName="endDate" required>
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+            <mat-error *ngIf="projectForm.get('endDate')?.hasError('required')">
+              End date is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Requirements</mat-label>
+          <textarea matInput formControlName="requirements" rows="3"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Expected Deliverables</mat-label>
+          <textarea matInput formControlName="deliverables" rows="3"></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="milestones-card">
+      <mat-card-header>
+        <mat-card-title>Project Milestones</mat-card-title>
+        <button mat-button color="primary" type="button" (click)="addMilestone()">
+          <mat-icon>add</mat-icon>
+          Add Milestone
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <div formArrayName="milestones" class="milestones-list">
+          @for (milestone of milestones.controls; track $index) {
+            <div [formGroupName]="$index" class="milestone-item">
+              <div class="milestone-header">
+                <h3>Milestone {{ $index + 1 }}</h3>
+                <div class="milestone-actions">
+                  <button mat-icon-button type="button" (click)="moveMilestoneUp($index)" [disabled]="$index === 0">
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button mat-icon-button type="button" (click)="moveMilestoneDown($index)" [disabled]="$index === milestones.length - 1">
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                  <button mat-icon-button type="button" color="warn" (click)="removeMilestone($index)" [disabled]="milestones.length === 1">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Title</mat-label>
+                <input matInput formControlName="title" required>
+                <mat-error>Milestone title is required</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" rows="2" required></textarea>
+                <mat-error>Milestone description is required</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Deadline</mat-label>
+                <input matInput [matDatepicker]="milestonePicker" formControlName="dueDate" required>
+                <mat-datepicker-toggle matSuffix [for]="milestonePicker"></mat-datepicker-toggle>
+                <mat-datepicker #milestonePicker></mat-datepicker>
+                <mat-error>Deadline is required</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Acceptance Criteria</mat-label>
+                <textarea matInput formControlName="acceptanceCriteria" rows="2"></textarea>
+              </mat-form-field>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="submit-actions">
+      <button mat-raised-button type="button" routerLink="/frontoffice/client/dashboard">
+        Cancel
+      </button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!projectForm.valid">
+        <mat-icon>check</mat-icon>
+        Create Project
+      </button>
+    </div>
+  </form>
+</div>

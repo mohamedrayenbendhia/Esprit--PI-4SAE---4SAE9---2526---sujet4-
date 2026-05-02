@@ -1,0 +1,229 @@
+// ── Design tokens ─────────────────────────────────────────────────────────────
+$primary:      #0EA5E9;
+$primary-hov:  #0284C7;
+$primary-50:   #F0F9FF;
+$primary-100:  #E0F2FE;
+$gray-50:      #F8FAFC;
+$gray-100:     #F1F5F9;
+$gray-200:     #E2E8F0;
+$gray-300:     #CBD5E1;
+$gray-400:     #94A3B8;
+$gray-500:     #64748B;
+$gray-600:     #475569;
+$gray-700:     #334155;
+$gray-800:     #1E293B;
+$gray-900:     #0F172A;
+$success:      #10B981;
+$warning:      #F59E0B;
+$error:        #EF4444;
+$shadow-sm:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+$tr:           150ms ease;
+
+// ── Loading / Error ────────────────────────────────────────────────────────────
+.loading {
+  display: flex; justify-content: center; padding: 48px;
+}
+
+.error-msg {
+  display: flex; align-items: center; gap: 8px;
+  color: $error; padding: 16px; font-size: 14px;
+  mat-icon { font-size: 20px; }
+}
+
+// ── Dashboard shell ────────────────────────────────────────────────────────────
+.analytics-dashboard { padding: 8px 0 24px; }
+
+// ── Snapshot row ──────────────────────────────────────────────────────────────
+.snapshot-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+
+  @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+}
+
+.snapshot-card {
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #fff;
+
+  // trust card uses primary blue instead of purple
+  &.trust   { background: linear-gradient(135deg, $primary, $primary-hov); }
+  &.rating  { background: linear-gradient(135deg, #F59E0B, #FBBF24); }
+  &.days    { background: linear-gradient(135deg, #0EA5E9, #38BDF8); }
+  &.members { background: linear-gradient(135deg, #10B981, #34D399); }
+}
+
+.snap-label { font-size: 12px; opacity: 0.85; font-weight: 500; }
+.snap-value {
+  font-size: 2.2rem; font-weight: 700; line-height: 1;
+  .snap-of { font-size: 1rem; font-weight: 400; opacity: 0.75; }
+}
+.snap-sub   { font-size: 12px; opacity: 0.8; }
+.snap-sub.stars { font-size: 1rem; letter-spacing: 1px; }
+
+// ── Sections grid ─────────────────────────────────────────────────────────────
+.sections-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+.section-card {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: $shadow-sm;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: $gray-800;
+  mat-icon { color: $primary; font-size: 20px; }
+}
+
+.divider {
+  height: 1px;
+  background: $gray-100;
+  margin: 0 -20px;
+}
+
+// ── KPI tiles ─────────────────────────────────────────────────────────────────
+.kpi-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.kpi {
+  flex: 1;
+  min-width: 56px;
+  background: $gray-50;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid $gray-100;
+
+  &.blue  { background: #EFF6FF; border-color: #BFDBFE; }
+  &.green { background: #F0FDF4; border-color: #BBF7D0; }
+  &.red   { background: #FEF2F2; border-color: #FECACA; }
+  &.warn  { background: #FFFBEB; border-color: #FDE68A; }
+  &.gray  { background: $gray-50; border-color: $gray-200; }
+}
+
+.kpi-v {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $gray-900;
+  line-height: 1;
+}
+.kpi-l {
+  font-size: 11px;
+  color: $gray-500;
+  text-align: center;
+  font-weight: 500;
+}
+
+// ── Progress bars ─────────────────────────────────────────────────────────────
+.progress-stack { display: flex; flex-direction: column; gap: 8px; }
+
+.ps-row { display: flex; align-items: center; gap: 8px; }
+
+.ps-label {
+  width: 70px;
+  font-size: 12px;
+  color: $gray-500;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.ps-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: $gray-100;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.ps-bar {
+  height: 100%;
+  border-radius: 100px;
+  transition: width 0.5s ease;
+  min-width: 2px;
+
+  &.green  { background: #10B981; }
+  &.red    { background: $error; }
+  &.orange { background: $warning; }
+  &.gray   { background: $gray-400; }
+  &.blue   { background: $primary; }
+}
+
+.ps-count {
+  width: 24px;
+  font-size: 12px;
+  color: $gray-700;
+  font-weight: 600;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+// ── Star distribution ─────────────────────────────────────────────────────────
+.star-dist { display: flex; flex-direction: column; gap: 6px; }
+
+.star-row { display: flex; align-items: center; gap: 8px; }
+
+.star-label {
+  width: 28px;
+  font-size: 13px;
+  color: $gray-700;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+// ── Rate badge ────────────────────────────────────────────────────────────────
+.rate-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #FEF3C7;
+  color: #92400E;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+
+  &.green { background: #D1FAE5; color: #065F46; }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+}
+
+.reply-rate {
+  font-size: 13px;
+  color: $gray-500;
+  padding-top: 4px;
+  strong { color: $gray-700; }
+}
+
+// ── Trust level overrides ─────────────────────────────────────────────────────
+.trust-5   { background: linear-gradient(135deg, #059669, #10B981) !important; }
+.trust-4   { background: linear-gradient(135deg, $primary, $primary-hov) !important; }
+.trust-3   { background: linear-gradient(135deg, #D97706, #F59E0B) !important; }
+.trust-low { background: linear-gradient(135deg, $gray-500, $gray-400) !important; }

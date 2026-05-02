@@ -1,0 +1,371 @@
+@if (isLoading()) {
+  <div style="display:flex;justify-content:center;padding:64px">
+    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+  </div>
+}
+
+@if (!isLoading() && loadError()) {
+  <div class="error-container">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ loadError() }}</p>
+  </div>
+}
+
+@if (!isLoading() && org(); as o) {
+  <div class="settings-page">
+
+    <div class="settings-header">
+      <button mat-icon-button (click)="goToProfile()" matTooltip="View public profile">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <h2>{{ o.name }}</h2>
+        <span class="status-chip status-chip--{{ statusClass(o.status) }}">
+          {{ statusLabel(o.status) }}
+        </span>
+      </div>
+    </div>
+
+    <mat-tab-group animationDuration="200ms">
+
+      <!-- ── Information ───────────────────────────────────────────────── -->
+      <mat-tab label="Information">
+        <div class="tab-body">
+
+          <mat-form-field appearance="outline" style="width:100%">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="editForm.name" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" style="width:100%">
+            <mat-label>Description</mat-label>
+            <textarea matInput rows="4" [(ngModel)]="editForm.description"></textarea>
+          </mat-form-field>
+
+          <div class="row-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Logo URL</mat-label>
+              <input matInput [(ngModel)]="editForm.logoUrl" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Website</mat-label>
+              <input matInput [(ngModel)]="editForm.website" />
+            </mat-form-field>
+          </div>
+
+          <div class="row-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Location</mat-label>
+              <input matInput [(ngModel)]="editForm.location" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Size</mat-label>
+              <mat-select [(ngModel)]="editForm.size">
+                @for (s of sizes; track s) {
+                  <mat-option [value]="s">{{ s }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Spécialités -->
+          <div class="specialties-field">
+            <label>Specialties</label>
+            <mat-chip-grid #chipGrid>
+              @for (s of editSpecialties(); track s) {
+                <mat-chip-row (removed)="removeSpecialty(s)">
+                  {{ s }}
+                  <button matChipRemove><mat-icon>cancel</mat-icon></button>
+                </mat-chip-row>
+              }
+            </mat-chip-grid>
+            <mat-form-field appearance="outline" style="width:100%">
+              <input matInput placeholder="Add a specialty…"
+                     [matChipInputFor]="chipGrid"
+                     [matChipInputSeparatorKeyCodes]="separators"
+                     (matChipInputTokenEnd)="addSpecialty($event)" />
+            </mat-form-field>
+          </div>
+
+          <!-- Visibilité -->
+          <div class="visibility-row">
+            <label>Visibility:</label>
+            @for (v of visibilities; track v) {
+              <button mat-stroked-button
+                      [color]="org()?.visibility === v ? 'primary' : undefined"
+                      (click)="setVisibility(v)"
+                      [matTooltip]="visibilityLabel(v)">
+                {{ visibilityLabel(v) }}
+              </button>
+            }
+          </div>
+
+          @if (saveError()) {
+            <div class="error-msg"><mat-icon>error</mat-icon> {{ saveError() }}</div>
+          }
+          @if (saveSuccess()) {
+            <div class="success-msg"><mat-icon>check</mat-icon> Changes saved.</div>
+          }
+
+          <button mat-raised-button color="primary"
+                  [disabled]="saveLoading()"
+                  (click)="saveInfo()">
+            <mat-icon>save</mat-icon>
+            {{ saveLoading() ? 'Saving...' : 'Save' }}
+          </button>
+
+        </div>
+      </mat-tab>
+
+      <!-- ── Portfolio ─────────────────────────────────────────────────── -->
+      <mat-tab label="Portfolio">
+        <div class="tab-body">
+          <app-org-portfolio [orgId]="orgId" [canEdit]="true" />
+        </div>
+      </mat-tab>
+
+      <!-- ── Members ──────────────────────────────────────────────────── -->
+      <mat-tab label="Members ({{ members().length }})">
+        <div class="tab-body">
+          @if (members().length === 0) {
+            <p class="empty-text">No members loaded.</p>
+          }
+          <div class="member-list">
+            @for (m of members(); track m.id) {
+              <div class="member-row">
+                <div class="member-info">
+                  <mat-icon>person</mat-icon>
+                  <!-- Affiche un identifiant partiel — le userId complet est disponible -->
+                  <span class="member-id" [matTooltip]="m.userId">
+                    {{ m.userId.slice(0, 8) }}…
+                  </span>
+                  <span class="role-badge" [class]="'role-' + m.role.toLowerCase()">
+                    {{ roleLabel(m.role) }}
+                  </span>
+                </div>
+
+                <!-- Actions propriétaire uniquement -->
+                @if (isOwner()) {
+                  @if (m.role === MemberRole.MEMBER) {
+                    <button mat-icon-button color="primary"
+                            (click)="promote(m.id)"
+                            matTooltip="Promote to Manager">
+                      <mat-icon>upgrade</mat-icon>
+                    </button>
+                  }
+                  @if (m.role === MemberRole.MANAGER) {
+                    <button mat-icon-button
+                            (click)="demote(m.id)"
+                            matTooltip="Demote to Member">
+                      <mat-icon>arrow_downward</mat-icon>
+                    </button>
+                  }
+                  @if (m.role !== MemberRole.OWNER) {
+                    <button mat-icon-button color="warn"
+                            (click)="remove(m.id)"
+                            matTooltip="Remove this member">
+                      <mat-icon>person_remove</mat-icon>
+                    </button>
+                  }
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- ── Invitations ───────────────────────────────────────────────── -->
+      <mat-tab label="Invitations">
+        <div class="tab-body">
+          <h3>Invite a Member</h3>
+
+          <div class="row-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <!-- inviteeEmail — nom aligné backend -->
+              <input matInput [(ngModel)]="inviteForm.inviteeEmail"
+                     placeholder="ex: jean@mail.com" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Proposed Role</mat-label>
+              <!-- role — nom aligné backend -->
+              <mat-select [(ngModel)]="inviteForm.role">
+                @for (r of roles; track r) {
+                  <mat-option [value]="r">{{ roleLabel(r) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          @if (inviteError()) {
+            <div class="error-msg"><mat-icon>error</mat-icon> {{ inviteError() }}</div>
+          }
+          @if (inviteSuccess()) {
+            <div class="success-msg"><mat-icon>check</mat-icon> Invitation sent.</div>
+          }
+
+          <button mat-raised-button color="primary"
+                  [disabled]="inviteLoading()"
+                  (click)="sendInvite()">
+            <mat-icon>send</mat-icon>
+            {{ inviteLoading() ? 'Sending...' : 'Invite' }}
+          </button>
+
+          <mat-divider style="margin:24px 0"></mat-divider>
+
+          <h3>Pending Invitations ({{ invitations().length }})</h3>
+          @if (invitations().length === 0) {
+            <p class="empty-text">No pending invitations.</p>
+          }
+          @for (inv of invitations(); track inv.id) {
+            <div class="invitation-row">
+              <mat-icon>mail_outline</mat-icon>
+              <!-- inviteeEmail et inviteeId — noms corrigés (étaient invitedEmail/invitedUserId) -->
+              <span>{{ inv.inviteeEmail ?? inv.inviteeId ?? '—' }}</span>
+              <!-- role — nom corrigé (était proposedRole) -->
+              <span class="role-sm">{{ roleLabel(inv.role) }}</span>
+              <span class="expiry-sm">Exp. {{ inv.expiresAt | date:'MM/dd/yyyy' }}</span>
+              <button mat-icon-button color="warn"
+                      (click)="cancelInvitation(inv.id)"
+                      matTooltip="Cancel this invitation">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- ── Candidatures ──────────────────────────────────────────────── -->
+      <mat-tab label="Applications">
+        <div class="tab-body">
+          @if (isManager()) {
+            <app-org-applications-manager [orgId]="orgId" />
+          } @else {
+            <p class="empty-text">
+              <mat-icon>lock</mat-icon>
+              Insufficient rights — reserved for owner and managers.
+            </p>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- ── Devis ─────────────────────────────────────────────────────── -->
+      <mat-tab label="Quotes">
+        <div class="tab-body">
+          @if (isManager()) {
+            <app-org-rfq-manager [orgId]="orgId" />
+          } @else {
+            <p class="empty-text">
+              <mat-icon>lock</mat-icon>
+              Insufficient rights — reserved for owner and managers.
+            </p>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- ── Analytics ─────────────────────────────────────────────────── -->
+      <mat-tab label="Analytics">
+        <div class="tab-body">
+          <app-org-analytics [orgId]="orgId" />
+        </div>
+      </mat-tab>
+
+      <!-- ── Complétude du profil ──────────────────────────────────────── -->
+      <mat-tab label="Completeness">
+        <div class="tab-body">
+          <p class="tab-intro">
+            Track your profile completeness to maximize your visibility in public search.
+          </p>
+          <app-org-completion-score [orgId]="orgId" />
+        </div>
+      </mat-tab>
+
+      <!-- ── Zone de danger ────────────────────────────────────────────── -->
+      <mat-tab label="Danger Zone">
+        <div class="tab-body danger-zone">
+
+          <!-- Quitter l'organisation (membres non-propriétaires) -->
+          @if (!isOwner()) {
+            <div class="danger-card">
+              <h3><mat-icon>exit_to_app</mat-icon> Leave Organization</h3>
+              <p>You will permanently leave this organization. You may be re-invited later.</p>
+              @if (leaveError()) {
+                <div class="error-msg"><mat-icon>error</mat-icon> {{ leaveError() }}</div>
+              }
+              <button mat-raised-button color="warn"
+                      [disabled]="leaveLoading()"
+                      (click)="leaveOrg()">
+                <mat-icon>exit_to_app</mat-icon>
+                {{ leaveLoading() ? 'Leaving...' : 'Leave Organization' }}
+              </button>
+            </div>
+            <mat-divider style="margin:24px 0"></mat-divider>
+            <p class="empty-text">
+              <mat-icon>lock</mat-icon>
+              Only the owner can dissolve the organization.
+            </p>
+          } @else {
+            <div class="danger-card">
+              <h3><mat-icon>swap_horiz</mat-icon> Transfer Ownership</h3>
+              <p>
+                Transfer ownership of the organization to another member.
+                You will become a <strong>regular member</strong> after the transfer.
+              </p>
+              <mat-form-field appearance="outline" style="width:100%">
+                <mat-label>New owner</mat-label>
+                <mat-select [ngModel]="transferNewOwnerId()"
+                            (ngModelChange)="transferNewOwnerId.set($event)">
+                  @for (m of transferableMembers(); track m.id) {
+                    <mat-option [value]="m.userId">
+                      {{ m.userId }}
+                      <span class="role-badge role-badge--{{ m.role.toLowerCase() }}">{{ roleLabel(m.role) }}</span>
+                    </mat-option>
+                  }
+                  @if (transferableMembers().length === 0) {
+                    <mat-option disabled>No other active members</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              @if (transferError()) {
+                <div class="error-msg"><mat-icon>error</mat-icon> {{ transferError() }}</div>
+              }
+              @if (transferSuccess()) {
+                <div class="success-msg"><mat-icon>check</mat-icon> Ownership transferred — redirecting…</div>
+              }
+              <button mat-raised-button color="warn"
+                      [disabled]="transferLoading() || !transferNewOwnerId().trim()"
+                      (click)="transferOwnership()">
+                <mat-icon>swap_horiz</mat-icon>
+                {{ transferLoading() ? 'Transferring...' : 'Transfer Ownership' }}
+              </button>
+            </div>
+            <mat-divider style="margin:24px 0"></mat-divider>
+            <div class="danger-card">
+              <h3><mat-icon>warning</mat-icon> Dissolve Organization</h3>
+              <p>
+                This action is <strong>irreversible</strong>.
+                The organization will be set to <em>Dissolved</em> status and all members will be notified.
+              </p>
+              <mat-form-field appearance="outline" style="width:100%">
+                <mat-label>Confirm by typing the name: <strong>{{ o.name }}</strong></mat-label>
+                <input matInput
+                       [ngModel]="dissolveConfirmName()"
+                       (ngModelChange)="dissolveConfirmName.set($event)" />
+              </mat-form-field>
+              @if (dissolveError()) {
+                <div class="error-msg"><mat-icon>error</mat-icon> {{ dissolveError() }}</div>
+              }
+              <button mat-raised-button color="warn"
+                      [disabled]="dissolveLoading() || dissolveConfirmName() !== o.name"
+                      (click)="dissolve()">
+                <mat-icon>delete_forever</mat-icon>
+                {{ dissolveLoading() ? 'Dissolving...' : 'Dissolve Permanently' }}
+              </button>
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+  </div>
+}

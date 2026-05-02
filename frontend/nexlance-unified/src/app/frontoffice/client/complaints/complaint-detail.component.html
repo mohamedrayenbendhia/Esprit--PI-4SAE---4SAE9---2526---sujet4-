@@ -1,0 +1,243 @@
+<div class="detail-container">
+
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="state-box">
+    <div class="spinner"></div>
+  </div>
+
+  <ng-container *ngIf="!isLoading() && complaint()">
+
+    <!-- ── Header ──────────────────────────────────────────── -->
+    <div class="page-header">
+      <button class="btn-back" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon> Back
+      </button>
+      <div class="header-main">
+        <div class="ticket-row">
+          <span class="ticket-num">{{ complaint()!.ticketNumber }}</span>
+          <span class="status-badge"
+            [style.background]="getStatusColor(complaint()!.status) + '20'"
+            [style.color]="getStatusColor(complaint()!.status)">
+            {{ getStatusLabel(complaint()!.status) }}
+          </span>
+        </div>
+        <h1>{{ complaint()!.subject }}</h1>
+      </div>
+    </div>
+
+    <!-- Bandeau partie mise en cause -->
+    <div *ngIf="isReportedParty()" class="reported-party-banner">
+      <mat-icon>gavel</mat-icon>
+      <div>
+        <strong>You have been involved in this complaint</strong>
+        <p>The support team would like to hear your side of the story. Please reply in the conversation section below.</p>
+      </div>
+    </div>
+
+    <div class="content-layout">
+
+      <!-- ── Colonne principale ──────────────────────────── -->
+      <div class="main-col">
+
+        <!-- Infos réclamation -->
+        <div class="info-card">
+          <h3 class="section-title">
+            <mat-icon>info_outline</mat-icon> Details
+          </h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Category</span>
+              <span class="info-value">{{ getCategoryLabel(complaint()!.category) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Priority</span>
+              <span class="info-value priority-val" [style.color]="getPriorityColor(complaint()!.priority)">
+                <mat-icon>flag</mat-icon>
+                {{ getPriorityLabel(complaint()!.priority) }}
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Created on</span>
+              <span class="info-value">{{ formatDate(complaint()!.createdAt) }}</span>
+            </div>
+            <div class="info-item" *ngIf="complaint()!.resolvedAt">
+              <span class="info-label">Resolved on</span>
+              <span class="info-value">{{ formatDate(complaint()!.resolvedAt!) }}</span>
+            </div>
+          </div>
+
+          <div class="description-block">
+            <span class="info-label">Description</span>
+            <p class="description-text">{{ complaint()!.description }}</p>
+          </div>
+
+          <!-- Résolution -->
+          <div *ngIf="complaint()!.resolution" class="resolution-block">
+            <div class="resolution-header">
+              <mat-icon>check_circle</mat-icon>
+              <span>Resolution</span>
+            </div>
+            <p class="resolution-text">{{ complaint()!.resolution }}</p>
+          </div>
+        </div>
+
+        <!-- ── Attachments ─────────────────────────────── -->
+        <div class="attachments-card">
+          <h3 class="section-title">
+            <mat-icon>attach_file</mat-icon>
+            Attachments
+            <span class="attach-count" *ngIf="attachments.length > 0">
+              {{ attachments.length }}
+            </span>
+          </h3>
+
+          <!-- Composant réutilisable en mode lecture seule -->
+          <app-attachment-manager
+            [readonly]="true"
+            [existingAttachments]="attachments">
+          </app-attachment-manager>
+        </div>
+
+        <!-- Médiation (si escaladée ou panel activé) -->
+        @if (hasMediation()) {
+          <app-mediation-panel
+            [complaintId]="complaint()!.id"
+            [isAdmin]="false">
+          </app-mediation-panel>
+        }
+
+        <!-- Réouverture -->
+        @if (canReopen()) {
+          <div class="reopen-section">
+            @if (!showReopenForm()) {
+              <button mat-stroked-button color="primary" (click)="showReopenForm.set(true)">
+                <mat-icon>replay</mat-icon> Contest the resolution (7 days)
+              </button>
+            } @else {
+              <div class="reopen-form">
+                <h4><mat-icon>replay</mat-icon> Reason for reopening</h4>
+                <mat-form-field appearance="outline" style="width:100%">
+                  <mat-label>Explain why this resolution is unsatisfactory *</mat-label>
+                  <textarea matInput rows="3"
+                            [ngModel]="reopenReason()"
+                            (ngModelChange)="reopenReason.set($event)"></textarea>
+                </mat-form-field>
+                <div class="reopen-actions">
+                  <button mat-button (click)="showReopenForm.set(false)">Cancel</button>
+                  <button mat-raised-button color="primary"
+                          [disabled]="isReopening() || !reopenReason().trim()"
+                          (click)="reopen()">
+                    <mat-icon>send</mat-icon> Submit
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Conversation dual-fil -->
+        @if (complaint()) {
+          <app-complaint-conversation [complaint]="complaint()!" />
+        }
+
+      </div>
+
+      <!-- ── Sidebar ─────────────────────────────────────── -->
+      <div class="side-col">
+
+        <!-- Notation -->
+        <div *ngIf="canRate()" class="rating-card">
+          <h3 class="section-title">
+            <mat-icon>star_rate</mat-icon> Rate the service
+          </h3>
+          <p class="rating-hint">Your complaint has been resolved. How would you rate our service?</p>
+          <div class="stars-row">
+            <button
+              *ngFor="let i of [1,2,3,4,5]"
+              type="button"
+              class="star-btn"
+              [class.active]="i <= (hoverRating() || selectedRating())"
+              (mouseenter)="hoverRating.set(i)"
+              (mouseleave)="hoverRating.set(0)"
+              (click)="selectedRating.set(i)">
+              <mat-icon>{{ i <= (hoverRating() || selectedRating()) ? 'star' : 'star_border' }}</mat-icon>
+            </button>
+          </div>
+          <button
+            class="btn-rate"
+            [disabled]="!selectedRating() || isRating()"
+            (click)="submitRating()">
+            {{ isRating() ? 'Sending...' : 'Submit my rating' }}
+          </button>
+        </div>
+
+        <!-- NPS Survey -->
+        @if (showNps()) {
+          <app-nps-widget [complaintId]="complaint()!.id"></app-nps-widget>
+        }
+
+        <!-- Note existante -->
+        <div *ngIf="complaint()!.satisfactionRating" class="rating-done-card">
+          <mat-icon class="done-icon">star</mat-icon>
+          <p>You have rated this service</p>
+          <div class="stars-display">
+            <span *ngFor="let i of [1,2,3,4,5]">
+              <mat-icon [style.color]="i <= complaint()!.satisfactionRating! ? '#f59e0b' : '#d1d5db'">
+                {{ i <= complaint()!.satisfactionRating! ? 'star' : 'star_border' }}
+              </mat-icon>
+            </span>
+          </div>
+          <strong>{{ complaint()!.satisfactionRating }}/5</strong>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-card">
+          <h3 class="section-title">
+            <mat-icon>timeline</mat-icon> History
+          </h3>
+          <div class="timeline">
+            <div class="tl-item done">
+              <div class="tl-dot"></div>
+              <div class="tl-body">
+                <span class="tl-label">Complaint created</span>
+                <span class="tl-date">{{ formatDate(complaint()!.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="tl-item" [class.done]="complaint()!.status !== 'OPEN'">
+              <div class="tl-dot"></div>
+              <div class="tl-body">
+                <span class="tl-label">Assigned</span>
+                <ng-container *ngIf="complaint()!.firstResponseAt; else noResponse">
+                  <span class="tl-date">{{ formatDate(complaint()!.firstResponseAt!) }}</span>
+                </ng-container>
+                <ng-template #noResponse>
+                  <span class="tl-date pending" [class.warning]="isWaitingTooLong()">
+                    {{ complaint()!.status === 'OPEN' ? "Awaiting assignment" : 'In progress' }}
+                  </span>
+                </ng-template>
+              </div>
+            </div>
+            <div class="tl-item" [class.done]="complaint()!.resolvedAt">
+              <div class="tl-dot"></div>
+              <div class="tl-body">
+                <span class="tl-label">Resolved</span>
+                <span class="tl-date" *ngIf="complaint()!.resolvedAt">{{ formatDate(complaint()!.resolvedAt!) }}</span>
+                <span class="tl-date pending" *ngIf="!complaint()!.resolvedAt">Pending</span>
+              </div>
+            </div>
+            <div class="tl-item" [class.done]="complaint()!.closedAt">
+              <div class="tl-dot"></div>
+              <div class="tl-body">
+                <span class="tl-label">Closed</span>
+                <span class="tl-date" *ngIf="complaint()!.closedAt">{{ formatDate(complaint()!.closedAt!) }}</span>
+                <span class="tl-date pending" *ngIf="!complaint()!.closedAt">Pending</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </ng-container>
+
+</div>

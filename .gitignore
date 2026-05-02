@@ -1,0 +1,30 @@
+# Claude Code local files
+.claude/
+
+# Maven build output
+**/target/
+**/target
+
+# Node / Angular
+**/node_modules/
+**/dist/
+
+# IDE
+**/.idea/
+**/*.iml
+**/.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+**/.env
+**/application-local.properties
+**/application-local.yml
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/venv/
+**/*.egg-info/

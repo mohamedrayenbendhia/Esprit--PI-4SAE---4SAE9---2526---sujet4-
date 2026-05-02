@@ -1,0 +1,218 @@
+<div class="admin-tests">
+
+  <!-- Header -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="header-text">
+        <h1><mat-icon>quiz</mat-icon> Tests Management</h1>
+        <p>Create and manage certification tests</p>
+      </div>
+      <button mat-raised-button class="create-btn" (click)="openCreateTestForm()">
+        <mat-icon>add</mat-icon> New Test
+      </button>
+    </div>
+  </div>
+
+  <!-- Test Form -->
+  <div class="form-panel" *ngIf="showTestForm()">
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>{{ editingTest() ? 'edit' : 'add_circle' }}</mat-icon>
+          {{ editingTest() ? 'Edit Test' : 'Create New Test' }}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="testForm" class="test-form">
+  <div class="form-row">
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Test Title</mat-label>
+      <input matInput formControlName="title" placeholder="e.g. Angular Fundamentals">
+      <mat-icon matSuffix>title</mat-icon>
+      <mat-error *ngIf="testForm.get('title')?.hasError('required')">Title is required</mat-error>
+      <mat-error *ngIf="testForm.get('title')?.hasError('minlength')">Minimum 3 characters</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Skill</mat-label>
+      <mat-select formControlName="skillId">
+        <mat-option *ngFor="let skill of skills()" [value]="skill.id">
+          {{ skill.name }} ({{ skill.category }})
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="testForm.get('skillId')?.hasError('required')">Skill is required</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-row">
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Passing Score (%)</mat-label>
+      <input matInput type="number" formControlName="passingScore" min="1" max="100">
+      <mat-icon matSuffix>percent</mat-icon>
+      <mat-error *ngIf="testForm.get('passingScore')?.hasError('required')">Passing score is required</mat-error>
+      <mat-error *ngIf="testForm.get('passingScore')?.hasError('min')">Minimum 1%</mat-error>
+      <mat-error *ngIf="testForm.get('passingScore')?.hasError('max')">Maximum 100%</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-actions">
+    <button mat-button (click)="closeTestForm()">Cancel</button>
+    <button mat-raised-button class="save-btn" (click)="saveTest()" [disabled]="testForm.invalid">
+      <mat-icon>save</mat-icon> {{ editingTest() ? 'Update' : 'Create' }}
+    </button>
+  </div>
+</form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Two columns layout -->
+  <div class="content-grid">
+
+    <!-- Tests List -->
+    <mat-card class="tests-list-card">
+      <mat-card-header>
+        <mat-card-title>All Tests ({{ tests().length }})</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="loading()" class="loading-state">
+          <mat-icon class="spin">autorenew</mat-icon>
+          <p>Loading...</p>
+        </div>
+
+        <div *ngIf="!loading() && tests().length === 0" class="empty-state">
+          <mat-icon>quiz</mat-icon>
+          <p>No tests yet</p>
+        </div>
+
+        <div class="tests-list" *ngIf="!loading()">
+          <div class="test-item"
+               *ngFor="let test of tests()"
+               [class.selected]="selectedTest()?.id === test.id"
+               (click)="selectTest(test)">
+            <div class="test-item-info">
+              <div class="test-title">{{ test.title }}</div>
+              <div class="test-meta">
+                <span class="skill-badge">{{ getSkillName(test.skillId) }}</span>
+                <span class="score-badge" [style.color]="getScoreColor(test.passingScore)">
+                  {{ test.passingScore }}% to pass
+                </span>
+              </div>
+              <div class="question-count">
+                <mat-icon>help_outline</mat-icon>
+{{ test.questions.length || 0 }} questions
+              </div>
+            </div>
+            <div class="test-item-actions" (click)="$event.stopPropagation()">
+              <button mat-icon-button (click)="openEditTestForm(test)" matTooltip="Edit">
+                <mat-icon class="edit-icon">edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="deleteTest(test)" matTooltip="Delete">
+                <mat-icon class="delete-icon">delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Questions Panel -->
+    <mat-card class="questions-card" *ngIf="selectedTest(); else noTestSelected">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>help_outline</mat-icon>
+          Questions — {{ selectedTest()!.title }}
+        </mat-card-title>
+        <div class="header-actions">
+          <div class="ai-generate-row">
+            <mat-form-field appearance="outline" class="ai-count-field">
+              <mat-label>Count</mat-label>
+              <input matInput type="number" min="1" max="20"
+                     [value]="aiCount()"
+                     (change)="aiCount.set(+$any($event.target).value)">
+            </mat-form-field>
+            <button mat-raised-button class="ai-btn"
+                    (click)="generateWithAI()"
+                    [disabled]="aiGenerating()"
+                    matTooltip="Generate questions automatically using AI">
+              <mat-icon>{{ aiGenerating() ? 'hourglass_top' : 'auto_awesome' }}</mat-icon>
+              {{ aiGenerating() ? 'Generating...' : 'Generate with AI' }}
+            </button>
+          </div>
+          <button mat-raised-button class="add-question-btn" (click)="openAddQuestion()">
+            <mat-icon>add</mat-icon> Add Question
+          </button>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+
+        <!-- Question Form -->
+        <div class="question-form-panel" *ngIf="showQuestionForm()">
+          <form [formGroup]="questionForm" class="question-form">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Question Text</mat-label>
+    <textarea matInput formControlName="questionText" rows="2"></textarea>
+    <mat-error *ngIf="questionForm.get('questionText')?.hasError('required')">Question is required</mat-error>
+    <mat-error *ngIf="questionForm.get('questionText')?.hasError('minlength')">Minimum 5 characters</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Correct Answer</mat-label>
+    <input matInput formControlName="correctAnswer">
+    <mat-icon matSuffix>check_circle</mat-icon>
+    <mat-error *ngIf="questionForm.get('correctAnswer')?.hasError('required')">Correct answer is required</mat-error>
+  </mat-form-field>
+
+  <div class="form-actions">
+    <button mat-button (click)="closeQuestionForm()">Cancel</button>
+    <button mat-raised-button class="save-btn" (click)="saveQuestion()" [disabled]="questionForm.invalid">
+  <mat-icon>save</mat-icon> {{ editingQuestionId() ? 'Update Question' : 'Save Question' }}
+</button>
+  </div>
+</form>
+        </div>
+
+       <!-- Questions List -->
+<div class="questions-list">
+  <div class="empty-questions" *ngIf="!selectedTest()!.questions.length && !showQuestionForm()">
+    <mat-icon>help_outline</mat-icon>
+    <p>No questions yet — add your first question!</p>
+  </div>
+
+          <div class="question-card" *ngFor="let q of selectedTest()!.questions; let i = index">
+  <div class="question-header">
+    <span class="question-number">Q{{ i + 1 }}</span>
+    <div class="question-actions">
+  <button mat-icon-button (click)="openEditQuestion(q)" matTooltip="Edit question">
+    <mat-icon class="edit-icon">edit</mat-icon>
+  </button>
+  <button mat-icon-button (click)="deleteQuestion(q.id)" matTooltip="Delete question">
+    <mat-icon class="delete-icon">delete</mat-icon>
+  </button>
+</div>
+  </div>
+  <div class="question-text">{{ q.questionText }}</div>
+  <div class="correct-answer">
+    <mat-icon>check_circle</mat-icon>
+    {{ q.correctAnswer }}
+  </div>
+</div>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+    <ng-template #noTestSelected>
+      <mat-card class="no-test-card">
+        <mat-card-content>
+          <div class="empty-state">
+            <mat-icon>touch_app</mat-icon>
+            <h3>Select a test</h3>
+            <p>Click on a test to manage its questions</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </ng-template>
+
+  </div>
+</div>

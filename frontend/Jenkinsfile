@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Step 1: Pull Code') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Step 2: Stop Old Container') {
+            steps {
+                sh 'docker stop nexlance-front || true'
+                sh 'docker rm   nexlance-front || true'
+            }
+        }
+
+        stage('Step 3: Docker Build Frontend') {
+            steps {
+                dir('frontend/nexlance-unified') {
+                    sh 'docker build -t img-nexlance-front .'
+                }
+            }
+        }
+
+        stage('Step 4: Deploy Frontend') {
+            steps {
+                sh 'docker run -d --name nexlance-front --network nexlance-net -p 4200:80 img-nexlance-front'
+            }
+        }
+
+        stage('Step 5: Health Check') {
+            steps {
+                sleep(time: 10, unit: 'SECONDS')
+                sh 'curl -f http://localhost:4200 || echo "Frontend not ready yet"'
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo '✅ Frontend NexLance deployé → http://localhost:4200'
+        }
+        failure {
+            echo '❌ Build frontend échoué. Vérifier le Console Output Jenkins.'
+        }
+    }
+}

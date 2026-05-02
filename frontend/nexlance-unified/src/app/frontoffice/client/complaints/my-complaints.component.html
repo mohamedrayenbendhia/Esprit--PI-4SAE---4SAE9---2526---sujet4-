@@ -1,0 +1,308 @@
+<div class="mc-page">
+
+  <!-- ══ SIDEBAR FILTRES ══════════════════════════════════════════════ -->
+  <aside class="mc-sidebar" *ngIf="!isLoading()">
+    <div class="mc-sidebar__inner">
+
+      <div class="mc-sidebar__top">
+        <span class="mc-sidebar__title">Filters</span>
+        <button *ngIf="hasActiveFilters()" class="mc-sidebar__reset" (click)="resetFilters()">
+          Reset
+        </button>
+      </div>
+
+      <!-- Recherche -->
+      <div class="mc-section">
+        <label class="mc-search" [class.mc-search--filled]="!!searchQuery()">
+          <mat-icon class="mc-search__icon">search</mat-icon>
+          <input
+            type="text"
+            class="mc-search__input"
+            placeholder="Subject, ticket…"
+            [value]="searchQuery()"
+            (input)="searchQuery.set($any($event.target).value)"
+            autocomplete="off"/>
+          <button *ngIf="searchQuery()" type="button" class="mc-search__clear"
+                  (click)="searchQuery.set('')" aria-label="Clear">
+            <mat-icon>close</mat-icon>
+          </button>
+        </label>
+      </div>
+
+      <div class="mc-sidebar__divider"></div>
+
+      <!-- Statut -->
+      <div class="mc-section">
+        <p class="mc-section__label">Status</p>
+        <div class="mc-section__checks">
+          <label *ngFor="let f of statusFilters.slice(1)" class="mc-check">
+            <input
+              type="checkbox"
+              class="mc-check__input"
+              [checked]="filterStatus() === f.value"
+              (change)="filterStatus.set(filterStatus() === f.value ? 'all' : f.value)"/>
+            <span class="mc-check__box"></span>
+            <span class="mc-check__label">{{ f.label }}</span>
+            <span *ngIf="countByStatus()[f.value]" class="mc-check__count">
+              {{ countByStatus()[f.value] }}
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="mc-sidebar__divider"></div>
+
+      <!-- Priorité -->
+      <div class="mc-section">
+        <p class="mc-section__label">Priority</p>
+        <div class="mc-section__tags">
+          <button *ngFor="let p of priorityFilters.slice(1)"
+                  class="mc-tag"
+                  [class.mc-tag--active]="filterPriority() === p.value"
+                  (click)="filterPriority.set(filterPriority() === p.value ? 'all' : p.value)">
+            <span class="mc-tag__dot" [attr.data-priority]="p.value"></span>
+            {{ p.label }}
+            <mat-icon *ngIf="filterPriority() === p.value" class="mc-tag__close">close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="mc-sidebar__divider"></div>
+
+      <!-- Période -->
+      <div class="mc-section">
+        <p class="mc-section__label">Period</p>
+        <div class="mc-section__tags">
+          <button *ngFor="let d of dateFilters.slice(1)"
+                  class="mc-tag"
+                  [class.mc-tag--active]="filterDate() === d.value"
+                  (click)="filterDate.set(filterDate() === d.value ? 'all' : d.value)">
+            {{ d.label }}
+            <mat-icon *ngIf="filterDate() === d.value" class="mc-tag__close">close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="mc-sidebar__divider"></div>
+
+      <!-- Trier par -->
+      <div class="mc-section">
+        <p class="mc-section__label">Sort by</p>
+        <div class="mc-section__checks">
+          <label *ngFor="let s of sortOptions" class="mc-radio">
+            <input
+              type="radio"
+              name="sort"
+              class="mc-radio__input"
+              [checked]="sortBy() === s.value"
+              (change)="sortBy.set(s.value)"/>
+            <span class="mc-radio__circle"></span>
+            <span class="mc-radio__label">{{ s.label }}</span>
+          </label>
+        </div>
+      </div>
+
+    </div><!-- /mc-sidebar__inner -->
+  </aside>
+
+  <!-- ══ CONTENU PRINCIPAL ═════════════════════════════════════════════ -->
+  <main class="mc-content">
+
+    <!-- Header -->
+    <header class="mc-header">
+      <div class="mc-header__left">
+        <h1>My Complaints</h1>
+        <p>Track your cases and communicate with support.</p>
+      </div>
+      <button class="mc-btn-new" (click)="createNew()">
+        <mat-icon>add</mat-icon>
+        New complaint
+      </button>
+    </header>
+
+    <!-- Stat bar -->
+    <div class="mc-stats" *ngIf="!isLoading() && complaints().length > 0">
+      <button class="mc-stat mc-stat--total" disabled>
+        <span class="mc-stat__val">{{ complaints().length }}</span>
+        <span class="mc-stat__lbl">Total</span>
+      </button>
+      <button class="mc-stat mc-stat--open"
+              [class.mc-stat--active]="filterStatus() === 'OPEN'"
+              (click)="filterStatus.set(filterStatus() === 'OPEN' ? 'all' : 'OPEN')">
+        <span class="mc-stat__val">{{ countByStatus()['OPEN'] || 0 }}</span>
+        <span class="mc-stat__lbl">Open</span>
+      </button>
+      <button class="mc-stat mc-stat--progress"
+              [class.mc-stat--active]="filterStatus() === 'IN_PROGRESS'"
+              (click)="filterStatus.set(filterStatus() === 'IN_PROGRESS' ? 'all' : 'IN_PROGRESS')">
+        <span class="mc-stat__val">{{ countByStatus()['IN_PROGRESS'] || 0 }}</span>
+        <span class="mc-stat__lbl">In Progress</span>
+      </button>
+      <button class="mc-stat mc-stat--resolved"
+              [class.mc-stat--active]="filterStatus() === 'RESOLVED'"
+              (click)="filterStatus.set(filterStatus() === 'RESOLVED' ? 'all' : 'RESOLVED')">
+        <span class="mc-stat__val">{{ countByStatus()['RESOLVED'] || 0 }}</span>
+        <span class="mc-stat__lbl">Resolved</span>
+      </button>
+      <button class="mc-stat mc-stat--closed"
+              [class.mc-stat--active]="filterStatus() === 'CLOSED'"
+              (click)="filterStatus.set(filterStatus() === 'CLOSED' ? 'all' : 'CLOSED')">
+        <span class="mc-stat__val">{{ countByStatus()['CLOSED'] || 0 }}</span>
+        <span class="mc-stat__lbl">Closed</span>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mc-tabs" *ngIf="involvedComplaints().length > 0">
+      <button class="mc-tab"
+              [class.mc-tab--active]="activeTab() === 'mine'"
+              (click)="activeTab.set('mine')">
+        <mat-icon>report_problem</mat-icon>
+        My complaints
+        <span class="mc-tab__badge">{{ complaints().length }}</span>
+      </button>
+      <button class="mc-tab"
+              [class.mc-tab--active]="activeTab() === 'involved'"
+              (click)="activeTab.set('involved')">
+        <mat-icon>gavel</mat-icon>
+        Involved
+        <span class="mc-tab__badge mc-tab__badge--involved">{{ involvedComplaints().length }}</span>
+      </button>
+    </div>
+
+    <!-- Barre résultats + chips actifs -->
+    <div class="mc-results-bar" *ngIf="!isLoading() && complaints().length > 0">
+      <span class="mc-results-bar__count">
+        <strong>{{ filtered().length }}</strong>
+        result{{ filtered().length > 1 ? 's' : '' }}
+      </span>
+      <div class="mc-results-bar__chips" *ngIf="hasActiveFilters()">
+        <span *ngIf="filterStatus() !== 'all'" class="mc-chip">
+          {{ getStatusLabel(filterStatus()) }}
+          <button type="button" (click)="filterStatus.set('all')"><mat-icon>close</mat-icon></button>
+        </span>
+        <span *ngIf="filterPriority() !== 'all'" class="mc-chip">
+          {{ activePriorityLabel }}
+          <button type="button" (click)="filterPriority.set('all')"><mat-icon>close</mat-icon></button>
+        </span>
+        <span *ngIf="filterDate() !== 'all'" class="mc-chip">
+          {{ activeDateLabel }}
+          <button type="button" (click)="filterDate.set('all')"><mat-icon>close</mat-icon></button>
+        </span>
+        <span *ngIf="searchQuery()" class="mc-chip">
+          "{{ searchQuery() }}"
+          <button type="button" (click)="searchQuery.set('')"><mat-icon>close</mat-icon></button>
+        </span>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading()" class="mc-state">
+      <div class="mc-spinner"></div>
+      <p>Loading your complaints…</p>
+    </div>
+
+    <!-- Empty — aucune réclamation -->
+    <div *ngIf="!isLoading() && complaints().length === 0" class="mc-state mc-state--empty">
+      <div class="mc-state__icon"><mat-icon>inbox</mat-icon></div>
+      <h2>No complaints</h2>
+      <p>You haven't submitted any complaints yet.</p>
+      <button class="mc-btn-new" (click)="createNew()">
+        <mat-icon>add</mat-icon> Create my first complaint
+      </button>
+    </div>
+
+    <!-- Empty — aucun résultat après filtres -->
+    <div *ngIf="!isLoading() && complaints().length > 0 && filtered().length === 0"
+         class="mc-state mc-state--empty">
+      <div class="mc-state__icon"><mat-icon>filter_list_off</mat-icon></div>
+      <h2>No results</h2>
+      <p>No complaints match the selected filters.</p>
+      <button class="mc-btn-secondary" (click)="resetFilters()">
+        <mat-icon>restart_alt</mat-icon> Reset filters
+      </button>
+    </div>
+
+    <!-- Liste mes réclamations -->
+    <div *ngIf="!isLoading() && activeTab() === 'mine' && filtered().length > 0"
+         class="mc-list">
+      <article *ngFor="let c of filtered()" class="mc-card" (click)="viewDetail(c.id)">
+        <div class="mc-card__priority-bar" [attr.data-priority]="c.priority"></div>
+        <div class="mc-card__body">
+          <div class="mc-card__top">
+            <span class="mc-card__cat">
+              <mat-icon>{{ getCategoryIcon(c.category) }}</mat-icon>
+              {{ getCategoryLabel(c.category) }}
+            </span>
+            <span class="mc-card__status" [attr.data-status]="c.status">
+              {{ getStatusLabel(c.status) }}
+            </span>
+          </div>
+          <div class="mc-card__ticket">{{ c.ticketNumber }}</div>
+          <h3 class="mc-card__subject">{{ c.subject }}</h3>
+          <p class="mc-card__desc">
+            {{ c.description | slice:0:120 }}{{ c.description.length > 120 ? '…' : '' }}
+          </p>
+          <footer class="mc-card__foot">
+            <span class="mc-card__meta">
+              <mat-icon>calendar_today</mat-icon>
+              {{ formatDate(c.createdAt) }}
+            </span>
+            <span class="mc-card__meta mc-card__meta--priority" [attr.data-priority]="c.priority">
+              <mat-icon>flag</mat-icon>
+              {{ getPriorityLabel(c.priority) }}
+            </span>
+            <span *ngIf="c.satisfactionRating" class="mc-card__meta mc-card__meta--rating">
+              <mat-icon>star</mat-icon>{{ c.satisfactionRating }}/5
+            </span>
+            <span *ngIf="canRate(c)" class="mc-card__rate-hint">
+              <mat-icon>star_border</mat-icon> Rate
+            </span>
+          </footer>
+        </div>
+        <div class="mc-card__arrow"><mat-icon>chevron_right</mat-icon></div>
+      </article>
+    </div>
+
+    <!-- Liste impliqué -->
+    <div *ngIf="!isLoading() && activeTab() === 'involved' && involvedComplaints().length > 0"
+         class="mc-list">
+      <article *ngFor="let c of involvedComplaints()"
+               class="mc-card mc-card--involved"
+               (click)="viewDetail(c.id)">
+        <div class="mc-card__involved-banner">
+          <mat-icon>gavel</mat-icon>
+          You are involved in this complaint
+        </div>
+        <div class="mc-card__priority-bar" [attr.data-priority]="c.priority"></div>
+        <div class="mc-card__body">
+          <div class="mc-card__top">
+            <span class="mc-card__cat">
+              <mat-icon>{{ getCategoryIcon(c.category) }}</mat-icon>
+              {{ getCategoryLabel(c.category) }}
+            </span>
+            <span class="mc-card__status" [attr.data-status]="c.status">
+              {{ getStatusLabel(c.status) }}
+            </span>
+          </div>
+          <div class="mc-card__ticket">{{ c.ticketNumber }}</div>
+          <h3 class="mc-card__subject">{{ c.subject }}</h3>
+          <p class="mc-card__desc">
+            {{ c.description | slice:0:120 }}{{ c.description.length > 120 ? '…' : '' }}
+          </p>
+          <footer class="mc-card__foot">
+            <span class="mc-card__meta">
+              <mat-icon>calendar_today</mat-icon>{{ formatDate(c.createdAt) }}
+            </span>
+            <span class="mc-card__meta mc-card__meta--priority" [attr.data-priority]="c.priority">
+              <mat-icon>flag</mat-icon>{{ getPriorityLabel(c.priority) }}
+            </span>
+          </footer>
+        </div>
+        <div class="mc-card__arrow"><mat-icon>chevron_right</mat-icon></div>
+      </article>
+    </div>
+
+  </main><!-- /mc-content -->
+
+</div><!-- /mc-page -->

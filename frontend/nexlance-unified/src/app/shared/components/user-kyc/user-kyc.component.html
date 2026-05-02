@@ -1,0 +1,147 @@
+<div class="user-kyc">
+  <div class="page-header">
+    <h1>KYC Verification</h1>
+    @if (kycStatus()) {
+      <div class="verification-status" [ngClass]="kycStatus()!.verified ? 'verified' : 'not-verified'">
+        @if (kycStatus()!.verified) {
+          <span class="status-icon">✓</span>
+          <span class="status-text">Account Verified</span>
+        } @else {
+          <span class="status-icon">!</span>
+          <span class="status-text">Verification Required</span>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="kyc-content">
+    <!-- Information section -->
+    <div class="info-box">
+      <h3>Why verify my identity?</h3>
+      <ul>
+        <li>✓ Access all platform features</li>
+        <li>✓ Increase your credibility with clients/freelancers</li>
+        <li>✓ Secure your transactions</li>
+        <li>✓ Comply with current regulations</li>
+      </ul>
+    </div>
+
+    <!-- Upload section -->
+    <div class="upload-section">
+      <h2>Submit a Document</h2>
+      
+      <div class="form-group">
+        <label for="documentType">Document Type</label>
+        <select 
+          id="documentType" 
+          [(ngModel)]="selectedDocumentType"
+          class="form-control">
+          <option [value]="DocumentType.IDENTITY_CARD">{{ getDocumentTypeLabel(DocumentType.IDENTITY_CARD) }}</option>
+          <option [value]="DocumentType.PASSPORT">{{ getDocumentTypeLabel(DocumentType.PASSPORT) }}</option>
+          <option [value]="DocumentType.DRIVER_LICENSE">{{ getDocumentTypeLabel(DocumentType.DRIVER_LICENSE) }}</option>
+          <option [value]="DocumentType.PROOF_ADDRESS">{{ getDocumentTypeLabel(DocumentType.PROOF_ADDRESS) }}</option>
+          <option [value]="DocumentType.BANK_STATEMENT">{{ getDocumentTypeLabel(DocumentType.BANK_STATEMENT) }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="expiryDate">Expiry Date (optional)</label>
+        <input 
+          type="date" 
+          id="expiryDate" 
+          [(ngModel)]="expiryDate"
+          class="form-control">
+      </div>
+
+      <div class="upload-zone">
+        <input 
+          type="file" 
+          id="fileInput" 
+          (change)="onFileSelected($event)"
+          accept="image/*,.pdf"
+          hidden>
+        
+        @if (!selectedFile) {
+          <label for="fileInput" class="upload-label">
+            <div class="upload-icon"><mat-icon>description</mat-icon></div>
+            <p>Click or drag your file here</p>
+            <small>Accepted formats: JPG, PNG, PDF (max 10MB)</small>
+          </label>
+        } @else {
+          <div class="file-selected">
+            <span>{{ selectedFile.name }}</span>
+            <button type="button" (click)="selectedFile = null" class="btn-remove">✕</button>
+          </div>
+        }
+      </div>
+
+      <button 
+        (click)="onSubmitDocument()" 
+        [disabled]="!selectedFile || uploading()"
+        class="btn btn-primary">
+        {{ uploading() ? 'Uploading...' : 'Submit Document' }}
+      </button>
+    </div>
+
+    <!-- Documents list -->
+    <div class="documents-section">
+      <h2>My Submitted Documents</h2>
+      
+      @if (loading()) {
+        <div class="loading">Loading...</div>
+      } @else if (verifications().length === 0) {
+        <div class="empty-state">
+          <p>No documents submitted yet</p>
+        </div>
+      } @else {
+        <div class="documents-grid">
+          @for (verification of verifications(); track verification.id) {
+            <div class="document-card">
+              <div class="card-header">
+                <h4>{{ getDocumentTypeLabel(verification.documentType) }}</h4>
+                <span class="badge" [ngClass]="getStatusBadgeClass(verification.status)">
+                  {{ getStatusLabel(verification.status) }}
+                </span>
+              </div>
+              
+              <div class="card-body">
+                <div class="document-info">
+                  <p><strong>Submitted on:</strong> {{ verification.submittedAt | date:'MM/dd/yyyy h:mm a' }}</p>
+                  
+                  @if (verification.reviewedAt) {
+                    <p><strong>Reviewed on:</strong> {{ verification.reviewedAt | date:'MM/dd/yyyy h:mm a' }}</p>
+                  }
+                  
+                  @if (verification.expiryDate) {
+                    <p><strong>Expires on:</strong> {{ verification.expiryDate | date:'MM/dd/yyyy' }}</p>
+                  }
+                  
+                  @if (verification.status === KYCStatus.REJECTED && verification.rejectionReason) {
+                    <div class="rejection-reason">
+                      <strong>Rejection Reason:</strong>
+                      <p>{{ verification.rejectionReason }}</p>
+                    </div>
+                  }
+                </div>
+                
+                <div class="document-preview">
+                  <img [src]="verification.documentUrl" alt="Document preview" />
+                </div>
+              </div>
+
+              <div class="card-actions">
+                @if (verification.status === KYCStatus.REJECTED || verification.status === KYCStatus.EXPIRED) {
+                  <button 
+                    (click)="deleteDocument(verification.id)"
+                    class="btn btn-danger btn-sm">
+                    Delete
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

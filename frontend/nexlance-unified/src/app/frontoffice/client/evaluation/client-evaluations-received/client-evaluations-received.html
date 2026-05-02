@@ -1,0 +1,105 @@
+<div class="evaluations-container">
+  <div class="header">
+    <h2>My Received Evaluations</h2>
+    <button class="btn-primary" [routerLink]="['/frontoffice/client/evaluations/stats']">
+      View Statistics
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    Loading your evaluations...
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && evaluations.length === 0" class="no-data">
+    <p>You haven't received any evaluations yet.</p>
+  </div>
+
+  <div class="evaluations-list" *ngIf="evaluations.length > 0">
+    <div class="evaluation-card" *ngFor="let eval of displayedEvaluations">
+      <div class="evaluation-header">
+        <!--  Affiche le nom au lieu de l'ID -->
+        <span class="freelancer-email">Freelancer: {{ getEvaluatorName(eval.evaluatorId) }}</span>
+       
+        <span class="date">{{ eval.createdAt | date:'dd/MM/yyyy' }}</span>
+      </div>
+
+      <div class="global-rating">
+        <div class="rating-value">{{ eval.ratingGlobal?.toFixed(1) }}/5</div>
+        <div class="rating-bar">
+          <div class="rating-fill" [style.width.%]="getRatingPercent(eval.ratingGlobal || 0)"></div>
+        </div>
+      </div>
+
+      <div class="scores">
+        <div class="score-item">
+          <span class="label">Quality:</span>
+          <div class="stars">
+            <span *ngFor="let star of getStars(eval.qualityScore)" class="star filled">★</span>
+            <span *ngFor="let star of getStars(5 - eval.qualityScore)" class="star">☆</span>
+          </div>
+        </div>
+
+        <div class="score-item">
+          <span class="label">Deadline:</span>
+          <div class="stars">
+            <span *ngFor="let star of getStars(eval.deadlineScore)" class="star filled">★</span>
+            <span *ngFor="let star of getStars(5 - eval.deadlineScore)" class="star">☆</span>
+          </div>
+        </div>
+
+        <div class="score-item">
+          <span class="label">Communication:</span>
+          <div class="stars">
+            <span *ngFor="let star of getStars(eval.communicationScore)" class="star filled">★</span>
+            <span *ngFor="let star of getStars(5 - eval.communicationScore)" class="star">☆</span>
+          </div>
+        </div>
+
+        <div class="score-item">
+          <span class="label">Professionalism:</span>
+          <div class="stars">
+            <span *ngFor="let star of getStars(eval.professionalismScore)" class="star filled">★</span>
+            <span *ngFor="let star of getStars(5 - eval.professionalismScore)" class="star">☆</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="comment" *ngIf="eval.comment">
+        "{{ eval.comment }}"
+      </div>
+
+      <div class="response" *ngIf="eval.responseText">
+        <strong>Freelancer's response:</strong>
+        <p>{{ eval.responseText }}</p>
+        <small>On {{ eval.responseDate | date:'dd/MM/yyyy' }}</small>
+      </div>
+
+      <div class="evaluation-footer">
+        <div class="votes">
+          <span class="helpful" *ngIf="eval.helpfulCount! > 0">
+             {{ eval.helpfulCount }} helpful
+          </span>
+          <span class="not-helpful" *ngIf="eval.notHelpfulCount! > 0">
+             {{ eval.notHelpfulCount }} not helpful
+          </span>
+        </div>
+
+        <button *ngIf="!eval.responseText"
+                class="btn-respond"
+                [routerLink]="['/frontoffice/client/evaluations/received']">
+          Respond
+        </button>
+      </div>
+    </div>
+
+    <div class="see-more-container" *ngIf="evaluations.length > 5">
+      <button class="btn-see-more" (click)="toggleShowAll()">
+        {{ showAllEvaluations ? 'Show less' : 'See more (' + (evaluations.length - 5) + ' more)' }}
+      </button>
+    </div>
+  </div>
+</div>

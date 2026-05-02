@@ -1,0 +1,100 @@
+<div class="client-skills">
+
+  <!-- Hero -->
+  <div class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <mat-icon>psychology</mat-icon>
+          {{ selectedSkill() ? selectedSkill()!.name + ' — Freelancers' : 'Browse Skills' }}
+        </h1>
+        <p class="hero-description">
+          {{ selectedSkill() ? 'Freelancers with this skill' : 'Explore all available skills and find the right freelancer' }}
+        </p>
+        <button mat-raised-button class="cta-button" (click)="back()" *ngIf="selectedSkill()">
+          <mat-icon>arrow_back</mat-icon> Back to Skills
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-box">
+          <div class="stat-value">{{ selectedSkill() ? freelancers().length : skills().length }}</div>
+          <div class="stat-label">{{ selectedSkill() ? 'Freelancers' : 'Skills' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="loading()">
+      <mat-icon>autorenew</mat-icon>
+      <p>Loading...</p>
+    </div>
+
+    <!-- Skills Grid -->
+    <div class="skills-grid" *ngIf="!loading() && !selectedSkill()">
+      <mat-card class="skill-card" *ngFor="let skill of skills()" (click)="selectSkill(skill)">
+        <mat-card-content>
+          <div class="skill-icon">
+            <mat-icon>psychology</mat-icon>
+          </div>
+          <h3>{{ skill.name }}</h3>
+          <div class="skill-category" *ngIf="skill.category">{{ skill.category }}</div>
+          <div class="skill-action">
+            <mat-icon>arrow_forward</mat-icon>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Freelancers Grid -->
+    <div class="freelancers-section" *ngIf="selectedSkill()">
+
+      <div class="loading-state" *ngIf="loadingFreelancers()">
+        <mat-icon>autorenew</mat-icon>
+        <p>Loading freelancers...</p>
+      </div>
+
+      <div class="empty-state" *ngIf="!loadingFreelancers() && freelancers().length === 0">
+        <mat-icon>person_off</mat-icon>
+        <h3>No freelancers found</h3>
+        <p>No freelancers have this skill yet</p>
+      </div>
+
+      <div class="freelancers-grid" *ngIf="!loadingFreelancers() && freelancers().length > 0">
+        <mat-card class="freelancer-card" *ngFor="let f of freelancers()">
+          <mat-card-content>
+            <div class="freelancer-header">
+<div class="freelancer-avatar">{{ getName(f.userId).substring(0,2).toUpperCase() }}</div>
+              <div class="freelancer-info">
+<h3>{{ getName(f.userId) }}</h3>
+                <span class="level-badge" [style.background]="getLevelColor(f.level) + '22'" [style.color]="getLevelColor(f.level)">
+                  {{ f.level }}
+                </span>
+              </div>
+            </div>
+            <div class="freelancer-footer">
+  <mat-icon>schedule</mat-icon>
+  {{ f.yearsOfExperience }} year(s) exp.
+</div>
+<div class="endorse-section">
+  <button mat-stroked-button
+          (click)="toggleEndorse(f); $event.stopPropagation()"
+          [style.color]="isEndorsed(f.userId, selectedSkill()!.id) ? '#e53935' : '#667eea'"
+          [style.border-color]="isEndorsed(f.userId, selectedSkill()!.id) ? '#e53935' : '#667eea'">
+    <mat-icon>{{ isEndorsed(f.userId, selectedSkill()!.id) ? 'thumb_down' : 'thumb_up' }}</mat-icon>
+    {{ isEndorsed(f.userId, selectedSkill()!.id) ? 'Remove' : 'Endorse' }}
+  </button>
+  <span class="endorse-count">
+    <mat-icon>verified</mat-icon>
+    {{ getEndorsementCount(f.userId, selectedSkill()!.id) }} endorsements
+  </span>
+</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,226 @@
+<!-- Chargement -->
+@if (isLoading()) {
+  <div class="loading"><mat-spinner diameter="36"></mat-spinner></div>
+}
+
+<!-- Erreur -->
+@if (error()) {
+  <div class="error-msg"><mat-icon>error_outline</mat-icon> {{ error() }}</div>
+}
+
+<!-- Dashboard -->
+@if (!isLoading() && analytics(); as a) {
+  <div class="analytics-dashboard">
+
+    <!-- ── En-tête snapshot ──────────────────────────────────────────────── -->
+    <div class="snapshot-row">
+
+      <div class="snapshot-card trust" [class]="trustClass(a.trustLevel)">
+        <span class="snap-label">Trust level</span>
+        <span class="snap-value">{{ a.trustLevel }}<span class="snap-of">/5</span></span>
+        <span class="snap-sub">TrustLevel</span>
+      </div>
+
+      <div class="snapshot-card rating">
+        <span class="snap-label">Average rating</span>
+        <span class="snap-value">{{ a.averageRating | number:'1.1-1' }}<span class="snap-of">/5</span></span>
+        <span class="snap-sub stars">{{ stars(a.averageRating) }}</span>
+      </div>
+
+      <div class="snapshot-card days">
+        <span class="snap-label">Days of activity</span>
+        <span class="snap-value">{{ a.daysActive }}</span>
+        <span class="snap-sub">since {{ a.createdAt | date:'MMM yyyy' }}</span>
+      </div>
+
+      <div class="snapshot-card members">
+        <span class="snap-label">Active members</span>
+        <span class="snap-value">{{ a.members.active }}</span>
+        <span class="snap-sub">{{ a.members.total }} total</span>
+      </div>
+
+    </div>
+
+    <!-- ── Grille principale ─────────────────────────────────────────────── -->
+    <div class="sections-grid">
+
+      <!-- ── Membres ─────────────────────────────────────────────────────── -->
+      <div class="section-card">
+        <h3 class="section-title"><mat-icon>group</mat-icon> Members</h3>
+        <div class="kpi-row">
+          <div class="kpi"><span class="kpi-v">{{ a.members.owners }}</span><span class="kpi-l">Owners</span></div>
+          <div class="kpi"><span class="kpi-v">{{ a.members.managers }}</span><span class="kpi-l">Managers</span></div>
+          <div class="kpi"><span class="kpi-v">{{ a.members.members }}</span><span class="kpi-l">Members</span></div>
+          <div class="kpi warn"><span class="kpi-v">{{ a.members.inactive }}</span><span class="kpi-l">Inactive</span></div>
+        </div>
+        <div class="progress-stack">
+          <div class="ps-row">
+            <span class="ps-label">Active</span>
+            <div class="ps-bar-wrap">
+              <div class="ps-bar green" [style.width.%]="barWidth(a.members.active, a.members.total)"></div>
+            </div>
+            <span class="ps-count">{{ a.members.active }}</span>
+          </div>
+          <div class="ps-row">
+            <span class="ps-label">Inactive</span>
+            <div class="ps-bar-wrap">
+              <div class="ps-bar gray" [style.width.%]="barWidth(a.members.inactive, a.members.total)"></div>
+            </div>
+            <span class="ps-count">{{ a.members.inactive }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Direct applications ─────────────────────────────────────── -->
+      <div class="section-card">
+        <h3 class="section-title"><mat-icon>send</mat-icon> Direct applications</h3>
+        <div class="kpi-row">
+          <div class="kpi blue"><span class="kpi-v">{{ a.applications.total }}</span><span class="kpi-l">Total</span></div>
+          <div class="kpi warn"><span class="kpi-v">{{ a.applications.pending }}</span><span class="kpi-l">Pending</span></div>
+          <div class="kpi green"><span class="kpi-v">{{ a.applications.accepted }}</span><span class="kpi-l">Accepted</span></div>
+          <div class="kpi red"><span class="kpi-v">{{ a.applications.rejected }}</span><span class="kpi-l">Rejected</span></div>
+        </div>
+        <div class="rate-badge" [class.green]="(a.applications.acceptanceRate ?? 0) >= 50">
+          <mat-icon>percent</mat-icon>
+          Acceptance rate: <strong>{{ rate(a.applications.acceptanceRate) }}</strong>
+        </div>
+        <div class="progress-stack">
+          <div class="ps-row">
+            <span class="ps-label">Accepted</span>
+            <div class="ps-bar-wrap"><div class="ps-bar green" [style.width.%]="barWidth(a.applications.accepted, a.applications.total)"></div></div>
+            <span class="ps-count">{{ a.applications.accepted }}</span>
+          </div>
+          <div class="ps-row">
+            <span class="ps-label">Rejected</span>
+            <div class="ps-bar-wrap"><div class="ps-bar red" [style.width.%]="barWidth(a.applications.rejected, a.applications.total)"></div></div>
+            <span class="ps-count">{{ a.applications.rejected }}</span>
+          </div>
+          <div class="ps-row">
+            <span class="ps-label">Pending</span>
+            <div class="ps-bar-wrap"><div class="ps-bar orange" [style.width.%]="barWidth(a.applications.pending, a.applications.total)"></div></div>
+            <span class="ps-count">{{ a.applications.pending }}</span>
+          </div>
+          <div class="ps-row">
+            <span class="ps-label">Withdrawn</span>
+            <div class="ps-bar-wrap"><div class="ps-bar gray" [style.width.%]="barWidth(a.applications.withdrawn, a.applications.total)"></div></div>
+            <span class="ps-count">{{ a.applications.withdrawn }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Avis ────────────────────────────────────────────────────────── -->
+      <div class="section-card">
+        <h3 class="section-title"><mat-icon>star</mat-icon> Client Reviews</h3>
+        <div class="kpi-row">
+          <div class="kpi blue"><span class="kpi-v">{{ a.reviews.total }}</span><span class="kpi-l">Total</span></div>
+          <div class="kpi green"><span class="kpi-v">{{ a.reviews.withReply }}</span><span class="kpi-l">Replied</span></div>
+          <div class="kpi red"><span class="kpi-v">{{ a.reviews.reported }}</span><span class="kpi-l">Reported</span></div>
+        </div>
+        <!-- Distribution étoiles -->
+        <div class="star-dist">
+          @for (star of [5, 4, 3, 2, 1]; track star) {
+            <div class="star-row">
+              <span class="star-label">{{ star }}★</span>
+              <div class="ps-bar-wrap">
+                <div class="ps-bar"
+                     [class.green]="star >= 4"
+                     [class.orange]="star === 3"
+                     [class.red]="star <= 2"
+                     [style.width.%]="barWidth(a.reviews.distribution[star.toString()] ?? 0, a.reviews.total)">
+                </div>
+              </div>
+              <span class="ps-count">{{ a.reviews.distribution[star.toString()] ?? 0 }}</span>
+            </div>
+          }
+        </div>
+        @if (a.reviews.total > 0) {
+          <div class="reply-rate">
+            Review response rate:
+            <strong>{{ rate(a.reviews.total > 0 ? +(a.reviews.withReply * 100 / a.reviews.total).toFixed(1) : null) }}</strong>
+          </div>
+        }
+      </div>
+
+      <!-- ── Collaborations ──────────────────────────────────────────────── -->
+      <div class="section-card">
+        <h3 class="section-title"><mat-icon>handshake</mat-icon> Collaboration Offers</h3>
+        <div class="kpi-row">
+          <div class="kpi blue"><span class="kpi-v">{{ a.collab.totalOffers }}</span><span class="kpi-l">Offers</span></div>
+          <div class="kpi green"><span class="kpi-v">{{ a.collab.openOffers }}</span><span class="kpi-l">Open</span></div>
+          <div class="kpi gray"><span class="kpi-v">{{ a.collab.closedOffers }}</span><span class="kpi-l">Closed</span></div>
+          <div class="kpi red"><span class="kpi-v">{{ a.collab.cancelledOffers }}</span><span class="kpi-l">Cancelled</span></div>
+        </div>
+        <div class="divider"></div>
+        <div class="kpi-row">
+          <div class="kpi blue"><span class="kpi-v">{{ a.collab.totalApplications }}</span><span class="kpi-l">Applications</span></div>
+          <div class="kpi warn"><span class="kpi-v">{{ a.collab.pendingApplications }}</span><span class="kpi-l">Pending</span></div>
+          <div class="kpi green"><span class="kpi-v">{{ a.collab.acceptedApplications }}</span><span class="kpi-l">Accepted</span></div>
+        </div>
+        <div class="rate-badge" [class.green]="(a.collab.applicationAcceptanceRate ?? 0) >= 50">
+          <mat-icon>percent</mat-icon>
+          Acceptance rate: <strong>{{ rate(a.collab.applicationAcceptanceRate) }}</strong>
+        </div>
+      </div>
+
+      <!-- ── RFQ ─────────────────────────────────────────────────────────── -->
+      <div class="section-card">
+        <h3 class="section-title"><mat-icon>request_quote</mat-icon> Quote Requests (RFQ)</h3>
+        <div class="kpi-row">
+          <div class="kpi blue"><span class="kpi-v">{{ a.rfq.total }}</span><span class="kpi-l">Received</span></div>
+          <div class="kpi warn"><span class="kpi-v">{{ a.rfq.pending }}</span><span class="kpi-l">Pending</span></div>
+          <div class="kpi green"><span class="kpi-v">{{ a.rfq.responded }}</span><span class="kpi-l">Responded</span></div>
+          <div class="kpi gray"><span class="kpi-v">{{ a.rfq.closed }}</span><span class="kpi-l">Closed</span></div>
+        </div>
+        <div class="rate-badge" [class.green]="(a.rfq.responseRate ?? 0) >= 70">
+          <mat-icon>percent</mat-icon>
+          Response rate: <strong>{{ rate(a.rfq.responseRate) }}</strong>
+        </div>
+        <div class="progress-stack">
+          <div class="ps-row">
+            <span class="ps-label">Responded</span>
+            <div class="ps-bar-wrap"><div class="ps-bar green" [style.width.%]="barWidth(a.rfq.responded, a.rfq.total)"></div></div>
+            <span class="ps-count">{{ a.rfq.responded }}</span>
+          </div>
+          <div class="ps-row">
+            <span class="ps-label">Pending</span>
+            <div class="ps-bar-wrap"><div class="ps-bar orange" [style.width.%]="barWidth(a.rfq.pending, a.rfq.total)"></div></div>
+            <span class="ps-count">{{ a.rfq.pending }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Invitations ─────────────────────────────────────────────────── -->
+      <div class="section-card">
+        <h3 class="section-title"><mat-icon>mail</mat-icon> Invitations sent</h3>
+        <div class="kpi-row">
+          <div class="kpi blue"><span class="kpi-v">{{ a.invitations.total }}</span><span class="kpi-l">Total</span></div>
+          <div class="kpi warn"><span class="kpi-v">{{ a.invitations.pending }}</span><span class="kpi-l">Pending</span></div>
+          <div class="kpi green"><span class="kpi-v">{{ a.invitations.accepted }}</span><span class="kpi-l">Accepted</span></div>
+          <div class="kpi red"><span class="kpi-v">{{ a.invitations.declined }}</span><span class="kpi-l">Rejected</span></div>
+        </div>
+        <div class="progress-stack">
+          <div class="ps-row">
+            <span class="ps-label">Accepted</span>
+            <div class="ps-bar-wrap"><div class="ps-bar green" [style.width.%]="barWidth(a.invitations.accepted, a.invitations.total)"></div></div>
+            <span class="ps-count">{{ a.invitations.accepted }}</span>
+          </div>
+          <div class="ps-row">
+            <span class="ps-label">Rejected</span>
+            <div class="ps-bar-wrap"><div class="ps-bar red" [style.width.%]="barWidth(a.invitations.declined, a.invitations.total)"></div></div>
+            <span class="ps-count">{{ a.invitations.declined }}</span>
+          </div>
+          <div class="ps-row">
+            <span class="ps-label">Expired</span>
+            <div class="ps-bar-wrap"><div class="ps-bar gray" [style.width.%]="barWidth(a.invitations.expired, a.invitations.total)"></div></div>
+            <span class="ps-count">{{ a.invitations.expired }}</span>
+          </div>
+        </div>
+        <div class="rate-badge" [class.green]="(a.invitations.acceptanceRate ?? 0) >= 50">
+          <mat-icon>percent</mat-icon>
+          Acceptance rate: <strong>{{ rate(a.invitations.acceptanceRate) }}</strong>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}

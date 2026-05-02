@@ -1,0 +1,459 @@
+.admin-dashboard {
+  padding: 20px;
+  max-width: 100%;
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
+
+  // Header
+  .header-section {
+    background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+    border-radius: 12px;
+    padding: 20px 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 30px rgba(14, 165, 233, 0.25);
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      
+      .header-text {
+        flex: 1;
+        
+        h1 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: white;
+          margin: 0 0 4px 0;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        p {
+          font-size: 0.875rem;
+          color: rgba(255, 255, 255, 0.9);
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  // Daily Quote Section (Quotable API)
+  .quote-section {
+    margin-bottom: 20px;
+
+    .quote-card {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-radius: 12px;
+      border-left: 4px solid #0EA5E9;
+
+      .quote-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 8px 16px;
+
+        .quote-icon {
+          color: #0EA5E9;
+          font-size: 32px;
+          width: 32px;
+          height: 32px;
+          margin-bottom: 8px;
+          opacity: 0.6;
+        }
+
+        blockquote {
+          font-size: 1rem;
+          font-style: italic;
+          color: #334155;
+          margin: 0 0 8px 0;
+          line-height: 1.5;
+        }
+
+        cite {
+          font-size: 0.85rem;
+          color: #64748b;
+          font-style: normal;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  // Statistiques principales
+  .stats-section {
+    margin-bottom: 20px;
+    
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 16px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      
+      .stat-card {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+        }
+        
+        &.users::before {
+          background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+        }
+        
+        &.projects::before {
+          background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%);
+        }
+        
+        &.revenue::before {
+          background: linear-gradient(135deg, #F97316 0%, #FBBF24 100%);
+        }
+        
+        &.kyc::before {
+          background: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
+        }
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        mat-card-content {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 18px;
+          
+          .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            mat-icon {
+              font-size: 26px;
+              width: 26px;
+              height: 26px;
+              color: white;
+            }
+          }
+          
+          .stat-info {
+            flex: 1;
+            
+            .stat-value {
+              font-size: 1.75rem;
+              font-weight: 700;
+              color: #2d3748;
+              margin-bottom: 2px;
+            }
+            
+            .stat-label {
+              font-size: 0.813rem;
+              color: #718096;
+              font-weight: 500;
+            }
+
+            .stat-sub {
+              font-size: 0.75rem;
+              color: #a0aec0;
+              margin-top: 2px;
+            }
+          }
+        }
+        
+        &.users .stat-icon {
+          background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+        }
+        
+        &.projects .stat-icon {
+          background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%);
+        }
+        
+        &.revenue .stat-icon {
+          background: linear-gradient(135deg, #F97316 0%, #FBBF24 100%);
+        }
+        
+        &.kyc .stat-icon {
+          background: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
+        }
+      }
+    }
+  }
+
+  // Détails de la plateforme
+  .details-section {
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 16px;
+    }
+    
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      
+      .detail-card {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        cursor: default;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        &.kyc-card {
+          cursor: pointer;
+          border: 2px solid #FEE2E2;
+          
+          &:hover {
+            border-color: #EF4444;
+          }
+        }
+        
+        mat-card-content {
+          text-align: center;
+          padding: 20px 18px;
+          
+          .detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            
+            mat-icon {
+              font-size: 24px;
+              width: 24px;
+              height: 24px;
+            }
+            
+            h3 {
+              font-size: 1rem;
+              font-weight: 600;
+              color: #2d3748;
+              margin: 0;
+            }
+          }
+          
+          .detail-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0EA5E9;
+            margin-bottom: 10px;
+          }
+          
+          .detail-info {
+            font-size: 0.813rem;
+            color: #64748B;
+            margin-bottom: 14px;
+          }
+          
+          button {
+            width: 100%;
+            border-radius: 8px;
+            font-weight: 600;
+            text-transform: none;
+          }
+        }
+      }
+    }
+  }
+
+  // Recent Users
+  .recent-users-section {
+    margin-bottom: 20px;
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+
+      h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+      }
+    }
+
+    .users-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+
+      .user-card {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        mat-card-content {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 16px;
+        }
+
+        .user-card-avatar {
+          flex-shrink: 0;
+
+          .avatar-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e2e8f0;
+          }
+
+          .avatar-initials {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            text-transform: uppercase;
+          }
+        }
+
+        .user-card-info {
+          flex: 1;
+          min-width: 0;
+
+          h4 {
+            margin: 0 0 4px 0;
+            font-size: 0.938rem;
+            font-weight: 600;
+            color: #2d3748;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .user-card-email {
+            display: block;
+            font-size: 0.813rem;
+            color: #718096;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 6px;
+          }
+
+          .user-card-role {
+            display: inline-block;
+            font-size: 0.688rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+
+            &.role-admin {
+              background: #EBF5FF;
+              color: #0284C7;
+            }
+
+            &.role-freelancer {
+              background: #F0FDF4;
+              color: #16A34A;
+            }
+
+            &.role-client {
+              background: #FFF7ED;
+              color: #EA580C;
+            }
+          }
+        }
+      }
+
+      .no-users {
+        grid-column: 1 / -1;
+        text-align: center;
+        color: #718096;
+        padding: 20px;
+      }
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    padding: 12px;
+    
+    .header-section {
+      padding: 16px 20px;
+      
+      .header-content {
+        .header-text h1 {
+          font-size: 1.25rem;
+        }
+        
+        .header-text p {
+          font-size: 0.75rem;
+        }
+      }
+    }
+
+
+
+
+
+
+  // NOUVELLES CARTES POUR ÉVALUATIONS ET BADGES
+  .evaluation-card .detail-header mat-icon {
+    color: #0EA5E9;
+  }
+  
+  .reported-card .detail-header mat-icon {
+    color: #EF4444;
+  }
+  
+  .responses-card .detail-header mat-icon {
+    color: #10B981;
+  }
+  
+  .badges-card .detail-header mat-icon {
+    color: #F59E0B;
+  }
+
+
+    
+    .stats-grid,
+    .details-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

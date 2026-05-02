@@ -1,0 +1,381 @@
+@use 'sass:color';
+@use '../../../../../../styles/nexlance-theme.scss' as *;
+
+.freelancer-projects-container {
+  padding: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 70vh;
+
+  // ===== PAGE HEADER =====
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+
+    .header-content {
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: $nexlance-gray-900;
+        margin: 0 0 6px 0;
+        letter-spacing: -0.5px;
+      }
+      .subtitle {
+        font-size: 15px;
+        color: $nexlance-gray-500;
+        margin: 0;
+      }
+    }
+
+    .header-stats {
+      .stat-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: $nexlance-primary-lighter;
+        color: $nexlance-primary-dark;
+        border-radius: 24px;
+        font-size: 14px;
+        font-weight: 600;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+  }
+
+  // ===== PROJECTS GRID =====
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 24px;
+    animation: fadeInGrid 0.5s ease;
+  }
+
+  @keyframes fadeInGrid {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // ===== PROJECT CARD =====
+  .project-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    border: 1px solid $nexlance-gray-100;
+    display: flex;
+    flex-direction: column;
+
+    &:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(14, 165, 233, 0.12), 0 8px 16px rgba(0, 0, 0, 0.06);
+      border-color: $nexlance-primary-light;
+
+      .card-accent {
+        height: 5px;
+      }
+
+      .project-icon {
+        transform: scale(1.1);
+        color: $nexlance-primary-dark;
+      }
+
+      .card-footer .view-link {
+        color: $nexlance-primary;
+
+        mat-icon {
+          transform: translateX(4px);
+        }
+      }
+    }
+
+    .card-accent {
+      height: 4px;
+      background: linear-gradient(90deg, $nexlance-primary, $nexlance-primary-light);
+      transition: height 0.3s ease;
+    }
+
+    .card-body {
+      padding: 24px;
+      flex: 1;
+    }
+
+    // --- Card Header ---
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+
+      .project-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+          transition: all 0.3s ease;
+        .project-icon {
+          font-size: 22px;
+          width: 22px;
+          height: 22px;
+          color: $nexlance-primary;
+        }
+
+        h3 {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 700;
+          color: $nexlance-gray-800;
+          letter-spacing: -0.3px;
+        }
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        &[data-status="ACTIVE"] {
+          background: rgba($nexlance-success, 0.12);
+          color: color.adjust($nexlance-success, $lightness: -8%);
+        }
+        &[data-status="ON_HOLD"] {
+          background: rgba($nexlance-warning, 0.12);
+          color: color.adjust($nexlance-warning, $lightness: -10%);
+        }
+        &[data-status="COMPLETED"] {
+          background: rgba($nexlance-primary, 0.12);
+          color: $nexlance-primary-dark;
+        }
+        &[data-status="CANCELLED"] {
+          background: rgba($nexlance-error, 0.1);
+          color: $nexlance-error;
+        }
+      }
+    }
+
+    // --- Progress Section ---
+    .progress-section {
+      margin-bottom: 20px;
+
+      .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+
+        .progress-label {
+          font-size: 13px;
+          font-weight: 500;
+          color: $nexlance-gray-500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .progress-value {
+          font-size: 14px;
+          font-weight: 700;
+          color: $nexlance-primary;
+
+          &.complete {
+            color: $nexlance-success;
+          }
+        }
+      }
+
+      .progress-track {
+        width: 100%;
+        height: 8px;
+        background: $nexlance-gray-100;
+        border-radius: 8px;
+        overflow: hidden;
+
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, $nexlance-primary, $nexlance-primary-light);
+          border-radius: 8px;
+          transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+          &.complete {
+            background: linear-gradient(90deg, $nexlance-success, color.adjust($nexlance-success, $lightness: 10%));
+          }
+        }
+      }
+    }
+
+    // --- Divider ---
+    .card-divider {
+      height: 1px;
+      background: $nexlance-gray-100;
+      margin-bottom: 20px;
+    }
+
+    // --- Project Meta ---
+    .project-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+
+      .meta-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          color: $nexlance-gray-400;
+          margin-top: 2px;
+        }
+
+        .meta-text {
+          display: flex;
+          flex-direction: column;
+
+          .meta-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: $nexlance-gray-400;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 2px;
+          }
+
+          .meta-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: $nexlance-gray-700;
+          }
+        }
+      }
+    }
+
+    // --- Card Footer ---
+    .card-footer {
+      padding: 16px 24px;
+      border-top: 1px solid $nexlance-gray-100;
+      background: linear-gradient(to bottom, white, $nexlance-gray-50);
+
+      .view-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        color: $nexlance-gray-500;
+        transition: all 0.25s ease;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          transition: transform 0.25s ease;
+        }
+      }
+    }
+  }
+
+  // ===== EMPTY STATE =====
+  .empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    background: #fff;
+    border-radius: 16px;
+    border: 2px dashed $nexlance-gray-200;
+
+    .empty-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: $nexlance-gray-50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+
+      mat-icon {
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
+        color: $nexlance-gray-300;
+      }
+    }
+
+    h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: $nexlance-gray-700;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 15px;
+      color: $nexlance-gray-400;
+      margin: 0;
+      line-height: 1.6;
+    }
+  }
+
+  // ===== LOADING STATE =====
+  .loading-container {
+    text-align: center;
+    padding: 80px 24px;
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid $nexlance-gray-100;
+      border-top-color: $nexlance-primary;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    p {
+      font-size: 15px;
+      color: $nexlance-gray-400;
+      margin: 0;
+    }
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ===== RESPONSIVE =====
+@media (max-width: 768px) {
+  .freelancer-projects-container {
+    padding: 20px 16px;
+
+    .page-header {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

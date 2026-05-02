@@ -1,0 +1,171 @@
+<div class="recommendation-analytics-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1><mat-icon>analytics</mat-icon> {{ 'admin.analytics.recommendations.title' | translate }}</h1>
+      <p class="subtitle">{{ 'admin.analytics.recommendations.subtitle' | translate }}</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="exportReport()">
+      <mat-icon>picture_as_pdf</mat-icon>
+      {{ 'admin.analytics.exportReport' | translate }}
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>{{ 'common.loading' | translate }}</p>
+  </div>
+
+  <!-- Analytics Content -->
+  <div *ngIf="!isLoading" class="analytics-content">
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <mat-card *ngFor="let stat of stats" class="kpi-card">
+        <mat-card-content>
+          <div class="kpi-header">
+            <div class="icon-container" [style.background-color]="stat.color + '20'">
+              <mat-icon [style.color]="stat.color">{{ stat.icon }}</mat-icon>
+            </div>
+            <div class="trend" *ngIf="stat.trend" [style.color]="getTrendColor(stat.trend)">
+              <mat-icon>{{ getTrendIcon(stat.trend) }}</mat-icon>
+              <span>{{ stat.trend > 0 ? '+' : '' }}{{ stat.trend }}%</span>
+            </div>
+          </div>
+          <div class="kpi-value" [style.color]="stat.color">{{ stat.value }}</div>
+          <div class="kpi-title">{{ stat.title | translate }}</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-grid">
+      <!-- Monthly Evolution -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>timeline</mat-icon>
+          <mat-card-title>{{ 'admin.analytics.recommendations.monthlyEvolution' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="bar-chart">
+            <div *ngFor="let item of monthlyData" class="bar-item">
+              <div class="bar-wrapper">
+                <div class="bar" 
+                     [style.height]="getBarHeight(item.value, getMaxValue(monthlyData))"
+                     [title]="item.value.toString()">
+                </div>
+              </div>
+              <span class="label">{{ item.name }}</span>
+              <span class="value">{{ item.value }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Top Clients -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>workspace_premium</mat-icon>
+          <mat-card-title>{{ 'admin.analytics.recommendations.topClients' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="horizontal-bars">
+            <div *ngFor="let item of topClients" class="h-bar-item">
+              <div class="h-bar-label">{{ item.name }}</div>
+              <div class="h-bar-wrapper">
+                <div class="h-bar" 
+                     [style.width]="getBarHeight(item.value, getMaxValue(topClients))">
+                </div>
+              </div>
+              <div class="h-bar-value">{{ item.value }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Top Freelancers -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>person_pin</mat-icon>
+          <mat-card-title>{{ 'admin.analytics.recommendations.topFreelancers' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="horizontal-bars">
+            <div *ngFor="let item of topFreelancers" class="h-bar-item">
+              <div class="h-bar-label">{{ item.name }}</div>
+              <div class="h-bar-wrapper">
+                <div class="h-bar freelancer" 
+                     [style.width]="getBarHeight(item.value, getMaxValue(topFreelancers))">
+                </div>
+              </div>
+              <div class="h-bar-value">{{ item.value }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Conversion Funnel -->
+      <mat-card class="chart-card funnel-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>filter_list</mat-icon>
+          <mat-card-title>{{ 'admin.analytics.recommendations.conversionFunnel' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="funnel">
+            <div *ngFor="let item of conversionData; let i = index" class="funnel-item">
+              <div class="funnel-bar" 
+                   [style.width]="getBarHeight(item.value, getMaxValue(conversionData))"
+                   [class]="'funnel-level-' + i">
+                <span class="funnel-name">{{ item.name }}</span>
+                <span class="funnel-value">{{ item.value }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <mat-icon>emoji_events</mat-icon>
+          <div class="summary-info">
+            <div class="summary-value">{{ acceptanceRate }}%</div>
+            <div class="summary-label">{{ 'admin.analytics.recommendations.avgAcceptance' | translate }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <mat-icon>speed</mat-icon>
+          <div class="summary-info">
+            <div class="summary-value">2.3 {{ 'admin.analytics.recommendations.days' | translate }}</div>
+            <div class="summary-label">{{ 'admin.analytics.recommendations.avgResponseTime' | translate }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <mat-icon>visibility</mat-icon>
+          <div class="summary-info">
+            <div class="summary-value">85%</div>
+            <div class="summary-label">{{ 'admin.analytics.recommendations.viewRate' | translate }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <mat-icon>notifications_active</mat-icon>
+          <div class="summary-info">
+            <div class="summary-value">42</div>
+            <div class="summary-label">{{ 'admin.analytics.recommendations.remindersSent' | translate }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

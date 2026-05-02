@@ -1,0 +1,116 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>
+    <mat-icon>assignment</mat-icon>
+    Create Project & Milestones
+  </h2>
+
+  <mat-dialog-content>
+    <!-- Freelancer Info -->
+    <div class="freelancer-banner">
+      <mat-icon>person</mat-icon>
+      <span>
+        Freelancer: <strong>{{ data.application.freelance?.firstName }} {{ data.application.freelance?.lastName }}</strong>
+        — Proposed Rate: <strong>{{ data.application.proposedRate }} DT</strong>
+      </span>
+    </div>
+
+    <!-- Project Info -->
+    <div class="section">
+      <h3>Project Details</h3>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Project Title</mat-label>
+          <input matInput [(ngModel)]="projectTitle" required>
+        </mat-form-field>
+      </div>
+      <div class="form-row two-cols">
+        <mat-form-field appearance="outline">
+          <mat-label>Start Date</mat-label>
+          <input matInput type="date" [(ngModel)]="startDate" required>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>End Date</mat-label>
+          <input matInput type="date" [(ngModel)]="endDate" required>
+        </mat-form-field>
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Requirements</mat-label>
+          <textarea matInput [(ngModel)]="requirements" rows="3"></textarea>
+        </mat-form-field>
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Deliverables</mat-label>
+          <textarea matInput [(ngModel)]="deliverables" rows="2" placeholder="Comma-separated list of deliverables"></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Milestones -->
+    <div class="section">
+      <div class="section-header">
+        <h3>Milestones</h3>
+        <button mat-mini-fab color="primary" (click)="addMilestone()" type="button">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      <div *ngFor="let milestone of milestones; let i = index" class="milestone-card">
+        <div class="milestone-header">
+          <span class="milestone-number">Milestone {{ i + 1 }}</span>
+          <button *ngIf="milestones.length > 1" mat-icon-button color="warn" (click)="removeMilestone(i)" type="button">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+
+        <div class="form-row two-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Title</mat-label>
+            <input matInput [(ngModel)]="milestone.title" required>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Due Date</mat-label>
+            <input matInput type="date" [(ngModel)]="milestone.dueDate" required>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput [(ngModel)]="milestone.description" rows="2"></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Deliverables</mat-label>
+            <input matInput [(ngModel)]="milestone.deliverables" placeholder="Comma-separated deliverables">
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Acceptance Criteria</mat-label>
+            <textarea matInput [(ngModel)]="milestone.acceptanceCriteria" rows="2"></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row checkbox-row">
+          <mat-checkbox [(ngModel)]="milestone.requiresDocuments" color="primary">
+            <mat-icon class="checkbox-icon">attach_file</mat-icon>
+            Documents required for this milestone
+          </mat-checkbox>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" [disabled]="!isFormValid()" (click)="onSubmit()">
+      <mat-icon>rocket_launch</mat-icon>
+      Create Project
+    </button>
+  </mat-dialog-actions>
+</div>

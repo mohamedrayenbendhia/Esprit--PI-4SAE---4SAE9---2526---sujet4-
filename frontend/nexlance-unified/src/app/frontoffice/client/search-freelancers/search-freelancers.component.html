@@ -1,0 +1,246 @@
+<div class="search-freelancers-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>{{ 'nav.findFreelancers' | translate }}</h1>
+      <p>Discover talented professionals for your projects</p>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <!-- SIDEBAR FILTERS -->
+    <aside class="filters-sidebar">
+      <div class="filter-section">
+        <h3>{{ 'jobs.filters' | translate }}</h3>
+
+        <!-- Skills Search -->
+        <div class="filter-group">
+          <label>{{ 'jobs.requiredSkills' | translate }}</label>
+          <div class="search-input">
+            <mat-icon>search</mat-icon>
+            <input 
+              type="text" 
+              [placeholder]="'common.search' | translate"
+              (input)="onSkillSearch($event)"
+            />
+          </div>
+          
+          <div class="skills-grid">
+            <button 
+              *ngFor="let skill of filteredSkills"
+              class="skill-chip"
+              [class.active]="selectedSkills.includes(skill)"
+              (click)="toggleSkill(skill)"
+            >
+              {{ skill }}
+            </button>
+          </div>
+
+          <div class="selected-skills" *ngIf="selectedSkills.length > 0">
+            <span 
+              *ngFor="let skill of selectedSkills"
+              class="selected-skill-tag"
+            >
+              {{ skill }}
+              <mat-icon (click)="removeSkill(skill)">close</mat-icon>
+            </span>
+          </div>
+        </div>
+
+        <!-- Experience Filter -->
+        <div class="filter-group">
+          <label>{{ 'jobs.experienceLevel' | translate }}</label>
+          <div class="radio-group">
+            <label *ngFor="let option of experienceOptions" class="radio-option" [class.selected]="experienceFilter === option.value">
+              <input 
+                type="radio" 
+                name="experience"
+                [value]="option.value"
+                [(ngModel)]="experienceFilter"
+                (change)="applyFilters()"
+              />
+              <span class="radio-dot"></span>
+              <span class="radio-label">{{ option.label }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Hourly Rate Filter -->
+        <div class="filter-group">
+          <label>Hourly Rate (DT/hr)</label>
+          <div class="rate-inputs">
+            <input 
+              type="number" 
+              [(ngModel)]="minRate"
+              (change)="applyFilters()"
+              placeholder="Min"
+              class="rate-input"
+            />
+            <span>-</span>
+            <input 
+              type="number" 
+              [(ngModel)]="maxRate"
+              (change)="applyFilters()"
+              placeholder="Max"
+              class="rate-input"
+            />
+          </div>
+          <div class="rate-range">
+            <span>10 DT</span>
+            <span>50 DT</span>
+            <span>100+ DT</span>
+          </div>
+        </div>
+
+        <!-- Rating Filter -->
+        <div class="filter-group">
+          <label>Minimum Rating</label>
+          <div class="rating-filter">
+            <span 
+              *ngFor="let star of [1,2,3,4,5]; let i = index"
+              class="star"
+              [class.filled]="i < minRating"
+              (click)="minRating = (minRating === i + 1) ? 0 : i + 1; applyFilters()"
+            >
+              <mat-icon>{{ i < minRating ? 'star' : 'star_border' }}</mat-icon>
+            </span>
+            <span class="rating-text">{{ minRating }}.0+</span>
+          </div>
+        </div>
+
+        <!-- Availability Filter -->
+        <div class="filter-group">
+          <label>Availability</label>
+          <div class="checkbox-group">
+            <label class="checkbox-option">
+              <mat-checkbox 
+                [(ngModel)]="availabilityFilters.immediate"
+                (change)="applyFilters()"
+                color="primary"
+              ></mat-checkbox>
+              <span>Immediately Available</span>
+            </label>
+            <label class="checkbox-option">
+              <mat-checkbox 
+                [(ngModel)]="availabilityFilters.twoWeeks"
+                (change)="applyFilters()"
+                color="primary"
+              ></mat-checkbox>
+              <span>Within 2 weeks</span>
+            </label>
+            <label class="checkbox-option">
+              <mat-checkbox 
+                [(ngModel)]="availabilityFilters.month"
+                (change)="applyFilters()"
+                color="primary"
+              ></mat-checkbox>
+              <span>Within a month</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="filter-actions">
+          <button class="btn btn-secondary" (click)="resetFilters()">
+            <mat-icon>refresh</mat-icon> Reset
+          </button>
+          <button class="btn btn-primary" (click)="applyFilters()">
+            <mat-icon>check</mat-icon> Apply
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RESULTS SECTION -->
+    <main class="results-section">
+      <div class="results-header">
+        <h2>{{ filteredFreelancers.length }} Freelancers Found</h2>
+        <div class="sort-control">
+          <label>{{ 'jobs.sortBy' | translate }}:</label>
+          <select (change)="onSortChange($event)" [(ngModel)]="sortBy">
+            <option value="rating">Rating</option>
+            <option value="rate">Rate</option>
+            <option value="experience">Experience</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>{{ 'common.loading' | translate }}</p>
+      </div>
+
+      <!-- Freelancers List -->
+      <div *ngIf="!isLoading" class="freelancers-list">
+        <div *ngFor="let freelancer of filteredFreelancers" class="freelancer-card">
+          <div class="freelancer-header">
+            <div class="avatar">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="freelancer-info">
+              <div class="name-rating">
+                <h3>{{ freelancer.name }}</h3>
+                <div class="rating">
+                  <mat-icon>star</mat-icon>
+                  <span class="rating-value">{{ freelancer.rating }}</span>
+                  <span class="review-count">({{ freelancer.reviewCount }})</span>
+                </div>
+              </div>
+              <div class="title-location">
+                <p class="title"><mat-icon>work</mat-icon> {{ freelancer.title }}</p>
+                <p class="location">
+                  <mat-icon>location_on</mat-icon> {{ freelancer.location }} • 
+                  <span [class.available]="freelancer.available" [class.unavailable]="!freelancer.available">
+                    {{ freelancer.available ? 'Available' : freelancer.availableIn }}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="freelancer-stats">
+            <div class="stat">
+              <mat-icon>payments</mat-icon>
+              <span class="stat-label">{{ freelancer.hourlyRate }} DT/hr</span>
+            </div>
+            <div class="stat">
+              <mat-icon>workspace_premium</mat-icon>
+              <span class="stat-label">{{ freelancer.experience }}+ years</span>
+            </div>
+          </div>
+
+          <div class="skills-section">
+            <p class="skills-label">Skills:</p>
+            <div class="skills-list">
+              <span *ngFor="let skill of freelancer.skills.slice(0, 5)" class="skill-badge">
+                {{ skill }}
+              </span>
+              <span *ngIf="freelancer.skills.length > 5" class="more-skills">
+                +{{ freelancer.skills.length - 5 }}
+              </span>
+            </div>
+          </div>
+
+          <div class="freelancer-actions">
+            <button class="btn btn-secondary" (click)="viewProfile(freelancer.id)">
+              <mat-icon>visibility</mat-icon> View Profile
+            </button>
+            <button class="btn btn-outline" (click)="openRecommendationModal(freelancer.id)">
+              <mat-icon>email</mat-icon> Recommend
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && filteredFreelancers.length === 0" class="empty-state">
+        <mat-icon>search_off</mat-icon>
+        <h3>No Freelancers Found</h3>
+        <p>Try adjusting your filters or search criteria</p>
+        <button class="btn btn-primary" (click)="resetFilters()">
+          Reset Filters
+        </button>
+      </div>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,58 @@
+@if (!isLoading() && survey() && !submitted()) {
+  <div class="nps-container">
+    <h4><mat-icon>sentiment_satisfied</mat-icon> How would you rate the handling of your complaint?</h4>
+    <p class="nps-subtitle">From 0 (not at all satisfied) to 10 (very satisfied)</p>
+
+    <div class="score-grid">
+      @for (s of scores; track s) {
+        <button class="score-btn"
+                [class]="scoreClass(s)"
+                [class.selected]="selectedScore() === s"
+                (click)="selectedScore.set(s)">
+          {{ s }}
+        </button>
+      }
+    </div>
+
+    @if (selectedScore() !== null) {
+      <div class="selected-emoji">{{ scoreLabel(selectedScore()!) }}</div>
+
+      <mat-form-field appearance="outline" style="width:100%;margin-top:12px">
+        <mat-label>Comment (optional)</mat-label>
+        <textarea matInput rows="2"
+                  [ngModel]="comment()" (ngModelChange)="comment.set($event)"
+                  placeholder="Tell us what could be improved..."></textarea>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" [disabled]="submitting()" (click)="submit()">
+        @if (submitting()) { <mat-spinner diameter="18"></mat-spinner> }
+        @else { <span class="btn-label"><mat-icon>send</mat-icon> Submit my rating</span> }
+      </button>
+    }
+  </div>
+}
+
+@if (submitted()) {
+  <div class="nps-thankyou">
+    <mat-icon>check_circle</mat-icon>
+    <p>Thank you for your feedback! It helps us improve our service.</p>
+  </div>
+}
+
+<style>
+.nps-container { padding: 20px; background: #f9f9f9; border-radius: 12px; border: 1px solid #e0e0e0; margin: 16px 0; }
+.nps-container h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; color: #333; }
+.nps-subtitle { color: #888; font-size: 0.85rem; margin: 0 0 16px; }
+.score-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.score-btn { width: 40px; height: 40px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-weight: 700; font-size: 0.95rem; transition: all 0.15s; }
+.score-btn.detractor { border-color: #ef9a9a; color: #c62828; }
+.score-btn.passive   { border-color: #ffe082; color: #f57f17; }
+.score-btn.promoter  { border-color: #a5d6a7; color: #2e7d32; }
+.score-btn.selected.detractor { background: #ffebee; border-color: #c62828; }
+.score-btn.selected.passive   { background: #fff8e1; border-color: #f57f17; }
+.score-btn.selected.promoter  { background: #e8f5e9; border-color: #2e7d32; }
+.score-btn:hover { transform: scale(1.1); }
+.selected-emoji { font-size: 2rem; text-align: center; margin: 8px 0; }
+.nps-thankyou { display: flex; align-items: center; gap: 12px; padding: 16px; background: #e8f5e9; border-radius: 8px; color: #2e7d32; margin: 16px 0; }
+.nps-thankyou mat-icon { color: #43a047; font-size: 28px; height: 28px; width: 28px; }
+</style>

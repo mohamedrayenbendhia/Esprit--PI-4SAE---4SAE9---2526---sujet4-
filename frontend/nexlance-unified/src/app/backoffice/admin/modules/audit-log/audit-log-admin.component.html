@@ -1,0 +1,229 @@
+<div class="audit-log-admin">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="header-text">
+        <h1>{{ 'admin.auditLog.title' | translate }}</h1>
+        <p>{{ 'admin.auditLog.subtitle' | translate }}</p>
+      </div>
+      <button mat-raised-button color="primary" (click)="refreshLogs()">
+        <mat-icon>refresh</mat-icon> {{ 'admin.auditLog.refresh' | translate }}
+      </button>
+      <span class="live-indicator" *ngIf="isLive()">
+        <span class="live-dot"></span> LIVE
+      </span>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-section" *ngIf="stats()">
+    <div class="stats-grid">
+      <mat-card class="stat-card total">
+        <mat-card-content>
+          <div class="stat-icon"><mat-icon>history</mat-icon></div>
+          <div class="stat-info">
+            <div class="stat-value">{{ stats()!.totalLogs }}</div>
+            <div class="stat-label">Total Logs</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card today">
+        <mat-card-content>
+          <div class="stat-icon"><mat-icon>today</mat-icon></div>
+          <div class="stat-info">
+            <div class="stat-value">{{ stats()!.todayLogs }}</div>
+            <div class="stat-label">Today</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card actions">
+        <mat-card-content>
+          <div class="stat-icon"><mat-icon>trending_up</mat-icon></div>
+          <div class="stat-info">
+            <div class="stat-value">{{ getTopActionEntries().length }}</div>
+            <div class="stat-label">Action Types</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card entities">
+        <mat-card-content>
+          <div class="stat-icon"><mat-icon>category</mat-icon></div>
+          <div class="stat-info">
+            <div class="stat-value">{{ getTopEntityEntries().length }}</div>
+            <div class="stat-label">Entity Types</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Entity Type</mat-label>
+          <mat-select [(ngModel)]="entityTypeFilter" (selectionChange)="applyFilters()">
+            <mat-option value="">All</mat-option>
+            <mat-option *ngFor="let type of entityTypes" [value]="type">{{ type }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Action</mat-label>
+          <mat-select [(ngModel)]="actionFilter" (selectionChange)="applyFilters()">
+            <mat-option value="">All</mat-option>
+            <mat-option *ngFor="let action of actions" [value]="action">{{ action }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>User</mat-label>
+          <input matInput [(ngModel)]="userFilter" (input)="applyFilters()" placeholder="Search by name...">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>From</mat-label>
+          <input matInput type="date" [(ngModel)]="dateFrom" (change)="applyFilters()">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>To</mat-label>
+          <input matInput type="date" [(ngModel)]="dateTo" (change)="applyFilters()">
+        </mat-form-field>
+
+        <button mat-button color="warn" (click)="clearFilters()" class="clear-btn">
+          <mat-icon>clear</mat-icon> Clear
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading audit logs...</p>
+  </div>
+
+  <!-- Logs Table -->
+  <mat-card *ngIf="!isLoading()" class="table-card">
+    <mat-card-content>
+      <div class="results-header">
+        <span class="results-count">{{ filteredLogs().length }} logs found</span>
+      </div>
+
+      <div class="table-container">
+        <table mat-table [dataSource]="pagedLogs()" matSort (matSortChange)="onSortChange($event)" [matSortActive]="currentSort.active" [matSortDirection]="currentSort.direction" class="audit-table">
+          <!-- Timestamp -->
+          <ng-container matColumnDef="timestamp">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Time</th>
+            <td mat-cell *matCellDef="let log">
+              <span class="timestamp">{{ formatTimestamp(log.timestamp) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Action -->
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Action</th>
+            <td mat-cell *matCellDef="let log">
+              <span class="action-chip" [style.background-color]="getActionColor(log.action)" [style.color]="'white'">
+                <mat-icon class="chip-icon">{{ getActionIcon(log.action) }}</mat-icon>
+                {{ log.action }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Entity Type -->
+          <ng-container matColumnDef="entityType">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Entity</th>
+            <td mat-cell *matCellDef="let log">
+              <span class="entity-type">{{ log.entityType }}</span>
+              <span class="entity-id">{{ log.entityId | slice:0:8 }}...</span>
+            </td>
+          </ng-container>
+
+          <!-- Entity ID -->
+          <ng-container matColumnDef="entityId">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Entity ID</th>
+            <td mat-cell *matCellDef="let log">
+              <span class="entity-id-full" [matTooltip]="log.entityId">{{ log.entityId | slice:0:12 }}...</span>
+            </td>
+          </ng-container>
+
+          <!-- User -->
+          <ng-container matColumnDef="userId">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>User</th>
+            <td mat-cell *matCellDef="let log">
+              <div class="user-cell">
+                <span class="user-name" [matTooltip]="log.userId">{{ getUserName(log.userId) }}</span>
+                <span class="user-role" *ngIf="log.userRole">{{ log.userRole }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Details -->
+          <ng-container matColumnDef="details">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Details</th>
+            <td mat-cell *matCellDef="let log">
+              <span class="details-text" [matTooltip]="log.details || ''">
+                {{ log.details ? (log.details | slice:0:50) + '...' : '-' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="log-row"></tr>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="filteredLogs().length === 0" class="empty-state">
+        <mat-icon>folder_open</mat-icon>
+        <p>No audit logs found</p>
+      </div>
+
+      <mat-paginator
+        *ngIf="filteredLogs().length > 0"
+        [length]="filteredLogs().length"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Top Actions & Entity Breakdown -->
+  <div class="breakdown-section" *ngIf="stats()">
+    <mat-card class="breakdown-card">
+      <mat-card-content>
+        <h3><mat-icon>bar_chart</mat-icon> Top Actions</h3>
+        <div class="breakdown-list">
+          <div *ngFor="let entry of getTopActionEntries()" class="breakdown-item">
+            <span class="breakdown-label">
+              <mat-icon class="small-icon" [style.color]="getActionColor(entry[0])">{{ getActionIcon(entry[0]) }}</mat-icon>
+              {{ entry[0] }}
+            </span>
+            <span class="breakdown-value">{{ entry[1] }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="breakdown-card">
+      <mat-card-content>
+        <h3><mat-icon>category</mat-icon> Entity Types</h3>
+        <div class="breakdown-list">
+          <div *ngFor="let entry of getTopEntityEntries()" class="breakdown-item">
+            <span class="breakdown-label">{{ entry[0] }}</span>
+            <span class="breakdown-value">{{ entry[1] }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

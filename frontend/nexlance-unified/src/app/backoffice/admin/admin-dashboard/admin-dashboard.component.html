@@ -1,0 +1,334 @@
+<div class="admin-dashboard">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="header-text">
+        <h1>{{ 'admin.dashboard.title' | translate }}</h1>
+        <p>{{ 'admin.dashboard.welcome' | translate }}, {{ user?.firstName }} {{ user?.lastName }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daily Motivational Quote (Quotable API) -->
+  <div *ngIf="dailyQuote()" class="quote-section">
+    <mat-card class="quote-card">
+      <mat-card-content>
+        <div class="quote-content">
+          <mat-icon class="quote-icon">format_quote</mat-icon>
+          <blockquote>"{{ dailyQuote()?.content }}"</blockquote>
+          <cite>— {{ dailyQuote()?.author }}</cite>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Statistics -->
+  <div class="stats-section">
+    <h2>{{ 'admin.dashboard.platformOverview' | translate }}</h2>
+    <div class="stats-grid">
+      <mat-card class="stat-card users" (click)="navigateToUsers()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>people</mat-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ stats().totalUsers }}</div>
+            <div class="stat-label">{{ 'admin.dashboard.stats.totalUsers' | translate }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card projects" (click)="navigateToJobs()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>work</mat-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ stats().totalJobOffers }}</div>
+            <div class="stat-label">{{ 'admin.dashboard.stats.totalJobOffers' | translate }}</div>
+            <div class="stat-sub">{{ stats().openJobOffers }} {{ 'admin.dashboard.stats.open' | translate }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card revenue" (click)="navigateToProjects()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>folder_open</mat-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ stats().activeProjects }}</div>
+            <div class="stat-label">{{ 'admin.dashboard.stats.activeProjects' | translate }}</div>
+            <div class="stat-sub">{{ stats().completedProjects }} {{ 'admin.dashboard.stats.completed' | translate }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card kyc" (click)="navigateToKyc()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>verified_user</mat-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ stats().pendingKyc }}</div>
+            <div class="stat-label">{{ 'admin.dashboard.stats.pendingKyc' | translate }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- NOUVELLE SECTION: GESTION DES ÉVALUATIONS ET BADGES -->
+  <div class="details-section">
+    <h2>Gestion des évaluations & badges</h2>
+    <div class="details-grid">
+      <mat-card class="detail-card evaluation-card" (click)="navigateToEvaluations()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #0EA5E9;">star_rate</mat-icon>
+            <h3>Toutes les évaluations</h3>
+          </div>
+          <div class="detail-value">{{ stats().totalEvaluations || 0 }}</div>
+          <button mat-raised-button style="background: #0EA5E9; color: white; width: 100%; border-radius: 8px;">
+            Voir toutes
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card reported-card" (click)="navigateToReportedEvaluations()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #EF4444;">warning</mat-icon>
+            <h3>Signalements</h3>
+          </div>
+          <div class="detail-value">{{ stats().reportedEvaluations || 0 }}</div>
+          <button mat-raised-button style="background: #EF4444; color: white; width: 100%; border-radius: 8px;">
+            Modérer
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card responses-card" (click)="navigateToResponses()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #10B981;">chat_bubble</mat-icon>
+            <h3>Réponses freelancers</h3>
+          </div>
+          <div class="detail-value">{{ stats().evaluationsWithResponses || 0 }}</div>
+          <button mat-raised-button style="background: #10B981; color: white; width: 100%; border-radius: 8px;">
+            Consulter
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card badges-card" (click)="navigateToBadges()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #F59E0B;">military_tech</mat-icon>
+            <h3>Badges</h3>
+          </div>
+          <div class="detail-value">{{ stats().totalBadges || 0 }}</div>
+          <button mat-raised-button style="background: #F59E0B; color: white; width: 100%; border-radius: 8px;">
+            Gérer
+          </button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Detailed Statistics existante -->
+  <div class="details-section">
+    <h2>{{ 'admin.dashboard.platformDetails' | translate }}</h2>
+    <div class="details-grid">
+      <mat-card class="detail-card">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon color="primary">work_outline</mat-icon>
+            <h3>{{ 'admin.dashboard.stats.freelancers' | translate }}</h3>
+          </div>
+          <div class="detail-value">{{ stats().freelancers }}</div>
+          <button mat-raised-button color="primary" (click)="navigateToUsers()">
+            {{ 'admin.dashboard.actions.manageFreelancers' | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon color="accent">business</mat-icon>
+            <h3>{{ 'admin.dashboard.stats.clients' | translate }}</h3>
+          </div>
+          <div class="detail-value">{{ stats().clients }}</div>
+          <button mat-raised-button color="accent" (click)="navigateToUsers()">
+            {{ 'admin.dashboard.actions.manageClients' | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #2196f3;">assignment</mat-icon>
+            <h3>{{ 'admin.dashboard.stats.totalApplications' | translate }}</h3>
+          </div>
+          <div class="detail-value">{{ stats().totalApplications }}</div>
+          <button mat-raised-button style="background: #2196f3; color: white; width: 100%; border-radius: 8px;" (click)="navigateToJobs()">
+            {{ 'nav.manageJobs' | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #9c27b0;">recommend</mat-icon>
+            <h3>{{ 'admin.dashboard.stats.recommendations' | translate }}</h3>
+          </div>
+          <div class="detail-value">{{ stats().totalRecommendations }}</div>
+          <div class="detail-info" style="margin-bottom: 8px;">{{ stats().pendingRecommendations }} {{ 'admin.dashboard.stats.pendingLabel' | translate }}</div>
+          <button mat-raised-button style="background: #9c27b0; color: white; width: 100%; border-radius: 8px;" (click)="navigateToRecommendations()">
+            {{ 'nav.manageRecommendations' | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #43e97b;">check_circle</mat-icon>
+            <h3>{{ 'admin.dashboard.stats.completedProjects' | translate }}</h3>
+          </div>
+          <div class="detail-value">{{ stats().completedProjects }}</div>
+          <button mat-raised-button style="background: #43e97b; color: white; width: 100%; border-radius: 8px;" (click)="navigateToProjects()">
+            {{ 'nav.manageProjects' | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card kyc-card" (click)="navigateToKyc()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon color="warn">verified_user</mat-icon>
+            <h3>{{ 'admin.dashboard.stats.kycVerifications' | translate }}</h3>
+          </div>
+          <div class="detail-value">{{ stats().pendingKyc }}</div>
+          <button mat-raised-button color="warn" style="width: 100%; border-radius: 8px;">
+            {{ 'admin.dashboard.actions.processKyc' | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Recent Users -->
+  <div class="recent-users-section">
+    <div class="section-header">
+      <h2>{{ 'admin.dashboard.recentUsers' | translate }}</h2>
+      <button mat-stroked-button color="primary" (click)="navigateToUsers()">
+        {{ 'admin.dashboard.actions.viewAll' | translate }}
+      </button>
+    </div>
+    <div class="users-grid">
+      @for (user of recentUsers(); track user.id) {
+        <mat-card class="user-card">
+          <mat-card-content>
+            <div class="user-card-avatar">
+              @if (user.avatar) {
+                <img [src]="user.avatar" [alt]="user.firstName + ' ' + user.lastName" class="avatar-img">
+              } @else {
+                <div class="avatar-initials">{{ getInitials(user) }}</div>
+              }
+            </div>
+            <div class="user-card-info">
+              <h4>{{ user.firstName }} {{ user.lastName }}</h4>
+              <span class="user-card-email">{{ user.email }}</span>
+              <span class="user-card-role" [class]="'role-' + user.type.toLowerCase()">{{ user.type }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      } @empty {
+        <p class="no-users">No users found</p>
+      }
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions-section">
+    <h2>{{ 'admin.dashboard.quickActions' | translate }}</h2>
+    <div class="details-grid">
+      <mat-card class="detail-card" (click)="navigateToJobs()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #2196f3;">work</mat-icon>
+            <h3>{{ 'nav.manageJobs' | translate }}</h3>
+          </div>
+          <button mat-raised-button style="background: #2196f3; color: white; width: 100%; border-radius: 8px;">
+            {{ 'admin.dashboard.actions.viewAll' | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card" (click)="navigateToProjects()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #4caf50;">folder</mat-icon>
+            <h3>{{ 'nav.manageProjects' | translate }}</h3>
+          </div>
+          <button mat-raised-button style="background: #4caf50; color: white; width: 100%; border-radius: 8px;">
+            {{ 'admin.dashboard.actions.viewAll' | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card" (click)="navigateToRecommendations()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #9c27b0;">recommend</mat-icon>
+            <h3>{{ 'nav.manageRecommendations' | translate }}</h3>
+          </div>
+          <button mat-raised-button style="background: #9c27b0; color: white; width: 100%; border-radius: 8px;">
+            {{ 'admin.dashboard.actions.viewAll' | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card" (click)="navigateToJobAnalytics()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #ff9800;">analytics</mat-icon>
+            <h3>{{ 'nav.jobAnalytics' | translate }}</h3>
+          </div>
+          <button mat-raised-button style="background: #ff9800; color: white; width: 100%; border-radius: 8px;">
+            {{ 'admin.dashboard.actions.viewAll' | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="detail-card" (click)="navigateToAuditLog()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #8B5CF6;">history</mat-icon>
+            <h3>{{ 'admin.auditLog.title' | translate }}</h3>
+          </div>
+          <button mat-raised-button style="background: #8B5CF6; color: white; width: 100%; border-radius: 8px;">
+            {{ 'admin.auditLog.viewLogs' | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Nouvelle carte pour les badges -->
+      <mat-card class="detail-card" (click)="navigateToBadges()" style="cursor: pointer">
+        <mat-card-content>
+          <div class="detail-header">
+            <mat-icon style="color: #F59E0B;">military_tech</mat-icon>
+            <h3>Badges</h3>
+          </div>
+          <button mat-raised-button style="background: #F59E0B; color: white; width: 100%; border-radius: 8px;">
+            Gérer
+          </button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

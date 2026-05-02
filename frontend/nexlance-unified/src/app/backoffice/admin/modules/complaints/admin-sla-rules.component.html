@@ -1,0 +1,259 @@
+<div class="page-wrapper">
+
+  <!-- ── En-tête ─────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>SLA Rules</h1>
+      <p>Define response and resolution timeframes by priority level.</p>
+    </div>
+
+    <div class="header-right">
+      <!-- Compteur visuel 0/4 -->
+      <div class="rules-counter">
+        <div class="counter-dots">
+          @for (p of ALL_PRIORITIES; track p; let i = $index) {
+            <span class="dot" [class.filled]="i < rules().length"></span>
+          }
+        </div>
+        {{ rules().length }}/{{ MAX_RULES }} rules
+      </div>
+
+      <!-- Bouton désactivé si 4 règles déjà définies -->
+      <div>
+        <button class="btn-create" (click)="openCreate()" [disabled]="!canCreate() || showForm()">
+          <mat-icon>add</mat-icon>
+          New rule
+        </button>
+        @if (!canCreate()) {
+          <p class="btn-create-hint">All 4 priorities are configured</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- ── Loading ──────────────────────────────────────────────────────── -->
+    @if (isLoading()) {
+      <div class="loading-center">
+        <mat-icon style="font-size:40px;color:#94a3b8;animation:spin 1s linear infinite">autorenew</mat-icon>
+      </div>
+    }
+
+    <!-- ── Formulaire création / édition ────────────────────────────────── -->
+    @if (showForm()) {
+      <div class="card form-section">
+        <div class="card-header">
+          <div class="section-num">
+            <mat-icon style="font-size:16px;width:16px;height:16px">{{ editingId() ? 'edit' : 'add' }}</mat-icon>
+          </div>
+          <div>
+            <h3>{{ editingId() ? 'Edit SLA rule' : 'New SLA rule' }}</h3>
+            <p>{{ editingId() ? 'Modify the timeframes for this priority' : 'Configure timeframes for an unconfigured priority' }}</p>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="form-grid">
+
+            <!-- Priorité -->
+            <div class="field-group">
+              <label class="field-label">Priority</label>
+              <div class="form-select-wrap">
+                <select class="form-select" [(ngModel)]="form.priority" [disabled]="!!editingId()">
+                  @if (editingId()) {
+                    <option [value]="form.priority">{{ priorityMeta(form.priority).label }}</option>
+                  } @else {
+                    @for (p of availablePriorities(); track p) {
+                      <option [value]="p">{{ priorityMeta(p).label }}</option>
+                    }
+                  }
+                </select>
+              </div>
+            </div>
+
+            <!-- Première réponse -->
+            <div class="field-group">
+              <label class="field-label">First response time</label>
+              <div class="input-with-suffix">
+                <input class="form-input" type="number" min="1" [(ngModel)]="form.maxFirstResponseHours" placeholder="e.g. 4">
+                <span class="input-suffix">hours</span>
+              </div>
+            </div>
+
+            <!-- Délai résolution -->
+            <div class="field-group">
+              <label class="field-label">Resolution time</label>
+              <div class="input-with-suffix">
+                <input class="form-input" type="number" min="1" [(ngModel)]="form.maxResolutionHours" placeholder="e.g. 24">
+                <span class="input-suffix">hours</span>
+              </div>
+            </div>
+
+            <!-- Seuil d'alerte -->
+            <div class="field-group">
+              <label class="field-label">Warning threshold (before deadline)</label>
+              <div class="input-with-suffix">
+                <input class="form-input" type="number" min="1" [(ngModel)]="form.warningThresholdHours" placeholder="e.g. 2">
+                <span class="input-suffix">hours</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Toggle auto-escalade -->
+          <div class="escalade-toggle-wrap" [class.inactive]="!form.autoEscalate">
+            <div class="toggle-content">
+              <div class="toggle-title">
+                <mat-icon>bolt</mat-icon>
+                Auto-escalation when deadline is exceeded
+              </div>
+              <div class="toggle-desc">
+                When enabled, the complaint is automatically unassigned from the agent and escalated directly to the admin queue when the resolution deadline is exceeded.
+              </div>
+            </div>
+            <mat-slide-toggle
+              [(ngModel)]="form.autoEscalate"
+              [color]="'primary'">
+              {{ form.autoEscalate ? 'Enabled' : 'Disabled' }}
+            </mat-slide-toggle>
+          </div>
+
+          <!-- Actions -->
+          <div class="form-actions">
+            <button class="btn-secondary" (click)="cancel()">Cancel</button>
+            <button class="btn-primary" [disabled]="saving()" (click)="save()">
+              @if (saving()) {
+                <span class="inline-spinner"></span> Saving…
+              } @else {
+                <mat-icon>save</mat-icon> Save rule
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── Règles configurées ────────────────────────────────────────────── -->
+    @if (!isLoading()) {
+      @for (rule of orderedRules(); track rule.id) {
+        <div class="card rule-card">
+
+          <div class="rule-card-header">
+            <!-- Icône priorité -->
+            <div class="priority-icon"
+                 [style.background]="priorityMeta(rule.priority).bg"
+                 [style.color]="priorityMeta(rule.priority).color">
+              <mat-icon>{{ priorityMeta(rule.priority).icon }}</mat-icon>
+            </div>
+
+            <div class="rule-title">
+              <p class="priority-label"
+                 [style.color]="priorityMeta(rule.priority).color">
+                {{ priorityMeta(rule.priority).label }}
+              </p>
+              <p class="priority-sub">Priority level {{ rule.priority }}</p>
+            </div>
+
+            <div class="rule-actions">
+              <button class="btn-icon" (click)="openEdit(rule)" title="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="btn-icon danger" (click)="delete(rule)" title="Delete">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="rule-card-body">
+            <div class="stat-block">
+              <div class="stat-icon-label">
+                <mat-icon>reply</mat-icon>
+                First response
+              </div>
+              <div class="stat-value">{{ rule.maxFirstResponseHours }}h</div>
+              <div class="stat-hint">{{ (rule.maxFirstResponseHours / 24) | number:'1.0-1' }} day(s)</div>
+            </div>
+
+            <div class="stat-block">
+              <div class="stat-icon-label">
+                <mat-icon>task_alt</mat-icon>
+                Resolution
+              </div>
+              <div class="stat-value">{{ rule.maxResolutionHours }}h</div>
+              <div class="stat-hint">{{ (rule.maxResolutionHours / 24) | number:'1.0-1' }} day(s)</div>
+            </div>
+
+            <div class="stat-block">
+              <div class="stat-icon-label">
+                <mat-icon>notifications_active</mat-icon>
+                Warning at
+              </div>
+              <div class="stat-value">{{ rule.warningThresholdHours }}h</div>
+              <div class="stat-hint">before deadline</div>
+            </div>
+          </div>
+
+          <!-- Badge auto-escalade -->
+          <div class="rule-card-footer">
+            @if (rule.autoEscalate) {
+              <span class="escalade-badge active">
+                <mat-icon>bolt</mat-icon>
+                Auto-escalation to admin enabled
+              </span>
+            } @else {
+              <span class="escalade-badge inactive">
+                <mat-icon>remove</mat-icon>
+                No auto-escalation
+              </span>
+            }
+          </div>
+
+        </div>
+      }
+
+      <!-- ── Priorités non encore configurées (placeholders) ─────────── -->
+      @for (p of availablePriorities(); track p) {
+        @if (!showForm()) {
+          <div class="card rule-card" style="opacity:.45;cursor:default">
+            <div class="rule-card-header">
+              <div class="priority-icon"
+                   [style.background]="priorityMeta(p).bg"
+                   [style.color]="priorityMeta(p).color">
+                <mat-icon>{{ priorityMeta(p).icon }}</mat-icon>
+              </div>
+              <div class="rule-title">
+                <p class="priority-label" [style.color]="priorityMeta(p).color">{{ priorityMeta(p).label }}</p>
+                <p class="priority-sub">Not configured yet</p>
+              </div>
+              <button class="btn-create" style="font-size:13px;padding:7px 14px"
+                      (click)="form.priority=p; openCreate()">
+                <mat-icon>add</mat-icon> Configure
+              </button>
+            </div>
+          </div>
+        }
+      }
+    }
+
+    <!-- ── Empty state (aucune règle du tout) ───────────────────────────── -->
+    @if (!isLoading() && rules().length === 0 && !showForm()) {
+      <div class="card">
+        <div class="empty-state">
+          <mat-icon class="empty-icon">schedule</mat-icon>
+          <h3>No SLA rules configured</h3>
+          <p>Create a rule for each priority to define response and resolution timeframes.</p>
+          <button class="btn-create" (click)="openCreate()">
+            <mat-icon>add</mat-icon> Create first rule
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>

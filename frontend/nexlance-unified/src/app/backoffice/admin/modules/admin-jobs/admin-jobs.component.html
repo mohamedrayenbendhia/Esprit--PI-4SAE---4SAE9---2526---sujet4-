@@ -1,0 +1,147 @@
+<div class="admin-jobs-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>{{ 'admin.jobs.title' | translate }}</h1>
+      <p>{{ 'admin.jobs.subtitle' | translate }}</p>
+    </div>
+    <button class="btn-export" (click)="exportToCSV()">
+      <mat-icon>download</mat-icon> {{ 'admin.jobs.exportCsv' | translate }}
+    </button>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery" 
+        (keyup.enter)="onSearch()"
+        [placeholder]="'admin.jobs.searchPlaceholder' | translate"
+        class="search-input"
+      />
+      <button class="btn-search" (click)="onSearch()">
+        <mat-icon>search</mat-icon> {{ 'admin.jobs.search' | translate }}
+      </button>
+    </div>
+
+    <div class="filters-row">
+      <select [(ngModel)]="filters.category" (change)="onFilterChange()" class="filter-select">
+        <option [value]="undefined">{{ 'admin.jobs.allCategories' | translate }}</option>
+        <option value="development">{{ 'jobs.categories.development' | translate }}</option>
+        <option value="design">{{ 'jobs.categories.design' | translate }}</option>
+        <option value="marketing">{{ 'jobs.categories.marketing' | translate }}</option>
+        <option value="writing">{{ 'jobs.categories.writing' | translate }}</option>
+        <option value="other">{{ 'jobs.categories.other' | translate }}</option>
+      </select>
+
+      <select [(ngModel)]="filters.status" (change)="onFilterChange()" class="filter-select">
+        <option [value]="undefined">{{ 'admin.jobs.allStatuses' | translate }}</option>
+        <option value="draft">{{ 'jobs.draft' | translate }}</option>
+        <option value="open">{{ 'jobs.open' | translate }}</option>
+        <option value="in_progress">{{ 'jobs.IN_PROGRESS' | translate }}</option>
+        <option value="completed">{{ 'jobs.COMPLETED' | translate }}</option>
+        <option value="cancelled">{{ 'jobs.CANCELLED' | translate }}</option>
+        <option value="archived">{{ 'jobs.ARCHIVED' | translate }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon"><mat-icon>assessment</mat-icon></div>
+      <div class="stat-content">
+        <span class="stat-value">{{ totalElements }}</span>
+        <span class="stat-label">{{ 'admin.jobs.stats.totalOffers' | translate }}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><mat-icon>check_circle</mat-icon></div>
+      <div class="stat-content">
+        <span class="stat-value">{{ openJobsCount }}</span>
+        <span class="stat-label">{{ 'admin.jobs.stats.openOffers' | translate }}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><mat-icon>pending_actions</mat-icon></div>
+      <div class="stat-content">
+        <span class="stat-value">{{ inProgressJobsCount }}</span>
+        <span class="stat-label">{{ 'admin.jobs.stats.inProgress' | translate }}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><mat-icon>celebration</mat-icon></div>
+      <div class="stat-content">
+        <span class="stat-value">{{ completedJobsCount }}</span>
+        <span class="stat-label">{{ 'admin.jobs.stats.completed' | translate }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>{{ 'admin.jobs.loading' | translate }}</p>
+  </div>
+
+  <!-- Jobs Table -->
+  <div *ngIf="!isLoading" class="table-container">
+    <table class="jobs-table">
+      <thead>
+        <tr>
+          <th>{{ 'admin.jobs.table.title' | translate }}</th>
+          <th>{{ 'admin.jobs.table.client' | translate }}</th>
+          <th>{{ 'admin.jobs.table.category' | translate }}</th>
+          <th>{{ 'admin.jobs.table.budget' | translate }}</th>
+          <th>{{ 'admin.jobs.table.status' | translate }}</th>
+          <th>{{ 'admin.jobs.table.applications' | translate }}</th>
+          <th>{{ 'admin.jobs.table.views' | translate }}</th>
+          <th>{{ 'admin.jobs.table.publishDate' | translate }}</th>
+          <th>{{ 'admin.jobs.table.actions' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let job of jobs" (click)="viewJobDetails(job.id)" class="table-row">
+          <td class="title-cell">{{ job.title }}</td>
+          <td>{{ job.client?.firstName }} {{ job.client?.lastName }}</td>
+          <td>
+            <span class="category-tag">{{ job.category }}</span>
+          </td>
+          <td class="budget-cell">{{ job.budget }} DT</td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusBadgeClass(job.status)">
+              {{ getStatusLabel(job.status) }}
+            </span>
+          </td>
+          <td class="center">{{ job.applicantCount }}</td>
+          <td class="center">{{ job.viewCount }}</td>
+          <td>{{ formatDate(job.publishedAt || job.createdAt) }}</td>
+          <td class="actions-cell">
+            <button class="btn-action btn-view" (click)="viewJobDetails(job.id); $event.stopPropagation()">
+              <mat-icon>visibility</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="jobs.length === 0" class="empty-table">
+      <mat-icon>inbox</mat-icon>
+      <p>{{ 'admin.jobs.noResults' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!isLoading && jobs.length > 0 && totalPages > 1" class="pagination">
+    <button class="btn-page" [disabled]="filters.page === 0" (click)="previousPage()">
+      <mat-icon>chevron_left</mat-icon> {{ 'admin.jobs.pagination.previous' | translate }}
+    </button>
+    <span class="page-info">
+      {{ 'admin.jobs.pagination.page' | translate }} {{ (filters.page || 0) + 1 }} {{ 'admin.jobs.pagination.of' | translate }} {{ totalPages }}
+    </span>
+    <button class="btn-page" [disabled]="filters.page === totalPages - 1" (click)="nextPage()">
+      {{ 'admin.jobs.pagination.next' | translate }} <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+</div>

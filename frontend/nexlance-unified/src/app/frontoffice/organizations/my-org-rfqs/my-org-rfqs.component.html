@@ -1,0 +1,56 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2><mat-icon>request_quote</mat-icon> My Quote Requests</h2>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading"><div class="spinner"></div></div>
+  }
+
+  @if (!isLoading() && rfqs().length === 0) {
+    <div class="empty">
+      <mat-icon>request_quote</mat-icon>
+      <h3>No requests sent</h3>
+      <p>Browse organizations and send a quote request.</p>
+      <button mat-raised-button color="primary" routerLink="/organizations">
+        <mat-icon>search</mat-icon> Browse organizations
+      </button>
+    </div>
+  }
+
+  <div class="rfqs-list">
+    @for (rfq of rfqs(); track rfq.id) {
+      <div class="rfq-card">
+        <div class="rfq-header">
+          <div>
+            <h4>{{ rfq.title }}</h4>
+            <button class="org-link" (click)="viewOrg(rfq.organizationId)">
+              View organization
+            </button>
+          </div>
+          <span class="status-chip"
+                [style.background]="getStatusColor(rfq.status) + '20'"
+                [style.color]="getStatusColor(rfq.status)">
+            {{ getStatusLabel(rfq.status) }}
+          </span>
+        </div>
+        <p class="desc">{{ rfq.description }}</p>
+        @if (rfq.budgetMin || rfq.budgetMax) {
+          <p class="budget">Budget: {{ rfq.budgetMin ?? '?' }}€ — {{ rfq.budgetMax ?? '?' }}€</p>
+        }
+        @if (rfq.responseMessage) {
+          <div class="response">
+            <mat-icon>reply</mat-icon>
+            <p>{{ rfq.responseMessage }}</p>
+          </div>
+        }
+        <div class="meta">
+          <span><mat-icon>schedule</mat-icon>{{ rfq.createdAt | date:'dd/MM/yyyy' }}</span>
+          @if (rfq.respondedAt) {
+            <span><mat-icon>update</mat-icon>Response on {{ rfq.respondedAt | date:'MM/dd/yyyy' }}</span>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

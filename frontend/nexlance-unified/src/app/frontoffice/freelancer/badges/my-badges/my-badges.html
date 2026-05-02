@@ -1,0 +1,51 @@
+<div class="badges-container">
+  <div class="header">
+    <h2>My Badges</h2>
+    <button class="btn-primary" [routerLink]="['/frontoffice/freelancer/all-badges-progress']">
+      View All Badges
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    Loading your badges...
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && userBadges.length === 0" class="no-data">
+    <p>You haven't earned any badges yet.</p>
+    <p class="subtitle">Keep working to unlock your first badges!</p>
+    <button class="btn-primary" [routerLink]="['/frontoffice/freelancer/all-badges-progress']">
+      View Available Badges
+    </button>
+  </div>
+
+  <div *ngIf="!isLoading && userBadges.length > 0" class="badges-grid">
+    <div class="badge-card" *ngFor="let userBadge of userBadges">
+      <!-- ✅ Utiliser l'icône du badge depuis le backend -->
+      <div class="badge-icon" [style.background]="getBadgeColor(userBadge.badge.name)">
+        {{ getBadgeIcon(userBadge.badge) }}
+      </div>
+      <div class="badge-info">
+        <h3>{{ userBadge.badge.name }}</h3>
+        <!-- ✅ Utiliser la description du badge depuis le backend -->
+        <p class="badge-description">{{ userBadge.badge.description }}</p>
+        <div class="badge-meta">
+          <span class="badge-date">
+            Earned on {{ userBadge.assignedAt | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
+        <div class="badge-requirements">
+          <span class="requirement">
+            ⭐ Score: {{ userBadge.badge.minScore }}/5
+          </span>
+          <span class="requirement">
+            📋 Projects: {{ userBadge.badge.minProjects }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,418 @@
+<mat-toolbar class="app-header">
+  <div class="header-container">
+    <!-- Logo Nexlance -->
+    <div class="logo-section" (click)="navigateToDashboard()">
+      <img src="assets/images/nexlance-logo.svg" alt="NexLance" class="logo-full">
+      <img src="assets/images/nexlance-icon.svg" alt="NexLance" class="logo-icon-mobile">
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-section">
+      @if (isFreelancer) {
+        <button mat-button routerLink="/frontoffice/freelancer/dashboard">
+          <mat-icon>dashboard</mat-icon>
+          {{ 'nav.dashboard' | translate }}
+        </button> 
+        <!-- Job Offers Module Dropdown -->
+        <button mat-button [matMenuTriggerFor]="freelancerJobMenu" class="job-offers-btn">
+          <mat-icon>work_outline</mat-icon>
+          {{ 'nav.jobOffers' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #freelancerJobMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/freelancer/browse-jobs">
+            <mat-icon>search</mat-icon>
+            <span>{{ 'nav.browseJobs' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/freelancer/my-applications">
+            <mat-icon>assignment</mat-icon>
+            <span>{{ 'nav.myApplications' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/freelancer/my-recommendations">
+            <mat-icon>recommend</mat-icon>
+            <span>{{ 'nav.myRecommendations' | translate }}</span>
+          </button>
+        </mat-menu>
+        <!-- AI Recommendation Button -->
+        <button mat-button routerLink="/frontoffice/freelancer/ai-recommendations" class="ai-btn">
+          <mat-icon>psychology</mat-icon>
+          IA Recommandation
+        </button>
+        <!-- Projects Module Dropdown -->
+        <button mat-button [matMenuTriggerFor]="freelancerProjectMenu" class="job-offers-btn">
+          <mat-icon>folder_open</mat-icon>
+          {{ 'nav.projects' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #freelancerProjectMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/freelancer/my-projects">
+            <mat-icon>folder_open</mat-icon>
+            <span>{{ 'nav.myProjects' | translate }}</span>
+          </button>
+        </mat-menu>
+        <!-- Contracts Module Dropdown -->
+        <button mat-button [matMenuTriggerFor]="freelancerContractMenu" class="job-offers-btn">
+          <mat-icon>description</mat-icon>
+          Contracts
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #freelancerContractMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/freelancer/contracts">
+            <mat-icon>list_alt</mat-icon>
+            <span>My Contracts</span>
+          </button>
+        </mat-menu>
+        <!-- Evaluation Module Dropdown -->
+        <button mat-button [matMenuTriggerFor]="freelancerEvalMenu" class="job-offers-btn">
+          <mat-icon>star_rate</mat-icon>
+          {{ 'nav.evaluations' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #freelancerEvalMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/freelancer/evaluations">
+            <mat-icon>inbox</mat-icon>
+            <span>{{ 'nav.evaluationsReceived' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/freelancer/evaluations/given">
+            <mat-icon>rate_review</mat-icon>
+            <span>{{ 'nav.evaluationsGiven' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/freelancer/evaluations/evaluate">
+            <mat-icon>edit</mat-icon>
+            <span>{{ 'nav.evaluateClient' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/freelancer/evaluations/stats">
+            <mat-icon>bar_chart</mat-icon>
+            <span>{{ 'nav.evaluationStats' | translate }}</span>
+          </button>
+        </mat-menu>
+        <!-- Badges Module Dropdown -->
+        <button mat-button [matMenuTriggerFor]="freelancerBadgeMenu" class="job-offers-btn">
+          <mat-icon>emoji_events</mat-icon>
+          {{ 'nav.badges' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #freelancerBadgeMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/freelancer/badges">
+            <mat-icon>military_tech</mat-icon>
+            <span>{{ 'nav.myBadges' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/freelancer/badges/progress">
+            <mat-icon>trending_up</mat-icon>
+            <span>{{ 'nav.badgeProgress' | translate }}</span>
+          </button>
+        </mat-menu>
+        <!-- About Me Module Dropdown -->
+        <button mat-button [matMenuTriggerFor]="freelancerAboutMeMenu" class="job-offers-btn">
+          <mat-icon>person_outline</mat-icon>
+          {{ 'nav.aboutMe' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #freelancerAboutMeMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/freelancer/skills">
+            <mat-icon>psychology</mat-icon>
+            <span>{{ 'nav.skills' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/freelancer/portfolio">
+            <mat-icon>work_outline</mat-icon>
+            <span>{{ 'nav.portfolio' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/freelancer/certifications">
+            <mat-icon>verified</mat-icon>
+            <span>{{ 'nav.certifications' | translate }}</span>
+          </button>
+        </mat-menu>
+        <!-- Organisations (FREELANCER) -->
+        <button mat-button [matMenuTriggerFor]="freelancerOrgMenu" class="job-offers-btn">
+          <mat-icon>business</mat-icon>
+          {{ 'nav.organizations' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #freelancerOrgMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/my-organizations">
+            <mat-icon>domain</mat-icon>
+            <span>{{ 'nav.myOrganizations' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/my-org-invitations">
+            <mat-icon>mail_outline</mat-icon>
+            <span>{{ 'nav.orgInvitations' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/organizations">
+            <mat-icon>search</mat-icon>
+            <span>{{ 'nav.browseOrgs' | translate }}</span>
+          </button>
+        </mat-menu>
+        <!-- Réclamations (FREELANCER) -->
+        <button mat-button
+          routerLink="/frontoffice/freelancer/my-complaints"
+          routerLinkActive="nav-active"
+          class="job-offers-btn">
+          <mat-icon>report_problem</mat-icon>
+          {{ 'nav.myComplaints' | translate }}
+          <span class="complaints-badge" *ngIf="openComplaintsCount() > 0">{{ openComplaintsCount() }}</span>
+        </button>
+      }
+      @if (isClient) {
+        <button mat-button routerLink="/frontoffice/client/dashboard">
+          <mat-icon>dashboard</mat-icon>
+          {{ 'nav.dashboard' | translate }}
+        </button>
+        <button mat-button [matMenuTriggerFor]="clientJobMenu" class="job-offers-btn">
+          <mat-icon>work_outline</mat-icon>
+          {{ 'nav.jobOffers' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #clientJobMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/client/create-job">
+            <mat-icon>add_circle</mat-icon>
+            <span>{{ 'nav.createJob' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/client/my-jobs">
+            <mat-icon>work</mat-icon>
+            <span>{{ 'nav.myJobs' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/client/freelancers">
+            <mat-icon>person_search</mat-icon>
+            <span>{{ 'nav.findFreelancers' | translate }}</span>
+          </button>
+        </mat-menu>
+        <button mat-button [matMenuTriggerFor]="clientProjectMenu" class="job-offers-btn">
+          <mat-icon>folder_open</mat-icon>
+          {{ 'nav.projects' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #clientProjectMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/client/projects">
+            <mat-icon>folder_open</mat-icon>
+            <span>{{ 'nav.myProjects' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/client/projects/create">
+            <mat-icon>add_circle</mat-icon>
+            <span>{{ 'nav.createProject' | translate }}</span>
+          </button>
+        </mat-menu>
+        <button mat-button [matMenuTriggerFor]="clientRecoMenu" class="job-offers-btn">
+          <mat-icon>recommend</mat-icon>
+          {{ 'nav.recommendations' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #clientRecoMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/client/my-recommendations">
+            <mat-icon>star</mat-icon>
+            <span>{{ 'nav.myRecommendations' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/client/freelancers">
+            <mat-icon>person_search</mat-icon>
+            <span>{{ 'nav.requestRecommendation' | translate }}</span>
+          </button>
+        </mat-menu>
+        <!-- Contracts Module Dropdown -->
+        <button mat-button [matMenuTriggerFor]="clientContractMenu" class="job-offers-btn">
+          <mat-icon>description</mat-icon>
+          Contracts
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #clientContractMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/client/contracts">
+            <mat-icon>list_alt</mat-icon>
+            <span>My Contracts</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/client/contracts/create">
+            <mat-icon>add_circle</mat-icon>
+            <span>Create Contract</span>
+          </button>
+        </mat-menu>
+        <!-- Evaluation Module Dropdown -->
+        <button mat-button [matMenuTriggerFor]="clientEvalMenu" class="job-offers-btn">
+          <mat-icon>star_rate</mat-icon>
+          {{ 'nav.evaluations' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #clientEvalMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/client/evaluations">
+            <mat-icon>groups</mat-icon>
+            <span>{{ 'nav.freelancersOverview' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/client/evaluations/evaluate">
+            <mat-icon>edit</mat-icon>
+            <span>{{ 'nav.evaluateFreelancer' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/client/evaluations/given">
+            <mat-icon>rate_review</mat-icon>
+            <span>{{ 'nav.evaluationsGiven' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/client/evaluations/received">
+            <mat-icon>inbox</mat-icon>
+            <span>{{ 'nav.evaluationsReceived' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/client/evaluations/stats">
+            <mat-icon>bar_chart</mat-icon>
+            <span>{{ 'nav.evaluationStats' | translate }}</span>
+          </button>
+        </mat-menu>
+        <!-- Badges Module Dropdown -->
+        <button mat-button [matMenuTriggerFor]="clientBadgeMenu" class="job-offers-btn">
+          <mat-icon>emoji_events</mat-icon>
+          {{ 'nav.badges' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #clientBadgeMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/client/badges">
+            <mat-icon>military_tech</mat-icon>
+            <span>{{ 'nav.allBadges' | translate }}</span>
+          </button>
+        </mat-menu>
+        <!-- About Me Module Dropdown -->
+        <button mat-button [matMenuTriggerFor]="clientAboutMeMenu" class="job-offers-btn">
+          <mat-icon>person_outline</mat-icon>
+          {{ 'nav.aboutMe' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #clientAboutMeMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/client/skills">
+            <mat-icon>psychology</mat-icon>
+            <span>{{ 'nav.skills' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/client/portfolios">
+            <mat-icon>work_outline</mat-icon>
+            <span>{{ 'nav.portfolios' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/client/certifications">
+            <mat-icon>verified</mat-icon>
+            <span>{{ 'nav.certifications' | translate }}</span>
+          </button>
+        </mat-menu>
+        <!-- Organisations (CLIENT) -->
+        <button mat-button [matMenuTriggerFor]="clientOrgMenu" class="job-offers-btn">
+          <mat-icon>business</mat-icon>
+          {{ 'nav.organizations' | translate }}
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #clientOrgMenu="matMenu">
+          <button mat-menu-item routerLink="/frontoffice/my-organizations">
+            <mat-icon>domain</mat-icon>
+            <span>{{ 'nav.myOrganizations' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/my-organizations/create">
+            <mat-icon>add_business</mat-icon>
+            <span>{{ 'nav.createOrganization' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/frontoffice/my-org-invitations">
+            <mat-icon>mail_outline</mat-icon>
+            <span>{{ 'nav.orgInvitations' | translate }}</span>
+          </button>
+          <button mat-menu-item routerLink="/organizations">
+            <mat-icon>search</mat-icon>
+            <span>{{ 'nav.browseOrgs' | translate }}</span>
+          </button>
+        </mat-menu>
+        <!-- Réclamations (CLIENT) -->
+        <button mat-button
+          routerLink="/frontoffice/client/my-complaints"
+          routerLinkActive="nav-active"
+          class="job-offers-btn">
+          <mat-icon>report_problem</mat-icon>
+          {{ 'nav.myComplaints' | translate }}
+          <span class="complaints-badge" *ngIf="openComplaintsCount() > 0">{{ openComplaintsCount() }}</span>
+        </button>
+      }
+      @if (isAdmin) {
+        <button mat-button routerLink="/backoffice/admin/dashboard">
+          <mat-icon>admin_panel_settings</mat-icon>
+          {{ 'nav.admin' | translate }}
+        </button>
+      }
+    </div>
+
+    <!-- Language Switcher -->
+    <div class="language-section">
+      <app-language-switcher></app-language-switcher>
+    </div>
+
+    <!-- Notifications -->
+    @if (currentUser()) {
+      <app-notification-bell></app-notification-bell>
+    }
+
+    <!-- Menu utilisateur -->
+    <div class="user-section">
+      @if (currentUser()) {
+        <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
+          <div class="user-avatar">
+            {{ userInitials }}
+          </div>
+          <span class="user-name">{{ currentUser()?.firstName }}</span>
+          <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+        </button>
+
+        <mat-menu #userMenu="matMenu" class="user-menu">
+          <div class="user-info">
+            <div class="user-avatar-large">
+              {{ userInitials }}
+            </div>
+            <div class="user-details">
+              <div class="user-name-large">{{ userFullName }}</div>
+              <div class="user-email">{{ currentUser()?.email }}</div>
+              <div class="user-role">
+                @if (isFreelancer) {
+                  <mat-icon>work</mat-icon>
+                  <span>Freelancer</span>
+                }
+                @if (isClient) {
+                  <mat-icon>business</mat-icon>
+                  <span>Client</span>
+                }
+                @if (isAdmin) {
+                  <mat-icon>admin_panel_settings</mat-icon>
+                  <span>Administrateur</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <button mat-menu-item (click)="navigateToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>{{ 'nav.profile' | translate }}</span>
+          </button>
+
+          @if (isFreelancer) {
+            <button mat-menu-item (click)="navigateToFreelancerProfile()">
+              <mat-icon>work_outline</mat-icon>
+              <span>{{ 'nav.professionalProfile' | translate }}</span>
+            </button>
+          }
+
+          <button mat-menu-item (click)="navigateToKyc()">
+            <mat-icon>verified_user</mat-icon>
+            <span>{{ 'nav.kycVerification' | translate }}</span>
+          </button>
+
+          <button mat-menu-item (click)="navigateToSecurity()">
+            <mat-icon>security</mat-icon>
+            <span>{{ 'nav.security' | translate }}</span>
+          </button>
+
+          <mat-divider></mat-divider>
+
+          @if (isClient || isFreelancer) {
+            <button mat-menu-item (click)="navigateToComplaints()">
+              <mat-icon>report_problem</mat-icon>
+              <span>
+                {{ 'nav.myComplaints' | translate }}
+                <span class="menu-badge" *ngIf="openComplaintsCount() > 0">{{ openComplaintsCount() }}</span>
+              </span>
+            </button>
+            <mat-divider></mat-divider>
+          }
+
+          <button mat-menu-item (click)="logout()" class="logout-button">
+            <mat-icon>logout</mat-icon>
+            <span>{{ 'nav.logout' | translate }}</span>
+          </button>
+        </mat-menu>
+      }
+    </div>
+  </div>
+</mat-toolbar>

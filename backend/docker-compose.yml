@@ -1,0 +1,241 @@
+services:
+  # --- INFRASTRUCTURE ---
+  eureka-server:
+    build: ./eureka-server
+    image: img-eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - nexlance-net
+
+  config-server:
+    build: ./ConfigServer
+    image: img-config-server
+    ports:
+      - "8888:8888"
+    networks:
+      - nexlance-net
+
+  api-gateway:
+    build: ./api-gateway
+    image: img-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    depends_on:
+      - eureka-server
+      - config-server
+    networks:
+      - nexlance-net
+
+  # --- MICROSERVICES (11 Modules) ---
+
+  user-service:
+    build: ./microservices/service_user
+    image: img-user
+    ports:
+      - "8084:8084"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/smart_freelance_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on: [eureka-server, config-server]
+    networks: [nexlance-net]
+
+  complaint-service:
+    build: ./microservices/complaint-service
+    image: img-complaint
+    ports:
+      - "8092:8092"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/smart_freelance_complaints
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [eureka-server, config-server]
+    networks: [nexlance-net]
+
+  contrat-service:
+    build: ./microservices/contrat/Esprit--PI-4SAE---4SAE9---2526---sujet4--contrat
+    image: img-contrat
+    ports:
+      - "8086:8086"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/Contrat_db
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [eureka-server, config-server]
+    networks: [nexlance-net]
+
+  evaluation-service:
+    build: ./microservices/evaluation/Esprit--PI-4SAE---4SAE9---2526---sujet4--evaluation
+    image: img-evaluation
+    ports:
+      - "8085:8085"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [eureka-server, config-server]
+    networks: [nexlance-net]
+
+  joboffer-service:
+    build: ./microservices/joboffer/service_joboffer/NexLance
+    image: img-joboffer
+    ports:
+      - "8087:8087"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [eureka-server, config-server]
+    networks: [nexlance-net]
+
+  certification-service:
+    build: ./microservices/module_certification
+    image: img-certification
+    ports:
+      - "8083:8083"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [eureka-server, config-server]
+    networks: [nexlance-net]
+
+  portfolio-service:
+    build: ./microservices/module_portfolio
+    image: img-portfolio
+    ports:
+      - "8082:8082"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [eureka-server, config-server]
+    networks: [nexlance-net]
+
+  competence-service:
+    build: ./microservices/module_competence
+    image: img-competence
+    ports:
+      - "8081:8081"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [eureka-server, config-server]
+    networks: [nexlance-net]
+
+  notification-service:
+    build: ./microservices/notification-service
+    image: img-notification
+    ports:
+      - "9090:9090"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [eureka-server, config-server]
+    networks: [nexlance-net]
+
+  organization-service:
+    build: ./microservices/organization-service
+    image: img-organization
+    ports:
+      - "9095:9095"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [eureka-server, config-server]
+    networks: [nexlance-net]
+
+  projects-service:
+    build: ./microservices/service_projects
+    image: img-projects
+    ports:
+      - "9091:9091"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [eureka-server, config-server]
+    networks: [nexlance-net]
+
+  # --- RECOMMENDATION-AI ---
+  recommendation-ai:
+    build: ./microservices/recommendation-ai
+    image: img-recommendation
+    ports:
+      - "9000:9000"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [eureka-server]
+    networks: [nexlance-net]
+
+  # --- FRONTEND ---
+  frontend:
+    build: ../frontend/nexlance-unified
+    image: img-nexlance-front
+    ports:
+      - "4200:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - nexlance-net
+
+  # --- MONITORING ---
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9093:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - nexlance-net
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - nexlance-net
+
+  # --- SONARQUBE ---
+  sonarqube:
+    image: sonarqube:community
+    ports:
+      - "9001:9000"
+    environment:
+      - SONAR_JDBC_URL=jdbc:postgresql://sonar-db:5432/sonar
+      - SONAR_JDBC_USERNAME=sonar
+      - SONAR_JDBC_PASSWORD=sonar
+    depends_on:
+      - sonar-db
+    networks:
+      - nexlance-net
+
+  sonar-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonar
+    networks:
+      - nexlance-net
+
+networks:
+  nexlance-net:
+    driver: bridge

@@ -1,0 +1,311 @@
+@use '../../../../styles/nexlance-theme.scss' as *;
+
+.detail-container {
+  min-height: calc(100vh - 80px);
+  background: $nexlance-gray-50;
+  padding: $space-8 $space-6;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.state-box {
+  display: flex;
+  justify-content: center;
+  padding: $space-16;
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid $nexlance-gray-200;
+    border-top-color: $nexlance-primary;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+// ── Header ──────────────────────────────────────────────────
+
+.page-header {
+  margin-bottom: $space-8;
+
+  .btn-back {
+    display: flex; align-items: center; gap: $space-1;
+    background: none; border: none;
+    color: $nexlance-gray-500; font-size: $text-sm;
+    cursor: pointer; padding: 0; margin-bottom: $space-4;
+    transition: color $transition-fast;
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    &:hover { color: $nexlance-primary; }
+  }
+
+  .ticket-row {
+    display: flex; align-items: center; gap: $space-3;
+    margin-bottom: $space-2;
+
+    .ticket-num {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: $text-sm; color: $nexlance-gray-400;
+    }
+
+    .status-badge {
+      padding: 3px 12px; border-radius: 100px;
+      font-size: $text-xs; font-weight: $font-semibold;
+    }
+  }
+
+  h1 {
+    font-size: $text-2xl; font-weight: $font-bold;
+    color: $nexlance-gray-900; font-family: $font-family-heading;
+  }
+}
+
+// ── Layout ───────────────────────────────────────────────────
+
+.content-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: $space-6;
+  align-items: start;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+
+// ── Cards communes ───────────────────────────────────────────
+
+.info-card,
+.attachments-card,
+.messages-card,
+.rating-card,
+.rating-done-card,
+.timeline-card {
+  background: white;
+  border-radius: $radius-xl;
+  border: 1px solid $nexlance-gray-100;
+  padding: $space-6;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: $space-5;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $text-base;
+  font-weight: $font-semibold;
+  color: $nexlance-gray-800;
+  margin-bottom: $space-4;
+
+  mat-icon {
+    font-size: 18px; width: 18px; height: 18px;
+    color: $nexlance-primary;
+  }
+
+  // Badge compteur
+  .attach-count, .msg-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: $nexlance-primary;
+    color: white;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: $font-bold;
+    line-height: 1;
+  }
+}
+
+// ── Pièces jointes ───────────────────────────────────────────
+
+.attachments-card {
+  // Le AttachmentManagerComponent gère son propre layout interne
+  app-attachment-manager { display: block; }
+}
+
+// ── Info grid ────────────────────────────────────────────────
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-4;
+  margin-bottom: $space-5;
+
+  .info-item { display: flex; flex-direction: column; gap: $space-1; }
+  .info-label { font-size: $text-xs; color: $nexlance-gray-400; font-weight: $font-medium; }
+  .info-value {
+    font-size: $text-sm; color: $nexlance-gray-800; font-weight: $font-medium;
+
+    &.priority-val {
+      display: flex; align-items: center; gap: $space-1;
+      mat-icon { font-size: 14px; width: 14px; height: 14px; }
+    }
+  }
+}
+
+.description-block {
+  .info-label { font-size: $text-xs; color: $nexlance-gray-400; font-weight: $font-medium; display: block; margin-bottom: $space-2; }
+  .description-text { font-size: $text-sm; color: $nexlance-gray-700; line-height: 1.7; }
+}
+
+.resolution-block {
+  margin-top: $space-5; padding: $space-4;
+  background: #f0fdf4; border-radius: $radius-lg;
+  border-left: 3px solid #22c55e;
+
+  .resolution-header {
+    display: flex; align-items: center; gap: $space-2;
+    font-weight: $font-semibold; color: #15803d;
+    font-size: $text-sm; margin-bottom: $space-2;
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+  .resolution-text { font-size: $text-sm; color: #166534; }
+}
+
+// ── Messages ─────────────────────────────────────────────────
+
+.messages-list {
+  max-height: 400px; overflow-y: auto;
+  padding: $space-2; margin-bottom: $space-4;
+
+  .no-messages {
+    display: flex; flex-direction: column; align-items: center;
+    padding: $space-8; color: $nexlance-gray-400;
+    mat-icon { font-size: 36px; width: 36px; height: 36px; margin-bottom: $space-2; }
+    p { font-size: $text-sm; }
+  }
+}
+
+.message-bubble {
+  display: flex; margin-bottom: $space-3;
+
+  &.mine {
+    justify-content: flex-end;
+    .bubble-content {
+      background: $nexlance-primary; color: white;
+      border-radius: $radius-xl $radius-xl 4px $radius-xl;
+      .bubble-header {
+        .sender-label { color: rgba(white, .8); }
+        .msg-time     { color: rgba(white, .6); }
+      }
+      .bubble-text { color: white; }
+    }
+  }
+
+  &.support {
+    justify-content: flex-start;
+    .bubble-content { background: $nexlance-gray-100; border-radius: 4px $radius-xl $radius-xl $radius-xl; }
+  }
+
+  .bubble-content { max-width: 75%; padding: $space-3 $space-4; }
+  .bubble-header {
+    display: flex; justify-content: space-between; gap: $space-4; margin-bottom: $space-1;
+    .sender-label { font-size: $text-xs; font-weight: $font-semibold; color: $nexlance-gray-600; }
+    .msg-time     { font-size: $text-xs; color: $nexlance-gray-400; white-space: nowrap; }
+  }
+  .bubble-text { font-size: $text-sm; line-height: 1.5; color: $nexlance-gray-800; }
+}
+
+.message-input-area {
+  display: flex; gap: $space-3; align-items: flex-end;
+  padding-top: $space-4; border-top: 1px solid $nexlance-gray-100;
+
+  .msg-input {
+    flex: 1; padding: $space-3;
+    border: 1.5px solid $nexlance-gray-200; border-radius: $radius-lg;
+    font-size: $text-sm; font-family: $font-family-base;
+    resize: none; transition: all $transition-fast;
+    &:focus { outline: none; border-color: $nexlance-primary; box-shadow: 0 0 0 3px rgba($nexlance-primary, .1); }
+  }
+
+  .send-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: $nexlance-primary; color: white;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all $transition-fast;
+    mat-icon { font-size: 20px; width: 20px; height: 20px; }
+    &:hover:not(:disabled) { background: $nexlance-primary-dark; transform: scale(1.05); }
+    &:disabled { background: $nexlance-gray-200; cursor: not-allowed; }
+  }
+}
+
+.closed-notice {
+  display: flex; align-items: center; gap: $space-2;
+  font-size: $text-xs; color: $nexlance-gray-400;
+  padding: $space-3; background: $nexlance-gray-50;
+  border-radius: $radius-lg; margin-top: $space-4;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+}
+
+// ── Rating ───────────────────────────────────────────────────
+
+.rating-card {
+  .rating-hint { font-size: $text-sm; color: $nexlance-gray-500; margin-bottom: $space-4; }
+
+  .stars-row {
+    display: flex; gap: $space-1; margin-bottom: $space-4;
+
+    .star-btn {
+      background: none; border: none; cursor: pointer;
+      color: $nexlance-gray-300; transition: all $transition-fast; padding: $space-1;
+      mat-icon { font-size: 28px; width: 28px; height: 28px; }
+      &.active { color: #f59e0b; }
+    }
+  }
+
+  .btn-rate {
+    width: 100%; padding: $space-3;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white; border: none; border-radius: $radius-lg;
+    font-weight: $font-semibold; font-size: $text-sm;
+    cursor: pointer; transition: all $transition-fast;
+    &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(#f59e0b, .4); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}
+
+.rating-done-card {
+  text-align: center;
+  .done-icon { font-size: 36px; width: 36px; height: 36px; color: #f59e0b; }
+  p { font-size: $text-sm; color: $nexlance-gray-500; margin: $space-2 0; }
+  .stars-display { display: flex; justify-content: center; gap: 2px;
+    mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  }
+  strong { font-size: $text-lg; color: $nexlance-gray-800; }
+}
+
+// ── Timeline ─────────────────────────────────────────────────
+
+.timeline {
+  .tl-item {
+    display: flex; gap: $space-3; position: relative;
+    padding-bottom: $space-4;
+
+    &:not(:last-child)::after {
+      content: ''; position: absolute;
+      left: 7px; top: 16px; bottom: 0;
+      width: 2px; background: $nexlance-gray-100;
+    }
+
+    &.done {
+      .tl-dot { background: $nexlance-primary; border-color: $nexlance-primary; }
+      &::after { background: $nexlance-primary; }
+      .tl-label { color: $nexlance-gray-800; }
+    }
+
+    .tl-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: white; border: 2px solid $nexlance-gray-200;
+      flex-shrink: 0; margin-top: 2px; z-index: 1;
+    }
+
+    .tl-body { display: flex; flex-direction: column; gap: 2px; }
+    .tl-label { font-size: $text-sm; color: $nexlance-gray-400; font-weight: $font-medium; }
+    .tl-date {
+      font-size: $text-xs; color: $nexlance-gray-400;
+      &.pending { font-style: italic; }
+    }
+  }
+}
+

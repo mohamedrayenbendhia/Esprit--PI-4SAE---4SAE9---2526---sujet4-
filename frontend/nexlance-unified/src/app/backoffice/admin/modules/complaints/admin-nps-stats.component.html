@@ -1,0 +1,149 @@
+<div class="page-wrapper">
+
+  <!-- ── En-tête ─────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Customer Satisfaction — NPS</h1>
+      <p>Net Promoter Score based on post-closure complaint surveys.</p>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- ── Loading ──────────────────────────────────────────────────────── -->
+    @if (isLoading()) {
+      <div class="loading-center">
+        <mat-icon style="font-size:40px;color:#94a3b8;animation:spin 1s linear infinite">autorenew</mat-icon>
+      </div>
+    }
+
+    <!-- ── Empty state ───────────────────────────────────────────────────── -->
+    @if (!isLoading() && !stats()) {
+      <div class="card">
+        <div class="empty-state">
+          <mat-icon class="empty-icon">sentiment_neutral</mat-icon>
+          <h3>No NPS data available</h3>
+          <p>NPS surveys are sent automatically after complaint resolution.</p>
+        </div>
+      </div>
+    }
+
+    @if (!isLoading() && stats()) {
+
+      <!-- ── KPI row ─────────────────────────────────────────────────────── -->
+      <div class="kpi-row">
+
+        <!-- Score NPS principal -->
+        <div class="card kpi-card nps-main">
+          <div class="nps-score" [style.color]="npsColor(stats()!.npsScore)">
+            {{ stats()!.npsScore | number:'1.0-0' }}
+          </div>
+          <div class="nps-label">NPS Score</div>
+          <div class="nps-qual" [style.color]="npsColor(stats()!.npsScore)">
+            {{ npsLabel(stats()!.npsScore) }}
+          </div>
+          <div class="nps-scale">from -100 to +100</div>
+        </div>
+
+        <div class="card kpi-card">
+          <div class="kpi-icon-wrap">
+            <mat-icon>star</mat-icon>
+          </div>
+          <div class="kpi-number">
+            {{ stats()!.averageScore | number:'1.1-1' }}
+            <span class="kpi-unit">/10</span>
+          </div>
+          <div class="kpi-label">Average score</div>
+        </div>
+
+        <div class="card kpi-card">
+          <div class="kpi-icon-wrap">
+            <mat-icon>mail</mat-icon>
+          </div>
+          <div class="kpi-number">
+            {{ stats()!.responseRate | number:'1.0-0' }}
+            <span class="kpi-unit">%</span>
+          </div>
+          <div class="kpi-label">Response rate</div>
+          <div class="kpi-sub">{{ stats()!.totalResponded }} / {{ stats()!.totalSent }} surveys</div>
+        </div>
+
+      </div>
+
+      <!-- ── Segments Promoters / Passives / Detractors ──────────────────── -->
+      <div class="segments-row">
+
+        <div class="card segment-card promoter">
+          <div class="segment-icon">
+            <mat-icon>thumb_up</mat-icon>
+          </div>
+          <div class="seg-number">{{ stats()!.promoters }}</div>
+          <div class="seg-label">Promoters</div>
+          <div class="seg-range">Score 9 – 10</div>
+          <div class="seg-pct">
+            {{ stats()!.totalResponded > 0
+                ? (stats()!.promoters / stats()!.totalResponded * 100 | number:'1.0-0')
+                : 0 }}%
+          </div>
+        </div>
+
+        <div class="card segment-card passive">
+          <div class="segment-icon">
+            <mat-icon>thumbs_up_down</mat-icon>
+          </div>
+          <div class="seg-number">{{ stats()!.passives }}</div>
+          <div class="seg-label">Passives</div>
+          <div class="seg-range">Score 7 – 8</div>
+          <div class="seg-pct">
+            {{ stats()!.totalResponded > 0
+                ? (stats()!.passives / stats()!.totalResponded * 100 | number:'1.0-0')
+                : 0 }}%
+          </div>
+        </div>
+
+        <div class="card segment-card detractor">
+          <div class="segment-icon">
+            <mat-icon>thumb_down</mat-icon>
+          </div>
+          <div class="seg-number">{{ stats()!.detractors }}</div>
+          <div class="seg-label">Detractors</div>
+          <div class="seg-range">Score 0 – 6</div>
+          <div class="seg-pct">
+            {{ stats()!.totalResponded > 0
+                ? (stats()!.detractors / stats()!.totalResponded * 100 | number:'1.0-0')
+                : 0 }}%
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Distribution par score ─────────────────────────────────────── -->
+      <div class="card">
+        <div class="dist-header">
+          <h2>Score distribution</h2>
+          <p>Number of responses per score (0 to 10)</p>
+        </div>
+        <div class="dist-body">
+          @for (s of scoreRange; track s) {
+            <div class="dist-row">
+              <span class="dist-score" [style.color]="scoreColor(s)">{{ s }}</span>
+              <div class="dist-track">
+                <div class="dist-fill"
+                     [style.width.%]="barWidth(countForScore(s))"
+                     [style.background]="scoreColor(s)">
+                </div>
+              </div>
+              <span class="dist-count">{{ countForScore(s) }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    }
+
+  </div>
+</div>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>

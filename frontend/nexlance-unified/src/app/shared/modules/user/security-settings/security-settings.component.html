@@ -1,0 +1,180 @@
+<div class="security-settings-container">
+  <div class="page-header">
+    <h1>
+      <mat-icon>security</mat-icon>
+      Security Settings
+    </h1>
+    <p>Manage your account security and authentication</p>
+  </div>
+
+  <mat-tab-group>
+    <!-- Password Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>lock</mat-icon>
+        Password
+      </ng-template>
+      <div class="tab-content">
+        <app-change-password></app-change-password>
+      </div>
+    </mat-tab>
+
+    <!-- 2FA Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>phonelink_lock</mat-icon>
+        Two-Factor Authentication
+      </ng-template>
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Two-Factor Authentication (2FA)</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="twofa-content">
+              <!-- Status -->
+              <div class="status-section">
+                <div class="status-badge" [class.enabled]="twoFactorEnabled()">
+                  <mat-icon>{{ twoFactorEnabled() ? 'verified_user' : 'shield' }}</mat-icon>
+                  <span>2FA is {{ twoFactorEnabled() ? 'Enabled' : 'Disabled' }}</span>
+                </div>
+                <p class="status-description">
+                  {{ twoFactorEnabled() 
+                    ? 'Your account is protected with two-factor authentication.' 
+                    : 'Add an extra layer of security by enabling two-factor authentication.' }}
+                </p>
+              </div>
+
+              <!-- 2FA Disabled State -->
+              <div *ngIf="!twoFactorEnabled()" class="action-section">
+                <h3>Why enable 2FA?</h3>
+                <ul class="benefits-list">
+                  <li>
+                    <mat-icon>check_circle</mat-icon>
+                    <span>Protect your account from unauthorized access</span>
+                  </li>
+                  <li>
+                    <mat-icon>check_circle</mat-icon>
+                    <span>Receive alerts when someone tries to log in</span>
+                  </li>
+                  <li>
+                    <mat-icon>check_circle</mat-icon>
+                    <span>Use backup codes if you lose your device</span>
+                  </li>
+                </ul>
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  (click)="openSetup2FAModal()"
+                  [disabled]="isLoading()"
+                >
+                  <mat-icon>add</mat-icon>
+                  Enable Two-Factor Authentication
+                </button>
+              </div>
+
+              <!-- 2FA Enabled State -->
+              <div *ngIf="twoFactorEnabled()" class="action-section">
+                <h3>Manage 2FA</h3>
+                
+                <!-- Regenerate Backup Codes -->
+                <div class="action-item">
+                  <div class="action-info">
+                    <mat-icon>refresh</mat-icon>
+                    <div>
+                      <h4>Regenerate Backup Codes</h4>
+                      <p>Generate new backup codes. Your old codes will no longer work.</p>
+                    </div>
+                  </div>
+                  <button 
+                    mat-button 
+                    color="accent"
+                    (click)="showRegenerateForm.set(!showRegenerateForm())"
+                  >
+                    {{ showRegenerateForm() ? 'Cancel' : 'Regenerate' }}
+                  </button>
+                </div>
+
+                <div *ngIf="showRegenerateForm()" class="password-form">
+                  <form [formGroup]="regenerateForm" (ngSubmit)="regenerateBackupCodes()">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Confirm Password</mat-label>
+                      <input matInput type="password" formControlName="password" />
+                      <mat-error *ngIf="regenerateForm.get('password')?.hasError('required')">
+                        Password is required
+                      </mat-error>
+                    </mat-form-field>
+                    <button 
+                      mat-raised-button 
+                      color="accent" 
+                      type="submit"
+                      [disabled]="regenerateForm.invalid || isLoading()"
+                    >
+                      {{ isLoading() ? 'Regenerating...' : 'Confirm Regenerate' }}
+                    </button>
+                  </form>
+                </div>
+
+                <!-- Disable 2FA -->
+                <div class="action-item">
+                  <div class="action-info">
+                    <mat-icon class="danger">cancel</mat-icon>
+                    <div>
+                      <h4>Disable Two-Factor Authentication</h4>
+                      <p>Remove 2FA from your account (not recommended).</p>
+                    </div>
+                  </div>
+                  <button 
+                    mat-button 
+                    color="warn"
+                    (click)="showDisableForm.set(!showDisableForm())"
+                  >
+                    {{ showDisableForm() ? 'Cancel' : 'Disable' }}
+                  </button>
+                </div>
+
+                <div *ngIf="showDisableForm()" class="password-form">
+                  <form [formGroup]="disableForm" (ngSubmit)="disable2FA()">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Confirm Password</mat-label>
+                      <input matInput type="password" formControlName="password" />
+                      <mat-error *ngIf="disableForm.get('password')?.hasError('required')">
+                        Password is required
+                      </mat-error>
+                    </mat-form-field>
+                    <button 
+                      mat-raised-button 
+                      color="warn" 
+                      type="submit"
+                      [disabled]="disableForm.invalid || isLoading()"
+                    >
+                      {{ isLoading() ? 'Disabling...' : 'Confirm Disable' }}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Sessions Tab (future feature) -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>devices</mat-icon>
+        Active Sessions
+      </ng-template>
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Active Sessions</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="coming-soon">🚧 Sessions management coming soon...</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

@@ -1,0 +1,123 @@
+<div class="my-jobs-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>{{ 'jobs.myJobs' | translate }}</h1>
+      <button class="btn btn-primary" (click)="createNewJob()">
+        <span class="icon">+</span> {{ 'jobs.createJob' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="status-filters">
+      <button 
+        *ngFor="let option of statusOptions"
+        class="filter-btn"
+        [class.active]="selectedStatus === option.value"
+        (click)="onStatusFilterChange(option.value)"
+      >
+        {{ ('jobs.' + option.value) | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>{{ 'jobs.loadingYourJobs' | translate }}</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredJobs.length === 0" class="empty-state">
+    <div class="empty-icon"><mat-icon>description</mat-icon></div>
+    <h2>{{ 'jobs.noJobsFound' | translate }}</h2>
+    <p *ngIf="selectedStatus === 'all'">{{ 'jobs.noJobsCreated' | translate }}</p>
+    <p *ngIf="selectedStatus !== 'all'">{{ 'jobs.noJobsWithStatus' | translate }}</p>
+    <button class="btn btn-primary" (click)="createNewJob()">
+      {{ 'jobs.createFirstJob' | translate }}
+    </button>
+  </div>
+
+  <!-- Jobs Grid -->
+  <div *ngIf="!isLoading && filteredJobs.length > 0" class="jobs-grid">
+    <div 
+      *ngFor="let job of filteredJobs" 
+      class="job-card"
+      (click)="viewJobDetails(job.id)"
+    >
+      <div class="job-card-header">
+        <div class="category-badge">
+          <span class="icon">{{ getCategoryIcon(job.category) }}</span>
+          {{ job.category }}
+        </div>
+        <span class="status-badge" [ngClass]="getStatusBadgeClass(job.status)">
+          {{ getStatusLabel(job.status) }}
+        </span>
+      </div>
+
+      <div class="job-card-body">
+        <h3 class="job-title">{{ job.title }}</h3>
+        <p class="job-description">{{ job.description }}</p>
+
+        <div class="job-meta">
+          <div class="meta-item">
+            <span class="meta-icon"><mat-icon>attach_money</mat-icon></span>
+            <span>{{ job.budget }} DT</span>
+            <span class="meta-label">({{ job.budgetType === 'FIXED' ? ('jobs.fixed' | translate) : ('jobs.hourly' | translate) }})</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon"><mat-icon>calendar_today</mat-icon></span>
+            <span>{{ job.estimatedDuration }} {{ 'jobs.days' | translate }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon"><mat-icon>location_on</mat-icon></span>
+            <span>{{ job.location }}</span>
+            <span *ngIf="job.isRemote" class="remote-badge">{{ 'jobs.remote' | translate }}</span>
+          </div>
+        </div>
+
+        <div class="job-skills">
+          <span *ngFor="let skill of job.requiredSkills.slice(0, 4)" class="skill-tag">
+            {{ skill }}
+          </span>
+          <span *ngIf="job.requiredSkills.length > 4" class="skill-tag more">
+            +{{ job.requiredSkills.length - 4 }}
+          </span>
+        </div>
+      </div>
+
+      <div class="job-card-footer">
+        <div class="stats">
+          <div class="stat-item">
+            <span class="stat-icon"><mat-icon>visibility</mat-icon></span>
+            <span>{{ job.viewCount }} {{ 'jobs.views' | translate }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-icon"><mat-icon>assignment</mat-icon></span>
+            <span>{{ job.applicantCount }} {{ 'jobs.applications' | translate }}</span>
+          </div>
+        </div>
+
+        <div class="job-date">
+          {{ 'jobs.posted' | translate }} {{ formatDate(job.publishedAt || job.createdAt) }}
+        </div>
+
+        <div class="job-actions">
+          <button class="btn-action btn-view" (click)="viewJobDetails(job.id)">
+            {{ 'jobs.view' | translate }}
+          </button>
+          <button class="btn-action btn-edit" (click)="editJob(job.id, $event)">
+            {{ 'jobs.edit' | translate }}
+          </button>
+          <button class="btn-action btn-archive" (click)="archiveJob(job.id, $event)">
+            {{ 'jobs.archive' | translate }}
+          </button>
+          <button class="btn-action btn-delete" (click)="deleteJob(job.id, $event)">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

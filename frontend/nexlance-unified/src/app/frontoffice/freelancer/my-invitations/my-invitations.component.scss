@@ -1,0 +1,404 @@
+@use 'sass:color';
+@use '../../../../styles/nexlance-theme.scss' as *;
+
+.my-invitations-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: $space-8 $space-6;
+  min-height: 100vh;
+  background: $nexlance-gray-50;
+
+  .page-header {
+    margin-bottom: $space-8;
+    text-align: center;
+
+    .header-content {
+      h1 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $space-3;
+        font-size: $text-4xl;
+        font-weight: 700;
+        color: $nexlance-text-primary;
+        margin-bottom: $space-3;
+
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          color: $nexlance-primary;
+        }
+      }
+
+      .subtitle {
+        font-size: $text-lg;
+        color: $nexlance-text-secondary;
+      }
+    }
+  }
+
+  mat-tab-group {
+    margin-bottom: $space-8;
+    background: white;
+    border-radius: $radius-xl;
+    box-shadow: $shadow-md;
+  }
+
+  .loading-container {
+    text-align: center;
+    padding: $space-20;
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid $nexlance-gray-200;
+      border-top-color: $nexlance-primary;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto $space-4;
+    }
+
+    p {
+      color: $nexlance-text-secondary;
+      font-size: $text-lg;
+    }
+  }
+
+  .invitations-list {
+    display: grid;
+    gap: $space-6;
+
+    .empty-state {
+      text-align: center;
+      padding: $space-20;
+      background: white;
+      border-radius: $radius-2xl;
+      box-shadow: $shadow-md;
+
+      mat-icon {
+        font-size: 80px;
+        width: 80px;
+        height: 80px;
+        color: $nexlance-gray-300;
+        margin-bottom: $space-6;
+      }
+
+      h2 {
+        font-size: $text-2xl;
+        font-weight: 600;
+        color: $nexlance-text-primary;
+        margin-bottom: $space-3;
+      }
+
+      p {
+        color: $nexlance-text-secondary;
+        margin-bottom: $space-8;
+      }
+    }
+
+    .invitation-card {
+      cursor: pointer;
+      transition: $transition-all;
+      position: relative;
+      border-radius: $radius-2xl;
+      box-shadow: $shadow-md;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: $shadow-xl;
+      }
+
+      .status-badge {
+        position: absolute;
+        top: $space-4;
+        right: $space-4;
+        padding: $space-2 $space-4;
+        border-radius: $radius-full;
+        font-size: $text-sm;
+        font-weight: 600;
+        z-index: 1;
+
+        &.badge-pending {
+          background: $nexlance-orange;
+          color: white;
+        }
+
+        &.badge-accepted {
+          background: $nexlance-success;
+          color: white;
+        }
+
+        &.badge-declined {
+          background: $nexlance-error;
+          color: white;
+        }
+
+        &.badge-expired {
+          background: $nexlance-gray-400;
+          color: white;
+        }
+      }
+
+      .expired-warning {
+        position: absolute;
+        top: $space-16;
+        right: $space-4;
+        display: flex;
+        align-items: center;
+        gap: $space-1;
+        padding: $space-2 $space-3;
+        background: $nexlance-error;
+        color: white;
+        border-radius: $radius-lg;
+        font-size: $text-xs;
+        font-weight: 600;
+        z-index: 1;
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+
+      mat-card-header {
+        margin-bottom: $space-6;
+
+        .card-header-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          width: 100%;
+
+          .client-info {
+            display: flex;
+            gap: $space-4;
+            align-items: center;
+
+            .client-avatar {
+              width: 56px;
+              height: 56px;
+              border-radius: 50%;
+              background: linear-gradient(135deg, $nexlance-primary, $nexlance-primary-dark);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              mat-icon {
+                font-size: 32px;
+                width: 32px;
+                height: 32px;
+                color: white;
+              }
+            }
+
+            .client-details {
+              h3 {
+                font-size: $text-xl;
+                font-weight: 600;
+                color: $nexlance-text-primary;
+                margin: 0 0 $space-1 0;
+              }
+
+              .client-company {
+                font-size: $text-sm;
+                color: $nexlance-text-secondary;
+              }
+            }
+          }
+
+          .invitation-date {
+            display: flex;
+            align-items: center;
+            gap: $space-2;
+            font-size: $text-sm;
+            color: $nexlance-text-secondary;
+
+            mat-icon {
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+            }
+          }
+        }
+      }
+
+      mat-card-content {
+        .job-title {
+          display: flex;
+          align-items: center;
+          gap: $space-3;
+          margin-bottom: $space-6;
+          padding: $space-4;
+          background: $nexlance-gray-50;
+          border-radius: $radius-lg;
+
+          mat-icon {
+            font-size: 28px;
+            width: 28px;
+            height: 28px;
+            color: $nexlance-primary;
+          }
+
+          h2 {
+            font-size: $text-2xl;
+            font-weight: 700;
+            color: $nexlance-text-primary;
+            margin: 0;
+          }
+        }
+
+        .invitation-message {
+          display: flex;
+          gap: $space-3;
+          margin-bottom: $space-6;
+          padding: $space-5;
+          background: linear-gradient(135deg, rgba($nexlance-primary, 0.05), rgba($nexlance-primary, 0.1));
+          border-left: 4px solid $nexlance-primary;
+          border-radius: $radius-lg;
+
+          mat-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+            color: $nexlance-primary;
+            flex-shrink: 0;
+          }
+
+          p {
+            margin: 0;
+            color: $nexlance-text-primary;
+            line-height: 1.6;
+            font-style: italic;
+          }
+        }
+
+        .details-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: $space-4;
+          margin-bottom: $space-6;
+
+          .detail-item {
+            display: flex;
+            gap: $space-3;
+            padding: $space-4;
+            background: $nexlance-gray-50;
+            border-radius: $radius-lg;
+
+            mat-icon {
+              font-size: 24px;
+              width: 24px;
+              height: 24px;
+              color: $nexlance-primary;
+            }
+
+            .detail-content {
+              display: flex;
+              flex-direction: column;
+              gap: $space-1;
+
+              .label {
+                font-size: $text-sm;
+                color: $nexlance-text-secondary;
+              }
+
+              .value {
+                font-size: $text-base;
+                font-weight: 600;
+                color: $nexlance-text-primary;
+
+                .days-remaining {
+                  font-size: $text-xs;
+                  font-weight: 500;
+                  color: $nexlance-success;
+                }
+              }
+            }
+          }
+        }
+
+        .skills-section {
+          mat-chip-listbox {
+            mat-chip {
+              background: linear-gradient(135deg, $nexlance-primary-light, $nexlance-primary);
+              color: white;
+              font-weight: 500;
+            }
+
+            .more-chip {
+              background: $nexlance-gray-200;
+              color: $nexlance-text-secondary;
+            }
+          }
+        }
+      }
+
+      mat-card-actions {
+        display: flex;
+        justify-content: space-between;
+        padding: $space-6;
+        border-top: 2px solid $nexlance-gray-100;
+
+        .actions-left,
+        .actions-right {
+          display: flex;
+          gap: $space-3;
+        }
+
+        button {
+          display: inline-flex;
+          align-items: center;
+          gap: $space-2;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .my-invitations-container {
+    padding: $space-6 $space-4;
+
+    .page-header .header-content h1 {
+      font-size: $text-3xl;
+    }
+
+    .invitations-list .invitation-card {
+      mat-card-content {
+        .details-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      mat-card-actions {
+        flex-direction: column;
+        gap: $space-3;
+
+        .actions-left,
+        .actions-right {
+          width: 100%;
+          justify-content: stretch;
+
+          button {
+            flex: 1;
+          }
+        }
+      }
+    }
+  }
+}

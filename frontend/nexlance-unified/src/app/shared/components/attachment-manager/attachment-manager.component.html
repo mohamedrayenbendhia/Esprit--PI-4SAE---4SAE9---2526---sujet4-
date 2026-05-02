@@ -1,0 +1,249 @@
+<div class="attachment-manager">
+
+  <!-- ── Zone d'upload (masquée en readonly) ────────────────── -->
+  <div class="upload-section" *ngIf="!readonly">
+
+    <label
+      class="drop-zone"
+      [class.disabled]="!canAddMore()"
+      [title]="!canAddMore() ? 'Maximum ' + maxFiles + ' files reached' : ''">
+
+      <input
+        type="file"
+        multiple
+        [accept]="allowedExtensions"
+        class="file-input-hidden"
+        (change)="onFilesSelected($event)"
+        [disabled]="!canAddMore()">
+
+      <div class="drop-zone-content">
+        <mat-icon class="dz-icon">cloud_upload</mat-icon>
+        <p class="dz-text">
+          <span class="dz-link">Choose files</span>
+          or drag and drop
+        </p>
+        <p class="dz-sub">Images · PDF · Excel · Word — max {{ maxFileSizeMb }} MB / file</p>
+        <p class="dz-counter" [class.at-max]="!canAddMore()">
+          {{ totalFiles() }}/{{ maxFiles }} file{{ totalFiles() > 1 ? 's' : '' }}
+        </p>
+      </div>
+    </label>
+
+    <!-- Erreur fichier -->
+    <div class="file-error" *ngIf="fileError()">
+      <mat-icon>error_outline</mat-icon>
+      {{ fileError() }}
+    </div>
+  </div>
+
+  <!-- ── Liste des fichiers ──────────────────────────────────── -->
+  <div class="files-list" *ngIf="files().length > 0">
+
+    <div class="files-header" *ngIf="!readonly">
+      <span class="files-title">
+        <mat-icon>attach_file</mat-icon>
+        Attached files ({{ totalFiles() }})
+      </span>
+      <span class="files-hint">Click the name to rename · click the preview to enlarge</span>
+    </div>
+
+    <div class="files-header" *ngIf="readonly">
+      <span class="files-title">
+        <mat-icon>attach_file</mat-icon>
+        Attachments ({{ totalFiles() }})
+      </span>
+    </div>
+
+    <div class="file-grid">
+      <div
+        class="file-card"
+        *ngFor="let f of files()"
+        [class.is-image]="f.isImage">
+
+        <!-- ── Thumbnail / aperçu cliquable ── -->
+        <div
+          class="file-thumb"
+          [class.clickable]="f.isImage || f.isPdf"
+          (click)="(f.isImage || f.isPdf) && openPreview(f)">
+
+          <!-- Image : thumbnail -->
+          <img
+            *ngIf="f.isImage && f.previewUrl"
+            [src]="f.previewUrl"
+            [alt]="f.name"
+            class="thumb-img">
+
+          <!-- PDF : icône cliquable avec overlay -->
+          <div *ngIf="f.isPdf" class="thumb-icon-wrap" [attr.data-type]="'PDF'">
+            <mat-icon class="thumb-icon">picture_as_pdf</mat-icon>
+            <span class="thumb-type">PDF</span>
+          </div>
+
+          <!-- Non-image, non-PDF : icône + label type -->
+          <div *ngIf="!f.isImage && !f.isPdf" class="thumb-icon-wrap" [attr.data-type]="f.typeLabel">
+            <mat-icon class="thumb-icon">{{ f.typeIcon }}</mat-icon>
+            <span class="thumb-type">{{ f.typeLabel }}</span>
+          </div>
+
+          <!-- Overlay hover sur image ou PDF -->
+          <div class="thumb-overlay" *ngIf="f.isImage || f.isPdf">
+            <mat-icon>{{ f.isPdf ? 'open_in_new' : 'zoom_in' }}</mat-icon>
+          </div>
+        </div>
+
+        <!-- ── Infos fichier ── -->
+        <div class="file-info">
+
+          <!-- Nom : affichage normal ou input rename -->
+          <div class="file-name-row" *ngIf="!f.isRenaming">
+            <span
+              class="file-name"
+              [title]="f.name"
+              [class.renameable]="!readonly"
+              (click)="!readonly && startRename(f.id)">
+              {{ f.name }}
+            </span>
+            <button
+              class="btn-rename"
+              *ngIf="!readonly"
+              (click)="startRename(f.id)"
+              title="Rename">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+
+          <!-- Input rename inline -->
+          <div class="rename-row" *ngIf="f.isRenaming">
+            <input
+              class="rename-input"
+              type="text"
+              [(ngModel)]="f.tempName"
+              (keydown)="onRenameKeydown($event, f.id)"
+              autofocus>
+            <button class="btn-confirm-rename" (click)="confirmRename(f.id)" title="Confirm">
+              <mat-icon>check</mat-icon>
+            </button>
+            <button class="btn-cancel-rename" (click)="cancelRename(f.id)" title="Cancel">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+
+          <!-- Taille + type -->
+          <div class="file-meta">
+            <span class="file-type-badge" [attr.data-type]="f.typeLabel">{{ f.typeLabel }}</span>
+            <span class="file-size" *ngIf="f.sizeLabel">{{ f.sizeLabel }}</span>
+          </div>
+        </div>
+
+        <!-- ── Actions ── -->
+        <div class="file-actions">
+          <!-- Aperçu (image ou PDF) -->
+          <button
+            class="btn-file-action preview"
+            *ngIf="f.isImage || f.isPdf"
+            (click)="openPreview(f)"
+            title="Preview">
+            <mat-icon>visibility</mat-icon>
+          </button>
+
+          <!-- Téléchargement -->
+          <button
+            class="btn-file-action download"
+            (click)="downloadFile(f)"
+            title="Download">
+            <mat-icon>download</mat-icon>
+          </button>
+
+          <!-- Delete (edit mode only) -->
+          <button
+            class="btn-file-action remove"
+            *ngIf="!readonly"
+            (click)="removeFile(f.id)"
+            title="Delete">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── État vide (readonly) ───────────────────────────────── -->
+  <div class="empty-attachments" *ngIf="readonly && files().length === 0">
+    <mat-icon>attach_file</mat-icon>
+    <span>No attachments</span>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- MODAL PREVIEW                                              -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="preview-backdrop" *ngIf="preview()" (click)="closePreview()">
+  <div class="preview-modal" (click)="$event.stopPropagation()">
+
+    <!-- Header modal -->
+    <div class="preview-header">
+      <div class="preview-title">
+        <mat-icon>{{ preview()!.typeIcon }}</mat-icon>
+        <span>{{ preview()!.name }}</span>
+        <span class="preview-size" *ngIf="preview()!.sizeLabel">{{ preview()!.sizeLabel }}</span>
+      </div>
+      <div class="preview-header-actions">
+        <button class="btn-preview-dl" (click)="downloadFile(preview()!)" title="Download">
+          <mat-icon>download</mat-icon>
+        </button>
+        <button class="btn-preview-close" (click)="closePreview()" title="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenu -->
+    <div class="preview-body">
+      <!-- Image full-size -->
+      <img
+        *ngIf="preview()!.isImage && preview()!.previewUrl"
+        [src]="preview()!.previewUrl"
+        [alt]="preview()!.name"
+        class="preview-img">
+
+      <!-- PDF : iframe -->
+      <div *ngIf="preview()!.isPdf && preview()!.safePreviewUrl" class="preview-pdf">
+        <iframe
+          [src]="preview()!.safePreviewUrl"
+          class="pdf-iframe"
+          title="PDF Preview">
+        </iframe>
+      </div>
+
+      <!-- PDF sans URL (ne devrait pas arriver) : hint -->
+      <div *ngIf="preview()!.isPdf && !preview()!.safePreviewUrl" class="preview-placeholder">
+        <mat-icon class="placeholder-icon">picture_as_pdf</mat-icon>
+        <p class="placeholder-name">{{ preview()!.name }}</p>
+        <p class="placeholder-sub">PDF preview not available.</p>
+        <button class="btn-dl-placeholder" (click)="downloadFile(preview()!)">
+          <mat-icon>download</mat-icon>
+          Download file
+        </button>
+      </div>
+
+      <!-- Non-image, non-PDF : placeholder avec icône -->
+      <div *ngIf="!preview()!.isImage && !preview()!.isPdf" class="preview-placeholder">
+        <mat-icon class="placeholder-icon">{{ preview()!.typeIcon }}</mat-icon>
+        <p class="placeholder-name">{{ preview()!.name }}</p>
+        <p class="placeholder-sub">Preview not available for this file type.</p>
+        <button class="btn-dl-placeholder" (click)="downloadFile(preview()!)">
+          <mat-icon>download</mat-icon>
+          Download file
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer modal -->
+    <div class="preview-footer">
+      <span class="preview-footer-type">{{ preview()!.typeLabel }}</span>
+      <span *ngIf="preview()!.sizeLabel">{{ preview()!.sizeLabel }}</span>
+      <button class="btn-preview-close-footer" (click)="closePreview()">Close</button>
+    </div>
+  </div>
+</div>

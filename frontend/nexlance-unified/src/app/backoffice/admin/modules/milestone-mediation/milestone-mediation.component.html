@@ -1,0 +1,76 @@
+<div class="milestone-mediation-container">
+  @if (loading) {
+    <div class="loading">{{ 'admin.projects.loading' | translate }}</div>
+  } @else if (milestone) {
+    <div class="page-header">
+      <button mat-icon-button [routerLink]="['/backoffice/admin/projects', projectId]">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>{{ 'admin.projects.mediation.title' | translate }}</h1>
+    </div>
+
+    <div class="content-grid">
+      <mat-card class="criteria-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'admin.projects.mediation.acceptanceCriteria' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <h3>{{ milestone.title }}</h3>
+          <p>{{ milestone.description }}</p>
+          <mat-divider></mat-divider>
+          <div class="criteria">
+            <p>{{ milestone.acceptanceCriteria || ('admin.projects.mediation.noAttachments' | translate) }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="deliverables-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'admin.projects.mediation.submittedDeliverables' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (milestone.attachments) {
+            <p>{{ 'admin.projects.mediation.submittedDeliverables' | translate }}</p>
+          } @else {
+            <p>{{ 'admin.projects.mediation.noAttachments' | translate }}</p>
+          }
+          @if (milestone.rejectionReason) {
+            <div class="rejection-reason">
+              <strong>{{ 'admin.projects.mediation.rejectionReason' | translate }}:</strong>
+              <p>{{ milestone.rejectionReason }}</p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="admin-actions-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'admin.projects.mediation.adminActions' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'admin.projects.mediation.adminActions' | translate }}</mat-label>
+            <textarea matInput rows="4" [(ngModel)]="adminNotes" [placeholder]="'admin.projects.mediation.adminActions' | translate"></textarea>
+          </mat-form-field>
+
+          <div class="action-buttons">
+            <button mat-raised-button color="primary" (click)="forceApprove()">
+              <mat-icon>check_circle</mat-icon>
+              {{ 'admin.projects.mediation.forceApprove' | translate }}
+            </button>
+            <button mat-raised-button color="accent" (click)="requestRevisions()">
+              <mat-icon>edit</mat-icon>
+              {{ 'admin.projects.mediation.requestRevisions' | translate }}
+            </button>
+            <button mat-raised-button color="warn" (click)="cancelMilestone()">
+              <mat-icon>cancel</mat-icon>
+              {{ 'admin.projects.mediation.cancelMilestone' | translate }}
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  } @else {
+    <div class="error">{{ 'admin.projects.detail.backToProjects' | translate }}</div>
+  }
+</div>

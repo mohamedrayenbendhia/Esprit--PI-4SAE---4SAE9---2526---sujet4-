@@ -1,0 +1,81 @@
+@use '../../../../../styles/nexlance-theme.scss' as *;
+
+.stats-container { padding: $space-8 $space-6; max-width: 1200px; margin: 0 auto; }
+
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: $space-8;
+  .btn-back { display: flex; align-items: center; gap: $space-1; background: none; border: none; color: $nexlance-gray-500; font-size: $text-sm; cursor: pointer; padding: 0; margin-bottom: $space-3; transition: color $transition-fast; mat-icon { font-size: 18px; width: 18px; height: 18px; } &:hover { color: $nexlance-primary; } }
+  h1 { font-size: $text-3xl; font-weight: $font-bold; color: $nexlance-gray-900; font-family: $font-family-heading; }
+  .subtitle { font-size: $text-sm; color: $nexlance-gray-500; margin-top: $space-1; }
+  .btn-refresh { width: 40px; height: 40px; border-radius: 50%; background: white; border: 1.5px solid $nexlance-gray-200; cursor: pointer; display: flex; align-items: center; justify-content: center; color: $nexlance-gray-500; transition: all $transition-fast; mat-icon { font-size: 18px; width: 18px; height: 18px; } &:hover { border-color: $nexlance-primary; color: $nexlance-primary; } }
+}
+
+.state-box { display: flex; justify-content: center; padding: $space-16; .spinner { width: 40px; height: 40px; border: 3px solid $nexlance-gray-200; border-top-color: $nexlance-primary; border-radius: 50%; animation: spin 0.8s linear infinite; } }
+
+// ── KPIs ─────────────────────────────────────────────────────
+
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: $space-4; margin-bottom: $space-8;
+  @media (max-width: 1000px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 600px) { grid-template-columns: 1fr 1fr; }
+}
+
+.kpi-card {
+  background: white; border-radius: $radius-xl; border: 1px solid $nexlance-gray-100;
+  padding: $space-5; display: flex; align-items: center; gap: $space-4;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: transform $transition-fast;
+  &:hover { transform: translateY(-2px); }
+
+  &.total .kpi-icon { background: rgba($nexlance-primary,.1); color: $nexlance-primary; }
+
+  .kpi-icon { width: 44px; height: 44px; border-radius: $radius-lg; background: $nexlance-gray-100; display: flex; align-items: center; justify-content: center; flex-shrink: 0; mat-icon { font-size: 22px; width: 22px; height: 22px; } }
+  .kpi-body { display: flex; flex-direction: column; }
+  .kpi-val { font-size: $text-2xl; font-weight: $font-bold; color: $nexlance-gray-900; line-height: 1; }
+  .kpi-label { font-size: $text-xs; color: $nexlance-gray-400; margin-top: 3px; }
+}
+
+// ── Charts ───────────────────────────────────────────────────
+
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: $space-6; margin-bottom: $space-6; @media (max-width: 800px) { grid-template-columns: 1fr; } }
+
+.chart-card, .agents-card {
+  background: white; border-radius: $radius-xl; border: 1px solid $nexlance-gray-100;
+  padding: $space-6; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.chart-title { display: flex; align-items: center; gap: $space-2; font-size: $text-base; font-weight: $font-semibold; color: $nexlance-gray-800; margin-bottom: $space-5; mat-icon { font-size: 18px; width: 18px; height: 18px; color: $nexlance-primary; } }
+
+.bar-chart { display: flex; flex-direction: column; gap: $space-4; }
+
+.bar-item {
+  display: grid; grid-template-columns: 140px 1fr 60px; align-items: center; gap: $space-3;
+  .bar-label { font-size: $text-sm; color: $nexlance-gray-600; font-weight: $font-medium; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { height: 10px; background: $nexlance-gray-100; border-radius: 100px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 100px; transition: width 0.6s ease; min-width: 4px; }
+  .bar-stats { display: flex; flex-direction: column; align-items: flex-end; }
+  .bar-count { font-size: $text-sm; font-weight: $font-bold; color: $nexlance-gray-800; line-height: 1; }
+  .bar-pct { font-size: $text-xs; color: $nexlance-gray-400; }
+}
+
+// ── Agents ───────────────────────────────────────────────────
+
+.agents-grid { display: flex; flex-direction: column; gap: $space-3; }
+
+.agent-row {
+  display: flex; align-items: center; gap: $space-3; padding: $space-3;
+  background: $nexlance-gray-50; border-radius: $radius-lg;
+  transition: background $transition-fast;
+  &:hover { background: $nexlance-gray-100; }
+
+  .agent-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba($nexlance-primary,.1); color: $nexlance-primary; display: flex; align-items: center; justify-content: center; font-size: $text-sm; font-weight: $font-bold; flex-shrink: 0; }
+  .agent-info { flex: 1; min-width: 0; }
+  .agent-name { display: block; font-size: $text-sm; font-weight: $font-medium; color: $nexlance-gray-800; }
+  .agent-email { display: block; font-size: $text-xs; color: $nexlance-gray-400; }
+
+  .agent-specs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .spec-chip { font-size: 10px; padding: 2px 7px; background: rgba($nexlance-primary,.1); color: $nexlance-primary; border-radius: 4px; font-weight: $font-medium; }
+  .spec-more { font-size: 10px; padding: 2px 7px; background: $nexlance-gray-200; color: $nexlance-gray-500; border-radius: 4px; }
+  .no-spec { font-size: $text-xs; color: $nexlance-gray-400; font-style: italic; }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

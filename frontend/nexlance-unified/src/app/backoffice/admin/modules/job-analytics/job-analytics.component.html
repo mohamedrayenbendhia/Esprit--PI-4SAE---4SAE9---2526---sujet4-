@@ -1,0 +1,161 @@
+<div *ngIf="!isLoading" class="analytics-container">
+  <div class="page-header">
+    <h1><mat-icon>assessment</mat-icon> {{ 'admin.analytics.title' | translate }}</h1>
+    <p>{{ 'admin.analytics.subtitle' | translate }}</p>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon kpi-blue"><mat-icon>description</mat-icon></div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ stats.totalOffers }}</span>
+        <span class="kpi-label">{{ 'admin.analytics.kpis.totalOffers' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon kpi-green"><mat-icon>article</mat-icon></div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ stats.totalApplications }}</span>
+        <span class="kpi-label">{{ 'admin.analytics.kpis.totalApplications' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon kpi-purple"><mat-icon>trending_up</mat-icon></div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ stats.conversionRate }}%</span>
+        <span class="kpi-label">{{ 'admin.analytics.kpis.conversionRate' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon kpi-orange"><mat-icon>star</mat-icon></div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ stats.avgApplicationsPerOffer }}</span>
+        <span class="kpi-label">{{ 'admin.analytics.kpis.avgApplicationsPerOffer' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon kpi-red"><mat-icon>schedule</mat-icon></div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ stats.avgResponseTime }}j</span>
+        <span class="kpi-label">{{ 'admin.analytics.kpis.avgResponseTime' | translate }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-grid">
+    <!-- Category Distribution -->
+    <div class="chart-card">
+      <h2>{{ 'admin.analytics.charts.offersByCategory' | translate }}</h2>
+      <div class="bar-chart">
+        <div *ngFor="let item of categoryData" class="bar-item">
+          <div class="bar-wrapper">
+            <div 
+              class="bar" 
+              [style.height]="getBarHeight(item.count, getMaxValue(categoryData, 'count'))"
+              [style.background]="item.color"
+            >
+              <span class="bar-value">{{ item.count }}</span>
+            </div>
+          </div>
+          <span class="bar-label">{{ item.category }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget Distribution -->
+    <div class="chart-card">
+      <h2>{{ 'admin.analytics.charts.budgetDistribution' | translate }}</h2>
+      <div class="horizontal-bars">
+        <div *ngFor="let item of budgetDistribution" class="h-bar-item">
+          <span class="h-bar-label">{{ item.range }}</span>
+          <div class="h-bar-wrapper">
+            <div 
+              class="h-bar" 
+              [style.width]="getBarHeight(item.count, getMaxValue(budgetDistribution, 'count'))"
+            ></div>
+          </div>
+          <span class="h-bar-value">{{ item.count }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acceptance Rates -->
+    <div class="chart-card">
+      <h2>{{ 'admin.analytics.charts.acceptanceRates' | translate }}</h2>
+      <div class="progress-bars">
+        <div *ngFor="let item of acceptanceRates" class="progress-item">
+          <div class="progress-header">
+            <span class="progress-label">{{ item.level }}</span>
+            <span class="progress-value">{{ item.rate }}%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div 
+              class="progress-bar-fill" 
+              [style.width.%]="item.rate"
+              [ngClass]="{
+                'low': item.rate < 40,
+                'medium': item.rate >= 40 && item.rate < 60,
+                'high': item.rate >= 60
+              }"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Clients -->
+    <div class="chart-card">
+      <h2>{{ 'admin.analytics.charts.topClients' | translate }}</h2>
+      <div class="top-list">
+        <div *ngFor="let client of topClients; let i = index" class="top-item">
+          <span class="rank">{{ i + 1 }}</span>
+          <div class="client-info">
+            <span class="client-name">{{ client.name }}</span>
+            <span class="client-stats">{{ client.offers }} {{ 'admin.analytics.charts.offers' | translate }} • {{ client.completionRate }}% {{ 'admin.analytics.charts.completed' | translate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Trends -->
+    <div class="chart-card full-width">
+      <h2>{{ 'admin.analytics.charts.monthlyTrends' | translate }}</h2>
+      <div class="line-chart">
+        <div class="chart-legend">
+          <div class="legend-item">
+            <span class="legend-dot blue"></span>
+            <span>{{ 'admin.analytics.charts.legend.offers' | translate }}</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot green"></span>
+            <span>{{ 'admin.analytics.charts.legend.applications' | translate }}</span>
+          </div>
+        </div>
+        <div class="chart-area">
+          <div *ngFor="let data of monthlyData" class="month-group">
+            <div class="dual-bars">
+              <div class="dual-bar offers" [style.height]="getBarHeight(data.offers, getMaxValue(monthlyData, 'applications'))">
+                <span class="dual-value">{{ data.offers }}</span>
+              </div>
+              <div class="dual-bar applications" [style.height]="getBarHeight(data.applications, getMaxValue(monthlyData, 'applications'))">
+                <span class="dual-value">{{ data.applications }}</span>
+              </div>
+            </div>
+            <span class="month-label">{{ data.month }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isLoading" class="loading-state">
+  <div class="spinner"></div>
+  <p>{{ 'admin.analytics.loading' | translate }}</p>
+</div>

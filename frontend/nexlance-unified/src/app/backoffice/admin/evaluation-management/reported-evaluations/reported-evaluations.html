@@ -1,0 +1,181 @@
+<div class="admin-container">
+  <div class="header">
+    <h2>Gestion des évaluations</h2>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab === 'reported'" (click)="switchTab('reported')">
+      Signalements ({{ evaluations.length }})
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'responses'" (click)="switchTab('responses')">
+      Réponses des freelancers ({{ evaluationsWithResponses.length }})
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">Chargement...</div>
+
+  <!-- TAB 1: SIGNALEMENTS -->
+  <div *ngIf="!isLoading && activeTab === 'reported'">
+    <div *ngIf="evaluations.length === 0" class="no-data">
+      <p>Aucun signalement en attente</p>
+    </div>
+
+    <div *ngIf="evaluations.length > 0" class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Évaluateur</th>
+            <th>Évalué</th>
+            <th>Note</th>
+            <th>Raison</th>
+            <th>Réponse</th>
+            <th>Statut</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let eval of paginatedEvaluations">
+            <td>{{ eval.id }}</td>
+            <!--  Email au lieu de l'ID -->
+            <td>{{ getEmail(eval.evaluatorId) }}</td>
+            <td>{{ getEmail(eval.evaluatedId) }}</td>
+            <td>{{ eval.ratingGlobal }}/5</td>
+            <td>{{ getReasonLabel(eval.reportReason || '') }}</td>
+            <td>
+              <span *ngIf="eval.responseText" class="response-indicator" (click)="viewResponse(eval)">
+                Voir réponse
+              </span>
+              <span *ngIf="!eval.responseText" class="no-response">-</span>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(eval.reportStatus || '')">
+                {{ eval.reportStatus }}
+              </span>
+            </td>
+            <td>{{ eval.createdAt | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <button *ngIf="eval.reportStatus === 'PENDING'" class="btn-moderate" (click)="openModerateDialog(eval)">
+                Modérer
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button (click)="prevPage()" [disabled]="currentPage === 0">← Précédent</button>
+        <span>Page {{ currentPage + 1 }} / {{ totalPages }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage === totalPages - 1">Suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: RÉPONSES DES FREELANCERS -->
+  <div *ngIf="!isLoading && activeTab === 'responses'">
+    <div *ngIf="evaluationsWithResponses.length === 0" class="no-data">
+      <p>Aucune réponse de freelancer</p>
+    </div>
+
+    <div *ngIf="evaluationsWithResponses.length > 0" class="responses-grid">
+      <div class="response-card" *ngFor="let eval of evaluationsWithResponses">
+        <div class="response-header">
+          <span class="response-id">#{{ eval.id }}</span>
+          <span class="response-date">{{ eval.responseDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="response-content">
+          <div class="info-row">
+            <span class="info-label">Freelancer:</span>
+            <!--  Email au lieu de l'ID -->
+        <span class="info-value">{{ getEmail(eval.evaluatedId) }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Client:</span>
+            <!--  Email au lieu de l'ID -->
+            <span class="info-value">{{ getEmail(eval.evaluatorId) }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Note:</span>
+            <span class="info-value">{{ eval.ratingGlobal }}/5</span>
+          </div>
+
+          <div class="comment-box">
+            <div class="comment-label">Commentaire:</div>
+            <div class="comment-text">{{ eval.comment || 'Aucun commentaire' }}</div>
+          </div>
+
+          <div class="response-box">
+            <div class="response-label">Réponse:</div>
+            <div class="response-text">{{ eval.responseText }}</div>
+          </div>
+
+          <div class="response-actions">
+            <button class="btn-view" (click)="viewResponse(eval)">Détails</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Modération -->
+  <div class="modal" *ngIf="showModerateDialog" (click)="closeModerateDialog()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Modérer le signalement</h3>
+      <div class="modal-body">
+        <p><strong>Évaluation #{{ selectedEvaluation?.id }}</strong></p>
+        <p>Raison: {{ getReasonLabel(selectedEvaluation?.reportReason || '') }}</p>
+        <div class="form-group">
+          <label>Décision:</label>
+          <select [(ngModel)]="moderationDecision" class="form-control">
+            <option [value]="approvedValue">Approuver</option>
+            <option [value]="rejectedValue">Rejeter</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModerateDialog()">Annuler</button>
+        <button class="btn-primary" (click)="moderateEvaluation()">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Détails réponse -->
+  <div class="modal" *ngIf="showResponseDialog" (click)="closeResponseDialog()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Détails de l'évaluation #{{ selectedEvaluation?.id }}</h3>
+      <div class="modal-body">
+        <div class="detail-row">
+          <label>Freelancer:</label>
+          <!--  Email au lieu de l'ID -->
+          <div class="value">{{ getEmail(selectedEvaluation?.evaluatedId || '') }}</div>
+        </div>
+        <div class="detail-row">
+          <label>Client:</label>
+          <!--  Email au lieu de l'ID -->
+          <div class="value">{{ getEmail(selectedEvaluation?.evaluatorId || '') }}</div>
+        </div>
+        <div class="detail-row">
+          <label>Commentaire:</label>
+          <div class="value comment">{{ selectedEvaluation?.comment || 'Aucun commentaire' }}</div>
+        </div>
+        <div class="detail-row" *ngIf="selectedEvaluation?.responseText">
+          <label>Réponse:</label>
+          <div class="value response">{{ selectedEvaluation?.responseText }}</div>
+          <div class="date" *ngIf="selectedEvaluation?.responseDate">
+            {{ selectedEvaluation?.responseDate | date:'dd/MM/yyyy HH:mm' }}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeResponseDialog()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

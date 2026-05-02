@@ -1,0 +1,95 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'maven_3'
+    }
+
+    stages {
+
+        stage('Step 1: Pull Code') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Step 2: Maven Build All Microservices') {
+            steps {
+                dir('backend') {
+                    sh 'mvn clean install -DskipTests'
+                }
+            }
+        }
+
+        stage('Step 3: SonarQube Analysis') {
+            steps {
+                dir('backend') {
+                    sh '''
+                        mvn sonar:sonar \
+                          -Dsonar.host.url=http://localhost:9001 \
+                          -Dsonar.login=admin \
+                          -Dsonar.password=admin \
+                          -DskipTests
+                    '''
+                }
+            }
+        }
+
+        stage('Step 4: Stop Old Containers') {
+            steps {
+                dir('backend') {
+                    sh 'docker-compose down --remove-orphans || true'
+                }
+            }
+        }
+
+        stage('Step 5: Docker Compose Build') {
+            steps {
+                dir('backend') {
+                    sh 'docker-compose build'
+                }
+            }
+        }
+
+        stage('Step 6: Deploy & Run All (Docker)') {
+            steps {
+                dir('backend') {
+                    sh 'docker-compose up -d'
+                }
+            }
+        }
+
+        stage('Step 7: Deploy to K3s / Kubernetes') {
+            steps {
+                sh 'kubectl apply -f k8s/namespace.yaml'
+                sh 'kubectl apply -f k8s/infrastructure/'
+                sh 'kubectl apply -f k8s/microservices/'
+                sh 'kubectl apply -f k8s/ai/'
+                sh 'kubectl apply -f k8s/frontend/'
+                sh 'kubectl apply -f k8s/monitoring/'
+            }
+        }
+
+        stage('Step 8: Health Check') {
+            steps {
+                sleep(time: 20, unit: 'SECONDS')
+                sh 'curl -f http://localhost:8761 || echo "Eureka not ready yet"'
+                sh 'curl -f http://localhost:4200 || echo "Frontend not ready yet"'
+                sh 'curl -f http://localhost:9001 || echo "SonarQube not ready yet"'
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo '✅ NexLance complet : Frontend→4200 | Gateway→8080 | Eureka→8761 | SonarQube→9001 | Grafana→3000 | Prometheus→9093'
+        }
+        failure {
+            echo '❌ Build échoué. Vérifier le Console Output Jenkins.'
+        }
+        always {
+            echo '--- Fin du pipeline NexLance ---'
+        }
+    }
+}

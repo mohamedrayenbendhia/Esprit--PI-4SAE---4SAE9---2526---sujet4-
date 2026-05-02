@@ -1,0 +1,297 @@
+<div class="freelancer-profile">
+  <div class="profile-header">
+    <h1>My Freelance Profile</h1>
+    @if (profile()) {
+      <div class="profile-stats">
+        <div class="stat-card">
+          <span class="stat-value">{{ profile()!.completionRate || 0 }}%</span>
+          <span class="stat-label">Profile Complete</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">{{ profile()!.responseTime || 0 }}h</span>
+          <span class="stat-label">Response Time</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">{{ profile()!.hourlyRate || 0 }} DT</span>
+          <span class="stat-label">Hourly Rate</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Availability Status -->
+  @if (profile()) {
+    <div class="availability-section">
+      <h3>Current Availability</h3>
+      <div class="availability-buttons">
+        <button 
+          [class.active]="profile()!.availability === Availability.AVAILABLE"
+          (click)="updateAvailability(Availability.AVAILABLE)"
+          class="btn btn-availability btn-success">
+          <i class="bi bi-check-circle"></i> Available
+        </button>
+        <button 
+          [class.active]="profile()!.availability === Availability.BUSY"
+          (click)="updateAvailability(Availability.BUSY)"
+          class="btn btn-availability btn-warning">
+          <i class="bi bi-clock"></i> Busy
+        </button>
+        <button 
+          [class.active]="profile()!.availability === Availability.UNAVAILABLE"
+          (click)="updateAvailability(Availability.UNAVAILABLE)"
+          class="btn btn-availability btn-danger">
+          <i class="bi bi-x-circle"></i> Unavailable
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Navigation Tabs -->
+  <div class="tabs">
+    <button 
+      [class.active]="activeTab() === 'general'"
+      (click)="setActiveTab('general')"
+      class="tab">
+      <i class="bi bi-person"></i> General Information
+    </button>
+    <button 
+      [class.active]="activeTab() === 'professional'"
+      (click)="setActiveTab('professional')"
+      class="tab">
+      <i class="bi bi-briefcase"></i> Professional Profile
+    </button>
+    <button 
+      [class.active]="activeTab() === 'kyc'"
+      (click)="setActiveTab('kyc')"
+      class="tab">
+      <i class="bi bi-shield-check"></i> KYC Verification
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- General Information Tab -->
+    @if (activeTab() === 'general') {
+      <div class="content-section">
+        <h2>Personal Information</h2>
+        
+        <div class="avatar-section">
+          @if (user()?.avatar) {
+            <img [src]="user()!.avatar" alt="Avatar" class="avatar">
+          } @else {
+            <div class="avatar-placeholder">
+              {{ user()?.firstName?.charAt(0) }}{{ user()?.lastName?.charAt(0) }}
+            </div>
+          }
+          <div class="avatar-upload">
+            <input 
+              type="file" 
+              id="avatar" 
+              accept="image/*" 
+              (change)="onAvatarChange($event)"
+              hidden>
+            <label for="avatar" class="btn btn-secondary">
+              <i class="bi bi-upload"></i> Change Photo
+            </label>
+          </div>
+        </div>
+
+        <form [formGroup]="generalForm" (ngSubmit)="onUpdateGeneral()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="firstName">First Name *</label>
+              <input 
+                type="text" 
+                id="firstName" 
+                formControlName="firstName"
+                placeholder="John"
+                class="form-control">
+              @if (generalForm.get('firstName')?.invalid && generalForm.get('firstName')?.touched) {
+                <small class="error">First name is required</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="lastName">Last Name *</label>
+              <input 
+                type="text" 
+                id="lastName" 
+                formControlName="lastName"
+                placeholder="Doe"
+                class="form-control">
+              @if (generalForm.get('lastName')?.invalid && generalForm.get('lastName')?.touched) {
+                <small class="error">Last name is required</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email *</label>
+              <input 
+                type="email" 
+                id="email" 
+                formControlName="email"
+                placeholder="john.doe@example.com"
+                class="form-control"
+                readonly>
+            </div>
+
+            <div class="form-group">
+              <label for="phoneNumber">Phone Number</label>
+              <input 
+                type="tel" 
+                id="phoneNumber" 
+                formControlName="phoneNumber"
+                placeholder="+1 234 567 8900"
+                class="form-control">
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            [disabled]="!generalForm.valid || loading()"
+            class="btn btn-primary">
+            @if (loading()) {
+              <i class="bi bi-hourglass-split spinning"></i> Saving...
+            } @else {
+              <i class="bi bi-save"></i> Save Changes
+            }
+          </button>
+        </form>
+      </div>
+    }
+
+    <!-- Professional Profile Tab -->
+    @if (activeTab() === 'professional') {
+      <div class="content-section">
+        <h2>Professional Profile</h2>
+        
+        <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()">
+          <div class="form-group">
+            <label for="title">Professional Title *</label>
+            <input 
+              type="text" 
+              id="title" 
+              formControlName="title"
+              placeholder="e.g., Full Stack Developer, UI/UX Designer"
+              class="form-control">
+            @if (profileForm.get('title')?.invalid && profileForm.get('title')?.touched) {
+              <small class="error">Title is required</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="bio">Professional Bio * (minimum 100 characters)</label>
+            <textarea 
+              id="bio" 
+              formControlName="bio"
+              rows="6"
+              placeholder="Describe your experience, skills, and what makes you unique..."
+              class="form-control"></textarea>
+            @if (profileForm.get('bio')?.invalid && profileForm.get('bio')?.touched) {
+              <small class="error">Bio must be at least 100 characters</small>
+            }
+            <small class="char-count">{{ profileForm.get('bio')?.value?.length || 0 }} / 100 minimum</small>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="hourlyRate">Hourly Rate (DT) *</label>
+              <div class="input-group">
+                <span class="input-prefix">DT</span>
+                <input 
+                  type="number" 
+                  id="hourlyRate" 
+                  formControlName="hourlyRate"
+                  placeholder="75"
+                  min="0"
+                  step="5"
+                  class="form-control">
+              </div>
+              @if (profileForm.get('hourlyRate')?.touched && profileForm.get('hourlyRate')?.invalid) {
+                <small class="error">Hourly rate is required and must be 0 or more</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="experienceYears">Years of Experience *</label>
+              <input 
+                type="number" 
+                id="experienceYears" 
+                formControlName="experienceYears"
+                placeholder="5"
+                min="0"
+                class="form-control">
+              @if (profileForm.get('experienceYears')?.touched && profileForm.get('experienceYears')?.invalid) {
+                <small class="error">Years of experience is required</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="location">Location *</label>
+              <input 
+                type="text" 
+                id="location" 
+                formControlName="location"
+                placeholder="New York, USA"
+                class="form-control">
+              @if (profileForm.get('location')?.touched && profileForm.get('location')?.invalid) {
+                <small class="error">Location is required</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="timezone">Timezone *</label>
+              <select id="timezone" formControlName="timezone" class="form-control">
+                <option value="UTC">UTC</option>
+                <option value="Europe/Paris">Europe/Paris (CET)</option>
+                <option value="Europe/London">Europe/London (GMT)</option>
+                <option value="America/New_York">America/New_York (EST)</option>
+                <option value="America/Los_Angeles">America/Los_Angeles (PST)</option>
+                <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+              </select>
+              @if (profileForm.get('timezone')?.touched && profileForm.get('timezone')?.invalid) {
+                <small class="error">Timezone is required</small>
+              }
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="languages">Languages (comma-separated)</label>
+            <input 
+              type="text" 
+              id="languages" 
+              formControlName="languagesInput"
+              placeholder="English, French, Spanish"
+              class="form-control">
+            <small class="help-text">Separate languages with commas</small>
+          </div>
+
+          <button 
+            type="submit" 
+            [disabled]="!profileForm.valid || loading()"
+            class="btn btn-primary">
+            @if (loading()) {
+              <i class="bi bi-hourglass-split spinning"></i> Saving...
+            } @else {
+              <i class="bi bi-save"></i> Save Professional Profile
+            }
+          </button>
+        </form>
+      </div>
+    }
+
+    <!-- KYC Verification Tab -->
+    @if (activeTab() === 'kyc') {
+      <div class="content-section">
+        <app-user-kyc></app-user-kyc>
+      </div>
+    }
+  </div>
+
+  <!-- Loading Overlay -->
+  @if (loading()) {
+    <div class="loading-overlay">
+      <div class="spinner"></div>
+    </div>
+  }
+</div>

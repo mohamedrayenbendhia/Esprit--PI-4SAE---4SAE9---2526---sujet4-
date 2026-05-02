@@ -1,0 +1,939 @@
+@use '../../../../styles/nexlance-theme.scss' as *;
+
+// Notification Toast
+.notification-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  min-width: 320px;
+  max-width: 500px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: slideInRight 0.3s ease-out;
+  backdrop-filter: blur(10px);
+
+  .notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    span {
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  }
+
+  .notification-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    margin-left: 12px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  &.notification-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+
+    .notification-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  &.notification-error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+
+    .notification-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.job-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $space-8 $space-6;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $space-8;
+
+    .btn-back, .btn-save {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-2;
+      padding: $space-3 $space-5;
+      border: none;
+      border-radius: $radius-lg;
+      font-weight: 600;
+      cursor: pointer;
+      transition: $transition-all;
+      font-size: $text-base;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .btn-back {
+      background: $nexlance-gray-100;
+      color: $nexlance-text-primary;
+
+      &:hover {
+        background: $nexlance-gray-200;
+        transform: translateX(-2px);
+      }
+    }
+
+    .btn-save {
+      background: white;
+      color: $nexlance-error;
+      border: 2px solid $nexlance-error;
+
+      &:hover {
+        background: $nexlance-error;
+        color: white;
+      }
+    }
+  }
+
+  .job-main-card {
+    @include card;
+    padding: $space-10;
+
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: $space-8;
+      padding-bottom: $space-8;
+      border-bottom: 2px solid $nexlance-gray-100;
+
+      .title-section {
+        flex: 1;
+
+        .category-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: $space-2;
+          padding: $space-2 $space-4;
+          background: linear-gradient(135deg, $nexlance-primary-light, $nexlance-primary);
+          color: white;
+          border-radius: $radius-full;
+          font-size: $text-sm;
+          font-weight: 600;
+          margin-bottom: $space-4;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+
+        .job-title {
+          font-size: $text-4xl;
+          font-weight: 700;
+          color: $nexlance-text-primary;
+          margin-bottom: $space-2;
+          line-height: 1.2;
+        }
+
+        .post-date {
+          color: $nexlance-text-secondary;
+          font-size: $text-base;
+          display: flex;
+          align-items: center;
+          gap: $space-2;
+        }
+      }
+
+      .action-section {
+        .btn-apply-main {
+          @include btn-primary;
+          padding: $space-4 $space-8;
+          font-size: $text-lg;
+          font-weight: 700;
+          display: inline-flex;
+          align-items: center;
+          gap: $space-2;
+          box-shadow: $shadow-xl;
+
+          mat-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+          }
+
+          &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: $shadow-2xl;
+          }
+
+          &:disabled {
+            background: $nexlance-gray-300;
+            cursor: not-allowed;
+            box-shadow: none;
+            color: $nexlance-gray-600;
+          }
+        }
+      }
+    }
+
+    .client-info-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $space-6;
+      background: linear-gradient(135deg, rgba($nexlance-primary-light, 0.1), rgba($nexlance-primary, 0.05));
+      border-radius: $radius-lg;
+      margin-bottom: $space-8;
+      border: 2px solid $nexlance-gray-100;
+
+      .client-profile {
+        display: flex;
+        gap: $space-4;
+        align-items: center;
+
+        .client-avatar {
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, $nexlance-primary, $nexlance-primary-dark);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: $shadow-lg;
+
+          mat-icon {
+            font-size: 40px;
+            width: 40px;
+            height: 40px;
+            color: white;
+          }
+        }
+
+        .client-details {
+          h3 {
+            font-size: $text-xl;
+            font-weight: 600;
+            color: $nexlance-text-primary;
+            margin-bottom: $space-1;
+          }
+
+          .client-meta {
+            display: flex;
+            gap: $space-3;
+            font-size: $text-sm;
+            color: $nexlance-text-secondary;
+            align-items: center;
+
+            .rating {
+              display: flex;
+              align-items: center;
+              gap: $space-1;
+              color: $nexlance-orange;
+              font-weight: 600;
+
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+              }
+            }
+
+            .separator {
+              color: $nexlance-gray-300;
+            }
+          }
+        }
+      }
+
+      .btn-view-profile {
+        @include btn-primary;
+        padding: $space-3 $space-5;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: $space-2;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    .job-details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: $space-6;
+      margin-bottom: $space-10;
+
+      .detail-card {
+        display: flex;
+        gap: $space-4;
+        padding: $space-5;
+        background: $nexlance-gray-50;
+        border: 2px solid $nexlance-gray-100;
+        border-radius: $radius-lg;
+        transition: $transition-all;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: $shadow-md;
+          border-color: $nexlance-primary-light;
+        }
+
+        .detail-icon {
+          mat-icon {
+            font-size: 32px;
+            width: 32px;
+            height: 32px;
+            color: $nexlance-primary;
+          }
+        }
+
+        .detail-content {
+          display: flex;
+          flex-direction: column;
+          gap: $space-1;
+
+          .detail-label {
+            font-size: $text-sm;
+            color: $nexlance-text-secondary;
+            font-weight: 500;
+          }
+
+          .detail-value {
+            font-size: $text-xl;
+            font-weight: 700;
+            color: $nexlance-text-primary;
+          }
+
+          .detail-sub {
+            font-size: $text-xs;
+            color: $nexlance-text-secondary;
+          }
+
+          .btn-currency-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+            padding: 2px 8px;
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: #64748b;
+            transition: all 0.2s;
+
+            mat-icon {
+              font-size: 14px;
+              width: 14px;
+              height: 14px;
+            }
+
+            &:hover {
+              background: #f1f5f9;
+              border-color: #0EA5E9;
+              color: #0EA5E9;
+            }
+          }
+
+          .currency-conversions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+
+            .currency-item {
+              padding: 2px 8px;
+              background: #f0f9ff;
+              border: 1px solid #bae6fd;
+              border-radius: 4px;
+              font-size: 0.75rem;
+              color: #0369a1;
+              font-weight: 500;
+            }
+          }
+
+          .remote-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: $space-1;
+            padding: $space-1 $space-3;
+            background: $nexlance-success;
+            color: white;
+            border-radius: $radius-full;
+            font-size: $text-xs;
+            font-weight: 600;
+            margin-top: $space-2;
+            width: fit-content;
+
+            mat-icon {
+              font-size: 14px;
+              width: 14px;
+              height: 14px;
+            }
+          }
+        }
+      }
+    }
+
+    .description-section,
+    .skills-section,
+    .attachments-section {
+      margin-bottom: $space-8;
+
+      h2 {
+        font-size: $text-2xl;
+        font-weight: 700;
+        color: $nexlance-text-primary;
+        margin-bottom: $space-6;
+        display: flex;
+        align-items: center;
+        gap: $space-3;
+
+        mat-icon {
+          color: $nexlance-primary;
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+        }
+      }
+
+      p {
+        font-size: $text-base;
+        color: $nexlance-text-secondary;
+        line-height: 1.8;
+        white-space: pre-wrap;
+      }
+    }
+
+    .skills-section {
+      .skills-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $space-3;
+
+        .skill-tag {
+          display: inline-flex;
+          align-items: center;
+          gap: $space-2;
+          padding: $space-3 $space-5;
+          background: linear-gradient(135deg, $nexlance-primary-light, $nexlance-primary);
+          color: white;
+          font-size: $text-base;
+          font-weight: 600;
+          border-radius: $radius-full;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+
+    .attachments-section {
+      .attachments-list {
+        display: grid;
+        gap: $space-3;
+
+        .attachment-item {
+          display: flex;
+          align-items: center;
+          gap: $space-3;
+          padding: $space-4;
+          background: $nexlance-gray-50;
+          border: 2px solid $nexlance-gray-100;
+          border-radius: $radius-lg;
+          cursor: pointer;
+          transition: $transition-all;
+
+          &:hover {
+            background: $nexlance-gray-100;
+            border-color: $nexlance-primary;
+
+            .download-icon {
+              color: $nexlance-primary;
+            }
+          }
+
+          mat-icon {
+            color: $nexlance-primary;
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+          }
+
+          .attachment-name {
+            flex: 1;
+            font-weight: 500;
+            color: $nexlance-text-primary;
+          }
+
+          .download-icon {
+            color: $nexlance-text-secondary;
+            transition: $transition-all;
+          }
+        }
+      }
+    }
+
+    .bottom-action {
+      margin-top: $space-10;
+      padding-top: $space-8;
+      border-top: 2px solid $nexlance-gray-100;
+      text-align: center;
+
+      .btn-apply-large {
+        @include btn-primary;
+        padding: $space-5 $space-12;
+        font-size: $text-xl;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: $space-3;
+        box-shadow: $shadow-xl;
+
+        mat-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+        }
+
+        &:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: $shadow-2xl;
+        }
+
+        &:disabled {
+          background: $nexlance-gray-300;
+          cursor: not-allowed;
+          box-shadow: none;
+          color: $nexlance-gray-600;
+        }
+      }
+    }
+  }
+}
+
+.loading-state {
+  text-align: center;
+  padding: $space-20;
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid $nexlance-gray-200;
+    border-top-color: $nexlance-primary;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto $space-4;
+  }
+
+  p {
+    color: $nexlance-text-secondary;
+    font-size: $text-lg;
+  }
+}
+
+// Application Modal
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: $space-6;
+
+  .modal-content {
+    background: white;
+    border-radius: $radius-2xl;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: $shadow-2xl;
+    animation: modalSlideIn 0.3s ease;
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $space-8;
+      border-bottom: 2px solid $nexlance-gray-100;
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 1;
+
+      h2 {
+        font-size: $text-2xl;
+        font-weight: 700;
+        color: $nexlance-text-primary;
+        margin: 0;
+      }
+
+      .btn-close {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: $nexlance-gray-100;
+        color: $nexlance-text-secondary;
+        cursor: pointer;
+        transition: $transition-all;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+
+        &:hover {
+          background: $nexlance-error;
+          color: white;
+        }
+      }
+    }
+
+    .modal-body {
+      padding: $space-8;
+
+      .form-group {
+        margin-bottom: $space-6;
+
+        label {
+          display: flex;
+          align-items: center;
+          gap: $space-2;
+          font-weight: 600;
+          color: $nexlance-text-primary;
+          margin-bottom: $space-3;
+          font-size: $text-base;
+
+          mat-icon {
+            color: $nexlance-primary;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        .form-control {
+          width: 100%;
+          padding: $space-4;
+          border: 2px solid $nexlance-gray-200;
+          border-radius: $radius-lg;
+          font-size: $text-base;
+          transition: $transition-all;
+          font-family: inherit;
+
+          &:focus {
+            outline: none;
+            border-color: $nexlance-primary;
+            box-shadow: 0 0 0 3px rgba($nexlance-primary, 0.1);
+          }
+
+          &::placeholder {
+            color: $nexlance-gray-400;
+          }
+        }
+
+        textarea.form-control {
+          resize: vertical;
+          min-height: 120px;
+        }
+
+        .helper-text {
+          display: block;
+          margin-top: $space-2;
+          font-size: $text-sm;
+          color: $nexlance-text-secondary;
+        }
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: $space-6;
+      }
+
+      .no-portfolio {
+        text-align: center;
+        padding: $space-8;
+        background: $nexlance-gray-50;
+        border-radius: $radius-lg;
+        color: $nexlance-text-secondary;
+
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          margin-bottom: $space-2;
+          color: $nexlance-gray-400;
+        }
+
+        p {
+          margin: 0;
+        }
+      }
+
+      .portfolio-selection {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: $space-4;
+
+        .portfolio-item {
+          position: relative;
+          padding: $space-4;
+          border: 2px solid $nexlance-gray-200;
+          border-radius: $radius-lg;
+          cursor: pointer;
+          transition: $transition-all;
+          text-align: center;
+
+          &:hover {
+            border-color: $nexlance-primary;
+            transform: translateY(-2px);
+          }
+
+          &.selected {
+            border-color: $nexlance-primary;
+            background: rgba($nexlance-primary, 0.05);
+
+            .check-icon {
+              opacity: 1;
+            }
+          }
+
+          .portfolio-thumbnail {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: $radius-md;
+            margin-bottom: $space-2;
+          }
+
+          mat-icon {
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+            color: $nexlance-gray-400;
+            margin-bottom: $space-2;
+          }
+
+          .portfolio-title {
+            display: block;
+            font-size: $text-sm;
+            font-weight: 500;
+            color: $nexlance-text-primary;
+          }
+
+          .check-icon {
+            position: absolute;
+            top: $space-2;
+            right: $space-2;
+            color: $nexlance-primary;
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+            opacity: 0;
+            transition: $transition-all;
+          }
+        }
+      }
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: $space-4;
+      padding: $space-8;
+      border-top: 2px solid $nexlance-gray-100;
+      position: sticky;
+      bottom: 0;
+      background: white;
+
+      .btn {
+        padding: $space-4 $space-8;
+        border: none;
+        border-radius: $radius-lg;
+        font-weight: 600;
+        font-size: $text-base;
+        cursor: pointer;
+        transition: $transition-all;
+        display: inline-flex;
+        align-items: center;
+        gap: $space-2;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+
+      .btn-secondary {
+        background: $nexlance-gray-100;
+        color: $nexlance-text-primary;
+
+        &:hover:not(:disabled) {
+          background: $nexlance-gray-200;
+        }
+      }
+
+      .btn-primary {
+        @include btn-primary;
+        box-shadow: $shadow-lg;
+
+        &:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: $shadow-xl;
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .job-detail-container {
+    padding: $space-4;
+
+    .page-header {
+      flex-direction: column;
+      gap: $space-4;
+    }
+
+    .job-main-card {
+      padding: $space-6;
+
+      .job-header {
+        flex-direction: column;
+        gap: $space-6;
+
+        .title-section .job-title {
+          font-size: $text-2xl;
+        }
+      }
+
+      .job-details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+
+  .modal-overlay {
+    .modal-content {
+      .modal-body {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+
+        .portfolio-selection {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    }
+  }
+}
+
+// Material Form Field styles
+.full-width {
+  width: 100%;
+  
+  mat-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}

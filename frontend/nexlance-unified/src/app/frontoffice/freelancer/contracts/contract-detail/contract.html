@@ -1,0 +1,441 @@
+<div class="detail-container" *ngIf="!loading && !error && contract">
+
+  <!-- Header avec bouton PDF -->
+  <div class="page-header">
+    <button class="btn-back" (click)="goBack()">
+      <span class="back-icon">←</span> Back
+    </button>
+    <div class="header-info">
+      <h1>SERVICE AGREEMENT</h1>
+      <div class="header-details">
+        <span class="contract-type">{{ contract.contractType }}</span>
+        <span class="contract-number"># {{ contract.contractNumber }}</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-pdf" (click)="downloadPdf()" title="Download PDF">
+        <svg class="pdf-icon" viewBox="0 0 24 24" width="18" height="18">
+          <path fill="currentColor" d="M20,2H8A2,2 0 0,0 6,4V16A2,2 0 0,0 8,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M8,4H20V8H8V4M8,10H20V12H8V10M8,14H15V16H8V14M4,6H2V20A2,2 0 0,0 4,22H18V20H4V6Z" />
+        </svg>
+        <span class="pdf-text">PDF</span>
+      </button>
+      <app-contract-status-badge [status]="contract.status!" class="header-status"></app-contract-status-badge>
+    </div>
+  </div>
+
+  <!-- Saved Signature Code Banner -->
+  <div class="code-banner" *ngIf="showSavedCode && savedSignatureCode">
+    <div class="code-banner-content">
+      <div class="code-banner-icon">🔑</div>
+      <div class="code-banner-text">
+        <strong>Your signature code has been generated!</strong>
+        <p>Save this code to sign future contracts without drawing again:</p>
+        <div class="code-display">{{ savedSignatureCode }}</div>
+      </div>
+      <button class="code-banner-close" (click)="showSavedCode = false">✕</button>
+    </div>
+  </div>
+
+  <!-- Action banner -->
+  <div class="action-banner" *ngIf="isPendingSignature()">
+    <div class="banner-content">
+      <span>This contract is awaiting your signature</span>
+      <div class="banner-actions">
+        <button class="btn-sign" (click)="openSignModal()">✍ Sign</button>
+        <button class="btn-modify" (click)="showModificationModal = true">Request Changes</button>
+        <button class="btn-decline" (click)="showDeclineModal = true">Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modification banner -->
+  <div class="modification-banner" *ngIf="contract.modificationComment && isPendingSignature()">
+    <div class="banner-body">
+      <strong>CONTRACT MODIFIED BY CLIENT</strong>
+      <p>This contract has been modified following your request. Please review before signing.</p>
+    </div>
+  </div>
+
+  <!-- Contract Document -->
+  <div class="contract-document">
+    
+    <div class="contract-preamble">
+      <p>THIS AGREEMENT IS MADE AND ENTERED INTO AS FOLLOWS:</p>
+    </div>
+
+    <!-- BETWEEN THE PARTIES -->
+    <div class="contract-article">
+      <div class="article-number">BETWEEN THE UNDERSIGNED:</div>
+      
+      <div class="party-block">
+        <p class="party-title">The Client,</p>
+        <div class="info-line">
+          <span class="info-label">Name:</span>
+          <span class="info-value">{{ contract.clientName || '—' }}</span>
+        </div>
+        <div class="info-line" *ngIf="contract.clientCompany">
+          <span class="info-label">Company:</span>
+          <span class="info-value">{{ contract.clientCompany }}</span>
+        </div>
+        <div class="info-line">
+          <span class="info-label">Email:</span>
+          <span class="info-value">{{ contract.clientEmail || '—' }}</span>
+        </div>
+        <div class="info-line" *ngIf="contract.clientPhone">
+          <span class="info-label">Phone:</span>
+          <span class="info-value">{{ contract.clientPhone }}</span>
+        </div>
+      </div>
+
+      <div class="party-block">
+        <p class="party-title">The Freelancer,</p>
+        <div class="info-line">
+          <span class="info-label">Name:</span>
+          <span class="info-value">{{ contract.freelancerName || '—' }}</span>
+        </div>
+        <div class="info-line">
+          <span class="info-label">Email:</span>
+          <span class="info-value">{{ contract.freelancerEmail || '—' }}</span>
+        </div>
+        <div class="info-line" *ngIf="contract.freelancerPhone">
+          <span class="info-label">Phone:</span>
+          <span class="info-value">{{ contract.freelancerPhone }}</span>
+        </div>
+        <div class="info-line" *ngIf="contract.freelancerSpecialty">
+          <span class="info-label">Specialty:</span>
+          <span class="info-value">{{ contract.freelancerSpecialty }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARTICLE 1: SCOPE OF WORK -->
+    <div class="contract-article">
+      <div class="article-number">ARTICLE 1: SCOPE OF WORK</div>
+      
+      <div class="info-line">
+        <span class="info-label">Contract Type:</span>
+        <span class="info-value">{{ contract.contractType }}</span>
+      </div>
+      
+      <div class="info-line">
+        <span class="info-label">Mission Title:</span>
+        <span class="info-value">{{ contract.missionTitle }}</span>
+      </div>
+      
+      <div class="info-line" *ngIf="contract.technologies">
+        <span class="info-label">Technologies:</span>
+        <span class="info-value">{{ contract.technologies }}</span>
+      </div>
+      
+      <div class="description-block" *ngIf="contract.missionDescription">
+        <span class="info-label">Description:</span>
+        <p class="description-text">{{ contract.missionDescription }}</p>
+      </div>
+      
+      <div class="description-block" *ngIf="contract.deliverables">
+        <span class="info-label">Deliverables:</span>
+        <p class="description-text">{{ contract.deliverables }}</p>
+      </div>
+    </div>
+
+    <!-- ARTICLE 2: TERM AND DURATION -->
+    <div class="contract-article" *ngIf="contract.startDate || contract.endDate || contract.durationMonths">
+      <div class="article-number">ARTICLE 2: TERM AND DURATION</div>
+      
+      <div class="info-line" *ngIf="contract.startDate">
+        <span class="info-label">Start Date:</span>
+        <span class="info-value">{{ contract.startDate | date:'dd/MM/yyyy' }}</span>
+      </div>
+      <div class="info-line" *ngIf="contract.endDate">
+        <span class="info-label">End Date:</span>
+        <span class="info-value">{{ contract.endDate | date:'dd/MM/yyyy' }}</span>
+      </div>
+      <div class="info-line" *ngIf="contract.durationMonths">
+        <span class="info-label">Duration:</span>
+        <span class="info-value">{{ contract.durationMonths }} months</span>
+      </div>
+    </div>
+
+    <!-- ARTICLE 3: COMPENSATION -->
+    <div class="contract-article">
+      <div class="article-number">ARTICLE 3: COMPENSATION</div>
+      
+      <div class="info-line">
+        <span class="info-label">Total Amount:</span>
+        <span class="info-value amount">{{ contract.totalAmount | currency:(contract.currency || 'EUR') }}</span>
+      </div>
+      <div class="info-line">
+        <span class="info-label">Currency:</span>
+        <span class="info-value">{{ contract.currency }}</span>
+      </div>
+      <div class="info-line" *ngIf="contract.vatRate">
+        <span class="info-label">VAT:</span>
+        <span class="info-value">{{ contract.vatRate }}%</span>
+      </div>
+      <div class="info-line">
+        <span class="info-label">Payment Method:</span>
+        <span class="info-value">{{ contract.paymentMethod }}</span>
+      </div>
+      <div class="info-line" *ngIf="contract.iban">
+        <span class="info-label">IBAN:</span>
+        <span class="info-value">{{ contract.iban }}</span>
+      </div>
+      <div class="info-line" *ngIf="contract.bic">
+        <span class="info-label">BIC:</span>
+        <span class="info-value">{{ contract.bic }}</span>
+      </div>
+    </div>
+
+    <!-- ARTICLE 4: LEGAL PROVISIONS -->
+    <div class="contract-article">
+      <div class="article-number">ARTICLE 4: LEGAL PROVISIONS</div>
+      
+      <div class="info-line">
+        <span class="info-label">Applicable Law:</span>
+        <span class="info-value">{{ contract.applicableLaw }}</span>
+      </div>
+      <div class="info-line" *ngIf="contract.competentCourt">
+        <span class="info-label">Jurisdiction:</span>
+        <span class="info-value">{{ contract.competentCourt }}</span>
+      </div>
+      <div class="info-line">
+        <span class="info-label">Confidentiality:</span>
+        <span class="info-value">{{ contract.confidentialityYears }} years</span>
+      </div>
+      <div class="info-line">
+        <span class="info-label">IP Transfer:</span>
+        <span class="info-value">{{ contract.ipTransferToClient ? 'Yes' : 'No' }}</span>
+      </div>
+      <div class="info-line">
+        <span class="info-label">Portfolio Rights:</span>
+        <span class="info-value">{{ contract.portfolioAllowed ? 'Yes' : 'No' }}</span>
+      </div>
+      <div class="info-line" *ngIf="contract.portfolioAllowed && contract.portfolioDelayMonths">
+        <span class="info-label">Portfolio Delay:</span>
+        <span class="info-value">{{ contract.portfolioDelayMonths }} months</span>
+      </div>
+    </div>
+
+    <!-- MILESTONES -->
+    <div class="contract-article" *ngIf="milestones && milestones.length > 0">
+      <div class="article-number">ARTICLE 5: MILESTONES</div>
+      
+      <div class="milestones-list">
+        <div class="milestone-item" *ngFor="let m of milestones; let i = index">
+          <div class="milestone-seq">{{ i + 1 }}</div>
+          <div class="milestone-content">
+            <div class="milestone-title">{{ m.title }}</div>
+            <div class="milestone-meta">
+              <span>Due: {{ m.dueDate | date:'dd/MM/yyyy' }}</span>
+              <span *ngIf="m.linkedPaymentAmount">Amount: {{ m.linkedPaymentAmount | currency:'EUR' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div class="contract-article" *ngIf="payments && payments.length > 0">
+      <div class="article-number">ARTICLE 6: PAYMENT SCHEDULE</div>
+      
+      <div class="payments-list">
+        <div class="payment-item" *ngFor="let p of payments; let i = index">
+          <div class="payment-seq">{{ i + 1 }}</div>
+          <div class="payment-content">
+            <div class="payment-label">{{ p.label }}</div>
+            <div class="payment-meta">
+              <span>Due: {{ p.dueDate | date:'dd/MM/yyyy' }}</span>
+              <span *ngIf="p.amount">Amount: {{ p.amount | currency:(contract.currency || 'EUR') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLAUSES -->
+    <div class="contract-article" *ngIf="clauses && clauses.length > 0">
+      <div class="article-number">ARTICLE 7: SPECIAL CLAUSES</div>
+      
+      <div class="clauses-list">
+        <div class="clause-item" *ngFor="let c of clauses">
+          <div class="clause-header">
+            <span class="clause-number">Clause {{ c.clauseNumber }}</span>
+            <strong>{{ c.title }}</strong>
+          </div>
+          <p class="clause-content">{{ c.content }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIGNATURES en ligne -->
+<div class="signatures-section">
+  <div class="article-number">SIGNATURES</div>
+  
+  <div class="signatures-grid">
+    <div class="signature-block">
+      <div class="signature-row">
+        <strong>The Client:</strong>
+      </div>
+      <div class="signature-image-wrap" *ngIf="contract.clientSignatureImage">
+        <img [src]="contract.clientSignatureImage" alt="Client signature" class="signature-img" />
+      </div>
+      <div class="signature-line" *ngIf="!contract.clientSignatureImage"></div>
+      <div class="signature-info" *ngIf="contract.clientSignedAt">
+        Signed on {{ contract.clientSignedAt | date:'dd/MM/yyyy HH:mm' }}
+      </div>
+      <div class="signature-info" *ngIf="!contract.clientSignedAt">
+        (Signature)
+      </div>
+    </div>
+    
+    <div class="signature-block">
+      <div class="signature-row">
+        <strong>The Freelancer:</strong>
+      </div>
+      <div class="signature-image-wrap" *ngIf="contract.freelancerSignatureImage">
+        <img [src]="contract.freelancerSignatureImage" alt="Freelancer signature" class="signature-img" />
+      </div>
+      <div class="signature-line" *ngIf="!contract.freelancerSignatureImage"></div>
+      <div class="signature-info" *ngIf="contract.freelancerSignedAt">
+        Signed on {{ contract.freelancerSignedAt | date:'dd/MM/yyyy HH:mm' }}
+      </div>
+      <div class="signature-info" *ngIf="!contract.freelancerSignedAt">
+        (Signature)
+      </div>
+    </div>
+  </div>
+  
+  <p class="contract-footer">
+    Executed in two copies, on {{ contract.createdAt | date:'dd/MM/yyyy' }}
+  </p>
+</div>
+  </div>
+
+  <!-- Currency Conversion (informational only — does not modify the contract) -->
+  <div class="conversion-box">
+    <div class="conversion-header">
+      <i class="fas fa-exchange-alt"></i> Real-Time Currency Conversion
+      <span class="conversion-info-badge">ℹ Informational only</span>
+    </div>
+    <div class="conversion-summary">
+      Contract amount: <strong>{{ contract.totalAmount | number:'1.2-2' }} {{ contract.currency || 'EUR' }}</strong>
+    </div>
+    <div class="conversion-controls">
+      <label class="conversion-label">Convert to:</label>
+      <select [(ngModel)]="selectedCurrency" class="currency-select">
+        <option *ngFor="let c of currencies" [value]="c">{{ c }}</option>
+      </select>
+      <button (click)="convertAmount()" [disabled]="converting" class="btn-convert">
+        <span *ngIf="!converting">Convert</span>
+        <span *ngIf="converting">Converting...</span>
+      </button>
+    </div>
+    <div class="conversion-result" *ngIf="conversionResult">
+      <div class="converted-amount">
+        {{ contract.totalAmount | number:'1.2-2' }} {{ contract.currency || 'EUR' }}
+        = {{ conversionResult.convertedAmount | number:'1.2-2' }} {{ conversionResult.to }}
+      </div>
+      <div class="conversion-rate">
+        1 {{ contract.currency || 'EUR' }} = {{ conversionResult.rate | number:'1.4-4' }} {{ conversionResult.to }}
+      </div>
+      <div class="conversion-date" *ngIf="conversionResult.date">
+        Rate as of {{ conversionResult.date }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom back button -->
+  <div class="document-footer">
+    <button class="btn-back-bottom" (click)="goBack()">← Back to list</button>
+  </div>
+
+</div>
+
+<!-- Signature Modal -->
+<div class="modal-overlay" *ngIf="showSignModal" (click)="showSignModal = false">
+  <div class="modal sign-modal" (click)="$event.stopPropagation()">
+    <h3>✍ SIGN CONTRACT</h3>
+
+    <!-- Tabs -->
+    <div class="sign-tabs">
+      <button [class.active]="signMode === 'draw'" (click)="signMode = 'draw'; signatureDataUrl = null">
+        🖊 Draw
+      </button>
+      <button [class.active]="signMode === 'code'" (click)="signMode = 'code'">
+        🔑 Use Code
+      </button>
+    </div>
+
+    <!-- Draw mode -->
+    <div class="sign-content" *ngIf="signMode === 'draw'">
+      <p class="sign-hint">Draw your signature below:</p>
+      <app-signature-pad #signPad (signatureChange)="onSignatureDrawn($event)"></app-signature-pad>
+    </div>
+
+    <!-- Code mode -->
+    <div class="sign-content" *ngIf="signMode === 'code'">
+      <p class="sign-hint">Enter your signature code:</p>
+      <div class="code-input-group">
+        <input type="text" [(ngModel)]="signatureCode"
+               (ngModelChange)="onCodeInput()"
+               placeholder="SIG-XXXX-XXXX"
+               class="code-input"
+               maxlength="13" />
+      </div>
+      <div class="signature-preview" *ngIf="codePreviewUrl">
+        <p class="preview-label">Preview:</p>
+        <img [src]="codePreviewUrl" alt="Signature preview" class="preview-img" />
+      </div>
+      <p class="sign-hint-small" *ngIf="savedSignatureCode">Your saved code: <strong>{{ savedSignatureCode }}</strong></p>
+    </div>
+
+    <!-- Preview (draw) -->
+    <div class="signature-preview" *ngIf="signMode === 'draw' && signatureDataUrl">
+      <p class="preview-label">Preview:</p>
+      <img [src]="signatureDataUrl" alt="Signature preview" class="preview-img" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="showSignModal = false">Cancel</button>
+      <button class="btn-primary" (click)="signContract()" [disabled]="!canSign || signing">
+        {{ signing ? 'Signing...' : 'Confirm Signature' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Decline Modal -->
+<div class="modal-overlay" *ngIf="showDeclineModal" (click)="showDeclineModal = false">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3>DECLINE CONTRACT</h3>
+    <p>Please indicate the reason for declining.</p>
+    <div class="form-group">
+      <label>Reason *</label>
+      <textarea [(ngModel)]="declineReason" rows="4" placeholder="Explain why..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="showDeclineModal = false">Cancel</button>
+      <button class="btn-danger" (click)="declineContract()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modification Modal -->
+<div class="modal-overlay" *ngIf="showModificationModal" (click)="showModificationModal = false">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3>REQUEST CHANGES</h3>
+    <p>Specify the changes you would like.</p>
+    <div class="form-group">
+      <label>Change description *</label>
+      <textarea [(ngModel)]="modificationReason" rows="4" placeholder="Describe the changes..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="showModificationModal = false">Cancel</button>
+      <button class="btn-primary" (click)="requestModification()">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading / Error -->
+<div class="loading-state" *ngIf="loading"><p>Loading...</p></div>
+<div class="error-state" *ngIf="error"><p>{{ error }}</p></div>

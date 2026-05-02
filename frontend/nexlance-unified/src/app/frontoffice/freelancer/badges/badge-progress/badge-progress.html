@@ -1,0 +1,114 @@
+<div class="progress-container">
+  <div class="header">
+    <h2>Badge Progress</h2>
+    <button class="btn-secondary" [routerLink]="['/frontoffice/freelancer/all-badges-progress']">
+      ← Back to all badges
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    Loading progress...
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="badge && !isLoading" class="progress-content">
+    <!-- Badge header -->
+    <div class="badge-header">
+      <div class="badge-icon" [style.background]="'linear-gradient(135deg, #667eea, #764ba2)'">
+        🏆
+      </div>
+      <div class="badge-info">
+        <h1>{{ badge.name }}</h1>
+        <p class="badge-description">{{ badge.description }}</p>
+        <div class="badge-requirements">
+          <span class="requirement">⭐ Minimum Score: {{ badge.minScore }}/5</span>
+          <span class="requirement">📋 Minimum Projects: {{ badge.minProjects }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Badge status -->
+    <div class="status-card" [class.obtained]="isObtained">
+      <div class="status-icon">{{ isObtained ? '✅' : '⏳' }}</div>
+      <div class="status-text">
+        <h3>{{ isObtained ? 'Badge Earned!' : 'Badge Not Earned' }}</h3>
+        <p *ngIf="isObtained">Congratulations! You have unlocked this badge.</p>
+        <p *ngIf="!isObtained">Keep up the good work to unlock this badge.</p>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-section">
+      <h3>Progress</h3>
+
+      <!-- Score -->
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>Average Score</span>
+          <span class="progress-value">{{ currentScore.toFixed(1) }}/{{ badge.minScore }}</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" 
+               [style.width.%]="scoreProgress"
+               [style.background]="getProgressColor(scoreProgress)">
+          </div>
+        </div>
+        <div class="progress-percentage">{{ scoreProgress.toFixed(0) }}%</div>
+      </div>
+
+      <!-- Projects -->
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>Projects Completed</span>
+          <span class="progress-value">{{ currentProjects }}/{{ badge.minProjects }}</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" 
+               [style.width.%]="projectsProgress"
+               [style.background]="getProgressColor(projectsProgress)">
+          </div>
+        </div>
+        <div class="progress-percentage">{{ projectsProgress.toFixed(0) }}%</div>
+      </div>
+
+      <!-- Overall progress -->
+      <div class="overall-progress">
+        <div class="overall-label">Overall Progress</div>
+        <div class="overall-circle">
+          <svg viewBox="0 0 36 36" class="circular-chart">
+            <path class="circle-bg"
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="#eee"
+                  stroke-width="3"/>
+            <path class="circle"
+                  [attr.stroke-dasharray]="overallProgress + ', 100'"
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  [attr.stroke]="getProgressColor(overallProgress)"
+                  stroke-width="3"
+                  stroke-linecap="round"/>
+            <text x="18" y="20.35" class="percentage">{{ overallProgress.toFixed(0) }}%</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn-primary" [routerLink]="['/frontoffice/freelancer/my-badges']">
+        View My Badges
+      </button>
+      <button class="btn-secondary" [routerLink]="['/frontoffice/freelancer/all-badges-progress']">
+        View All Badges
+      </button>
+    </div>
+  </div>
+</div>

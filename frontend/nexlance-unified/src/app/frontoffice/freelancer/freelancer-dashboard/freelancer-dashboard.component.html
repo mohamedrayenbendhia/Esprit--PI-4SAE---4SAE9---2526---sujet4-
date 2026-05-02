@@ -1,0 +1,135 @@
+<div class="freelancer-dashboard">
+  <!-- Hero Profile Section -->
+  <div class="hero-profile-section">
+    <div class="hero-profile-container">
+      <div class="profile-content">
+        <h1 class="greeting-title">{{ 'dashboard.hero.freelancerGreeting' | translate }}<br>{{ user?.firstName }} {{ user?.lastName }}</h1>
+        <p class="profile-description">
+          {{ 'dashboard.hero.freelancerDescription' | translate }}
+        </p>
+        <div class="hero-actions" style="display: flex; gap: 12px; margin-top: 16px;">
+          <button mat-raised-button class="cta-button" (click)="navigateToBrowseJobs()">
+            <mat-icon>search</mat-icon>
+            {{ 'nav.browseJobs' | translate }}
+          </button>
+          <button mat-raised-button class="cta-button" style="background: #fff; color: #333;" (click)="navigateToProfile()">
+            <mat-icon>work_outline</mat-icon>
+            {{ 'dashboard.actions.viewProProfile' | translate }}
+          </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+          <div class="stat-box">
+            <div class="stat-label">{{ 'dashboard.stats.activeProjects' | translate }}</div>
+            <div class="stat-value">{{ stats().activeProjects }}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">{{ 'dashboard.stats.completedProjects' | translate }}</div>
+            <div class="stat-value">{{ stats().completedProjects }}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">{{ 'dashboard.stats.totalApplications' | translate }}</div>
+            <div class="stat-value">{{ stats().totalApplications }}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">{{ 'dashboard.stats.successRate' | translate }}</div>
+            <div class="stat-value">{{ stats().successRate }}%</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">{{ 'dashboard.stats.pendingInvitations' | translate }}</div>
+            <div class="stat-value">{{ stats().pendingInvitations }}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">{{ 'dashboard.stats.experience' | translate }}</div>
+            <div class="stat-value">{{ stats().totalProjects }} {{ 'dashboard.stats.projects' | translate }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-image">
+        <div class="profile-avatar-large">
+          @if (avatarUrl()) {
+            <img [src]="avatarUrl()" alt="Profile" class="avatar-img-large">
+          } @else {
+            <mat-icon class="avatar-icon-large">person</mat-icon>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="actions-section">
+    <h2>{{ 'dashboard.quickActions' | translate }}</h2>
+    <div class="action-cards">
+      <mat-card class="action-card" (click)="navigateToBrowseJobs()">
+        <mat-card-content>
+          <mat-icon color="primary">search</mat-icon>
+          <h3>{{ 'nav.browseJobs' | translate }}</h3>
+          <p>{{ 'dashboard.actions.browseJobsDesc' | translate }}</p>
+          @if (availableJobsCount() > 0) {
+            <span class="action-badge" style="background: #4caf50; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+              {{ availableJobsCount() }} {{ 'dashboard.stats.available' | translate }}
+            </span>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="navigateToMyApplications()">
+        <mat-card-content>
+          <mat-icon color="accent">assignment</mat-icon>
+          <h3>{{ 'nav.myApplications' | translate }}</h3>
+          <p>{{ 'dashboard.actions.myApplicationsDesc' | translate }}</p>
+          @if (stats().pendingApplications > 0) {
+            <span class="action-badge" style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+              {{ stats().pendingApplications }} {{ 'dashboard.stats.pending' | translate }}
+            </span>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="navigateToMyInvitations()">
+        <mat-card-content>
+          <mat-icon style="color: #e91e63;">mail_outline</mat-icon>
+          <h3>{{ 'nav.myInvitations' | translate }}</h3>
+          <p>{{ 'dashboard.actions.myInvitationsDesc' | translate }}</p>
+          @if (stats().pendingInvitations > 0) {
+            <span class="action-badge" style="background: #e91e63; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+              {{ stats().pendingInvitations }} {{ 'dashboard.stats.new' | translate }}
+            </span>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="navigateToMyProjects()">
+        <mat-card-content>
+          <mat-icon style="color: #2196f3;">folder_open</mat-icon>
+          <h3>{{ 'nav.myProjects' | translate }}</h3>
+          <p>{{ 'dashboard.actions.myProjectsDesc' | translate }}</p>
+          @if (stats().activeProjects > 0) {
+            <span class="action-badge" style="background: #2196f3; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+              {{ stats().activeProjects }} {{ 'dashboard.stats.active' | translate }}
+            </span>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="navigateToProfile()">
+        <mat-card-content>
+          <mat-icon color="primary">work_outline</mat-icon>
+          <h3>{{ 'dashboard.actions.professionalProfile' | translate }}</h3>
+          <p>{{ 'dashboard.actions.professionalProfileDesc' | translate }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="navigateToKyc()">
+        <mat-card-content>
+          <mat-icon color="accent">verified_user</mat-icon>
+          <h3>{{ 'dashboard.actions.kycVerification' | translate }}</h3>
+          <p>{{ 'dashboard.actions.kycVerificationDesc' | translate }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

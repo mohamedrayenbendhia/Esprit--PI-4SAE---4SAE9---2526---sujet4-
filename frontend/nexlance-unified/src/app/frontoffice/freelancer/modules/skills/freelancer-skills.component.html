@@ -1,0 +1,132 @@
+<div class="freelancer-skills">
+
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <mat-icon>psychology</mat-icon>
+          My Skills
+        </h1>
+        <p class="hero-description">Manage and showcase your professional skills to attract the best clients.</p>
+        <button mat-raised-button class="cta-button" (click)="openForm()">
+          <mat-icon>add</mat-icon>
+          Add New Skill
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-box">
+          <div class="stat-value">{{ mySkills().length }}</div>
+          <div class="stat-label">Total Skills</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">{{ getExpertCount() }}</div>
+          <div class="stat-label">Expert Level</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">{{ getAvgYears() }}</div>
+          <div class="stat-label">Avg. Years</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Skill Form -->
+  <div class="form-section" *ngIf="showForm()">
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>add_circle</mat-icon>
+          Add a New Skill
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="skillForm" class="skill-form">
+  <div class="form-row">
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Skill</mat-label>
+      <mat-select formControlName="skillId">
+        <mat-option *ngFor="let skill of availableSkills()" [value]="skill.id">
+          {{ skill.name }}
+        </mat-option>
+      </mat-select>
+      <mat-icon matSuffix>psychology</mat-icon>
+      <mat-error *ngIf="skillForm.get('skillId')?.hasError('required')">Please select a skill</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Level</mat-label>
+      <mat-select formControlName="level">
+        <mat-option value="BEGINNER">Beginner</mat-option>
+        <mat-option value="INTERMEDIATE">Intermediate</mat-option>
+        <mat-option value="EXPERT">Expert</mat-option>
+      </mat-select>
+      <mat-icon matSuffix>trending_up</mat-icon>
+      <mat-error *ngIf="skillForm.get('level')?.hasError('required')">Please select a level</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Years of Experience</mat-label>
+      <input matInput type="number" formControlName="yearsOfExperience" min="0" max="50">
+      <mat-icon matSuffix>schedule</mat-icon>
+      <mat-error *ngIf="skillForm.get('yearsOfExperience')?.hasError('required')">Required</mat-error>
+      <mat-error *ngIf="skillForm.get('yearsOfExperience')?.hasError('min')">Minimum 0</mat-error>
+      <mat-error *ngIf="skillForm.get('yearsOfExperience')?.hasError('max')">Maximum 50</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-actions">
+    <button mat-button (click)="closeForm()">Cancel</button>
+    <button mat-raised-button class="save-btn" (click)="addSkill()" [disabled]="skillForm.invalid">
+      <mat-icon>save</mat-icon> Add Skill
+    </button>
+  </div>
+</form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Skills Grid -->
+  <div class="skills-section">
+    <h2>My Skills ({{ mySkills().length }})</h2>
+
+    <div class="loading-state" *ngIf="loading()">
+      <mat-icon>autorenew</mat-icon>
+      <p>Loading your skills...</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading() && mySkills().length === 0">
+      <mat-icon>psychology_alt</mat-icon>
+      <h3>No skills yet</h3>
+      <p>Add your first skill to showcase your expertise!</p>
+      <button mat-raised-button class="cta-button" (click)="openForm()">
+        <mat-icon>add</mat-icon> Add First Skill
+      </button>
+    </div>
+
+    <div class="skills-grid" *ngIf="!loading() && mySkills().length > 0">
+      <mat-card class="skill-card" *ngFor="let skill of mySkills()">
+        <mat-card-content>
+          <div class="skill-header">
+            <div class="skill-icon" [style.background]="getLevelColor(skill.level) + '22'">
+              <mat-icon [style.color]="getLevelColor(skill.level)">{{ getLevelIcon(skill.level) }}</mat-icon>
+            </div>
+            <div class="skill-info">
+<h3>{{ skill.skill.name }}</h3>
+              <span class="level-badge" [style.background]="getLevelColor(skill.level) + '22'" [style.color]="getLevelColor(skill.level)">
+                {{ skill.level }}
+              </span>
+            </div>
+          </div>
+          <div class="skill-footer">
+            <div class="years">
+              <mat-icon>schedule</mat-icon>
+              {{ skill.yearsOfExperience }} year(s) of experience
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+</div>

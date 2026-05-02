@@ -1,0 +1,122 @@
+<div class="my-applications-container">
+  <div class="page-header">
+    <h1>{{ 'applications.myApplications' | translate }}</h1>
+    <p>{{ 'applications.trackApplications' | translate }}</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-container">
+    <button 
+      *ngFor="let tab of tabs"
+      class="tab-btn"
+      [class.active]="activeTab === tab.id"
+      (click)="changeTab(tab.id)"
+    >
+      {{ ('applications.' + tab.id) | translate }}
+      <span class="tab-count">{{ getTabCount(tab.id) }}</span>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>{{ 'applications.loadingApplications' | translate }}</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredApplications.length === 0" class="empty-state">
+    <div class="empty-icon"><mat-icon>assignment</mat-icon></div>
+    <h2>{{ 'applications.noApplications' | translate }}</h2>
+    <p *ngIf="activeTab === 'all'">{{ 'applications.noApplicationsYet' | translate }}</p>
+    <p *ngIf="activeTab !== 'all'">{{ 'applications.noApplicationsCategory' | translate }}</p>
+    <button class="btn btn-primary" routerLink="/frontoffice/freelancer/browse-jobs">
+      {{ 'applications.browseJobs' | translate }}
+    </button>
+  </div>
+
+  <!-- Applications List -->
+  <div *ngIf="!isLoading && filteredApplications.length > 0" class="applications-list">
+    <div 
+      *ngFor="let application of filteredApplications"
+      class="application-card"
+      (click)="viewJobOffer(application.jobOfferId)"
+    >
+      <div class="card-header">
+        <div class="job-info">
+          <div class="category-badge">
+            <span class="icon">{{ getCategoryIcon(application.jobOffer?.category) }}</span>
+            {{ application.jobOffer?.category || 'N/A' }}
+          </div>
+          <h3 class="job-title">{{ application.jobOffer?.title }}</h3>
+          <p class="client-name">{{ application.jobOffer?.client?.firstName }} {{ application.jobOffer?.client?.lastName }}</p>
+        </div>
+        <span class="status-badge" [ngClass]="getStatusBadgeClass(application.status)">
+          {{ getStatusLabel(application.status) }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <div class="application-details">
+          <div class="detail-item">
+            <span class="detail-icon"><mat-icon>attach_money</mat-icon></span>
+            <div class="detail-content">
+              <span class="detail-label">{{ 'applications.proposedRate' | translate }}</span>
+              <span class="detail-value">{{ application.proposedRate }} DT</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-icon"><mat-icon>calendar_today</mat-icon></span>
+            <div class="detail-content">
+              <span class="detail-label">{{ 'applications.estimatedDelivery' | translate }}</span>
+              <span class="detail-value">{{ formatDate(application.estimatedDelivery) }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-icon"><mat-icon>rocket_launch</mat-icon></span>
+            <div class="detail-content">
+              <span class="detail-label">{{ 'applications.availableFrom' | translate }}</span>
+              <span class="detail-value">{{ formatDate(application.availableFrom) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cover-letter-preview">
+          <p><strong>{{ 'applications.coverLetter' | translate }}</strong></p>
+          <p>{{ application.coverLetter | slice:0:120 }}...</p>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="submission-info">
+          <span class="submission-date">{{ 'applications.submittedOn' | translate }} {{ formatDate(application.submittedAt) }}</span>
+          <span *ngIf="application.respondedAt" class="response-date">
+            • {{ 'applications.respondedOn' | translate }} {{ formatDate(application.respondedAt) }}
+          </span>
+        </div>
+        
+        <div class="actions">
+          <button class="btn-action btn-view" (click)="viewJobOffer(application.jobOfferId); $event.stopPropagation()">
+            {{ 'applications.viewJob' | translate }}
+          </button>
+          <button 
+            *ngIf="canWithdraw(application.status)"
+            class="btn-action btn-withdraw" 
+            (click)="withdrawApplication(application.id, $event)"
+          >
+            {{ 'applications.withdraw' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Response Badge for shortlisted/accepted -->
+      <div *ngIf="application.status === 'SHORTLISTED'" class="response-badge badge-shortlist">
+        <mat-icon>star</mat-icon> {{ 'applications.shortlistedMessage' | translate }}
+      </div>
+      <div *ngIf="application.status === 'ACCEPTED'" class="response-badge badge-accept">
+        <mat-icon>check_circle</mat-icon> {{ 'applications.acceptedMessage' | translate }}
+      </div>
+    </div>
+  </div>
+</div>

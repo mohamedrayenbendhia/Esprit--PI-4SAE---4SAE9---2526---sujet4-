@@ -1,0 +1,369 @@
+@use '../../../../styles/nexlance-theme.scss' as *;
+
+.public-profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $space-6;
+
+  .loading-container,
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: $nexlance-primary;
+      margin-bottom: $space-4;
+
+      &.spinner {
+        animation: spin 1s linear infinite;
+      }
+    }
+
+    h2 {
+      margin: $space-4 0;
+      color: $nexlance-text-primary;
+    }
+
+    p {
+      color: $nexlance-text-secondary;
+      margin-bottom: $space-6;
+    }
+  }
+
+  .profile-content {
+    .profile-header {
+      position: relative;
+      background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+      border-radius: $radius-xl;
+      padding: $space-8;
+      margin-bottom: $space-6;
+      color: white;
+      box-shadow: $shadow-lg;
+
+      .back-button {
+        position: absolute;
+        top: $space-4;
+        left: $space-4;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(10px);
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+      }
+
+      .header-content {
+        display: flex;
+        align-items: flex-start;
+        gap: $space-6;
+        margin-top: $space-8;
+
+        @media (max-width: 768px) {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+
+        .avatar-section {
+          position: relative;
+
+          .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid white;
+
+            mat-icon {
+              font-size: 64px;
+              width: 64px;
+              height: 64px;
+            }
+          }
+
+          .availability-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            padding: $space-1 $space-3;
+            border-radius: $radius-full;
+            background: $nexlance-error;
+            color: white;
+            font-size: $text-xs;
+            font-weight: 600;
+            text-transform: uppercase;
+            box-shadow: $shadow-md;
+
+            &.available {
+              background: $nexlance-success;
+            }
+          }
+        }
+
+        .info-section {
+          flex: 1;
+
+          h1 {
+            font-size: $text-3xl;
+            font-weight: 700;
+            margin: 0 0 $space-2;
+          }
+
+          .title {
+            font-size: $text-lg;
+            opacity: 0.9;
+            margin-bottom: $space-4;
+          }
+
+          .meta-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: $space-4;
+
+            span {
+              display: flex;
+              align-items: center;
+              gap: $space-1;
+              font-size: $text-sm;
+
+              mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+              }
+            }
+          }
+
+          .evaluation-rating {
+            display: flex;
+            align-items: center;
+            gap: $space-2;
+            margin-top: $space-3;
+            font-size: $text-base;
+
+            .star-icon {
+              color: #f59e0b;
+              font-size: 24px;
+              width: 24px;
+              height: 24px;
+            }
+
+            .rating-value {
+              font-weight: 700;
+              font-size: $text-xl;
+            }
+
+            .review-count {
+              opacity: 0.8;
+              font-size: $text-sm;
+            }
+
+            &.no-rating {
+              opacity: 0.7;
+              font-size: $text-sm;
+
+              mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+              }
+            }
+          }
+
+          .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: $space-4;
+            margin-top: $space-3;
+
+            span {
+              display: flex;
+              align-items: center;
+              gap: $space-1;
+              font-size: $text-sm;
+              opacity: 0.9;
+
+              mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+              }
+            }
+          }
+        }
+
+        .actions-section {
+          display: flex;
+          flex-direction: column;
+          gap: $space-3;
+
+          button {
+            white-space: nowrap;
+
+            mat-icon {
+              margin-right: $space-2;
+            }
+          }
+        }
+      }
+    }
+
+    .section-card {
+      margin-bottom: $space-6;
+      border-radius: $radius-xl;
+      box-shadow: $shadow-md;
+
+      mat-card-header {
+        display: flex;
+        align-items: center;
+        gap: $space-3;
+        padding: $space-6;
+        border-bottom: 1px solid $nexlance-gray-200;
+
+        mat-icon {
+          color: $nexlance-primary;
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+        }
+
+        mat-card-title {
+          font-size: $text-xl;
+          font-weight: 600;
+          margin: 0;
+        }
+      }
+
+      mat-card-content {
+        padding: $space-6;
+
+        .bio {
+          font-size: $text-base;
+          line-height: 1.7;
+          color: $nexlance-text-secondary;
+          white-space: pre-wrap;
+        }
+
+        mat-chip-set {
+          display: flex;
+          flex-wrap: wrap;
+          gap: $space-2;
+
+          mat-chip {
+            background: linear-gradient(135deg, #0EA5E915 0%, #0284C715 100%);
+            color: $nexlance-primary;
+            border: 1px solid #0EA5E940;
+            font-weight: 500;
+          }
+        }
+
+        .certifications-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+
+          li {
+            padding: $space-3 0;
+            border-bottom: 1px solid $nexlance-gray-200;
+            display: flex;
+            align-items: center;
+
+            &:before {
+              content: '✓';
+              color: $nexlance-success;
+              font-weight: bold;
+              margin-right: $space-3;
+              font-size: $text-lg;
+            }
+
+            &:last-child {
+              border-bottom: none;
+            }
+          }
+        }
+
+        .links-list {
+          display: flex;
+          flex-direction: column;
+          gap: $space-3;
+
+          .link-item {
+            display: flex;
+            align-items: center;
+            gap: $space-2;
+            padding: $space-3 $space-4;
+            border-radius: $radius-lg;
+            background: $nexlance-gray-50;
+            color: $nexlance-primary;
+            text-decoration: none;
+            transition: $transition-all;
+            font-weight: 500;
+
+            mat-icon {
+              font-size: 20px;
+              width: 20px;
+              height: 20px;
+            }
+
+            &:hover {
+              background: $nexlance-primary;
+              color: white;
+              transform: translateX(4px);
+            }
+          }
+        }
+      }
+
+      &.stats-card {
+        background: linear-gradient(135deg, #0EA5E908 0%, #0284C708 100%);
+        border: 1px solid #0EA5E920;
+
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: $space-6;
+
+          .stat-item {
+            text-align: center;
+            padding: $space-4;
+
+            .stat-value {
+              font-size: $text-3xl;
+              font-weight: 700;
+              color: $nexlance-primary;
+              margin-bottom: $space-2;
+            }
+
+            .stat-label {
+              font-size: $text-sm;
+              color: $nexlance-text-secondary;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

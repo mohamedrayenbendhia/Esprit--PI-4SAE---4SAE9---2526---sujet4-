@@ -1,0 +1,453 @@
+<div class="admin-orgs-page">
+  <h2>Organization Management</h2>
+
+  <mat-tab-group (selectedTabChange)="$event.index === 1 ? loadStats() : null">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TAB 1 — Pending verification
+    ══════════════════════════════════════════════════════════════════ -->
+    <mat-tab label="Pending ({{ pending().length }})">
+      <div class="tab-content">
+
+        @if (loadingPending()) {
+          <div class="loading-center"><mat-spinner diameter="40"></mat-spinner></div>
+        }
+
+        @if (!loadingPending() && pendingError()) {
+          <div class="error-state">
+            <mat-icon>error_outline</mat-icon>
+            <p>{{ pendingError() }}</p>
+            <button mat-stroked-button (click)="loadPending()">
+              <mat-icon>refresh</mat-icon> Retry
+            </button>
+          </div>
+        }
+
+        @if (!loadingPending() && !pendingError() && pending().length === 0) {
+          <div class="empty-state">
+            <mat-icon>check_circle</mat-icon>
+            <p>No organizations pending verification.</p>
+          </div>
+        }
+
+        @for (org of pending(); track org.id) {
+          <mat-card class="org-verify-card">
+            <mat-card-content>
+              <div class="org-header">
+                <div class="org-identity">
+                  @if (org.logoUrl) {
+                    <img [src]="org.logoUrl" class="org-logo" [alt]="org.name" />
+                  } @else {
+                    <div class="org-logo-placeholder"><mat-icon>domain</mat-icon></div>
+                  }
+                  <div>
+                    <h3>{{ org.name }}</h3>
+                    <span class="badge badge-type">{{ org.type }}</span>
+                    <span class="badge badge-size">{{ org.size }}</span>
+                    <span class="status-badge status-{{ statusClass(org.status) }}">
+                      {{ org.status }}
+                    </span>
+                  </div>
+                </div>
+                <button mat-icon-button (click)="viewPublicProfile(org.id)"
+                        matTooltip="View public profile">
+                  <mat-icon>open_in_new</mat-icon>
+                </button>
+              </div>
+
+              @if (org.description) {
+                <p class="org-desc">{{ org.description }}</p>
+              }
+
+              <div class="org-meta">
+                @if (org.location) { <span><mat-icon>place</mat-icon>{{ org.location }}</span> }
+                @if (org.siret)    { <span><mat-icon>badge</mat-icon>SIRET : {{ org.siret }}</span> }
+                @if (org.website)  { <span><mat-icon>language</mat-icon>{{ org.website }}</span> }
+                <span><mat-icon>schedule</mat-icon>{{ org.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+
+              @if (org.adminNote) {
+                <div class="admin-note-banner">
+                  <mat-icon>info</mat-icon> Previous note: {{ org.adminNote }}
+                </div>
+              }
+
+              <mat-form-field appearance="outline" class="note-field">
+                <mat-label>Admin note (required for REJECT or INFO REQUIRED)</mat-label>
+                <textarea matInput rows="2"
+                          [ngModel]="verifyNotes()[org.id] ?? ''"
+                          (ngModelChange)="setNote(org.id, $event)"></textarea>
+              </mat-form-field>
+
+              <div class="verify-actions">
+                <button mat-raised-button color="primary"
+                        [disabled]="verifyLoading() === org.id"
+                        (click)="verify(org.id, 'APPROVE')">
+                  @if (verifyLoading() === org.id) {
+                    <mat-spinner diameter="18"></mat-spinner>
+                  } @else {
+                    <mat-icon>check_circle</mat-icon> Approve
+                  }
+                </button>
+                <button mat-stroked-button color="warn"
+                        [disabled]="verifyLoading() === org.id"
+                        (click)="verify(org.id, 'REJECT')">
+                  <mat-icon>cancel</mat-icon> Reject
+                </button>
+                <button mat-stroked-button
+                        [disabled]="verifyLoading() === org.id"
+                        (click)="verify(org.id, 'AWAITING_INFO')">
+                  <mat-icon>help_outline</mat-icon> Info Required
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Suspend"
+                        (click)="openSuspend(org.id)">
+                  <mat-icon>block</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Force dissolution"
+                        (click)="forceDissolve(org.id)">
+                  <mat-icon>delete_forever</mat-icon>
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TAB 2 — Statistiques
+         FIXÉ : aligné sur OrgDashboardStats du backend
+                (totalOrganizations, activeOrganizations, pendingVerification, suspended, dissolved)
+    ══════════════════════════════════════════════════════════════════ -->
+    <mat-tab label="Statistics">
+      <div class="tab-content">
+
+        @if (loadingStats()) {
+          <div class="loading-center"><mat-spinner diameter="40"></mat-spinner></div>
+        }
+
+        @if (!loadingStats() && statsError()) {
+          <div class="error-state">
+            <mat-icon>error_outline</mat-icon>
+            <p>{{ statsError() }}</p>
+            <button mat-stroked-button (click)="retryStats()">
+              <mat-icon>refresh</mat-icon> Retry
+            </button>
+          </div>
+        }
+
+        @if (!loadingStats() && !statsError() && !stats()) {
+          <div class="empty-state">
+            <mat-icon>bar_chart</mat-icon>
+            <p>Statistics load when this tab is opened.</p>
+          </div>
+        }
+
+        @if (stats(); as s) {
+          <div class="stats-grid">
+
+            <mat-card class="stat-card highlight">
+              <mat-card-content>
+                <!-- totalOrganizations (corrigé — était stats().total) -->
+                <div class="stat-number">{{ s.totalOrganizations }}</div>
+                <div class="stat-label">Total organizations</div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="stat-card success">
+              <mat-card-content>
+                <!-- activeOrganizations (corrigé — était dans countByStatus.ACTIVE) -->
+                <div class="stat-number">{{ s.activeOrganizations }}</div>
+                <div class="stat-label">Active</div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="stat-card warn">
+              <mat-card-content>
+                <div class="stat-number">{{ s.pendingVerification }}</div>
+                <div class="stat-label">Pending verification</div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="stat-card danger">
+              <mat-card-content>
+                <div class="stat-number">{{ s.suspended }}</div>
+                <div class="stat-label">Suspended</div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="stat-card muted">
+              <mat-card-content>
+                <div class="stat-number">{{ s.dissolved }}</div>
+                <div class="stat-label">Dissolved</div>
+              </mat-card-content>
+            </mat-card>
+
+          </div>
+
+          <!-- Barre de progression visuelle par statut -->
+          @if (s.totalOrganizations > 0) {
+            <mat-card class="chart-card" style="margin-top:24px">
+              <mat-card-header>
+                <mat-card-title>Distribution by status</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="bar-row">
+                  <span class="bar-label">Active</span>
+                  <div class="bar-track">
+                    <div class="bar-fill success"
+                         [style.width.%]="s.activeOrganizations / s.totalOrganizations * 100"></div>
+                  </div>
+                  <span class="bar-count">{{ s.activeOrganizations }}</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Pending</span>
+                  <div class="bar-track">
+                    <div class="bar-fill warn"
+                         [style.width.%]="s.pendingVerification / s.totalOrganizations * 100"></div>
+                  </div>
+                  <span class="bar-count">{{ s.pendingVerification }}</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Suspended</span>
+                  <div class="bar-track">
+                    <div class="bar-fill danger"
+                         [style.width.%]="s.suspended / s.totalOrganizations * 100"></div>
+                  </div>
+                  <span class="bar-count">{{ s.suspended }}</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Dissolved</span>
+                  <div class="bar-track">
+                    <div class="bar-fill muted"
+                         [style.width.%]="s.dissolved / s.totalOrganizations * 100"></div>
+                  </div>
+                  <span class="bar-count">{{ s.dissolved }}</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TAB — Gestion (réactivation + badges)
+    ══════════════════════════════════════════════════════════════════ -->
+    <mat-tab label="Management">
+      <div class="tab-content">
+        <div class="audit-search">
+          <mat-form-field appearance="outline">
+            <mat-label>Filter by status</mat-label>
+            <mat-select [ngModel]="manageStatus()" (ngModelChange)="manageStatus.set($event)">
+              @for (s of statusOptions; track s) {
+                <mat-option [value]="s">{{ s }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-raised-button color="primary"
+                  (click)="loadManage()"
+                  [disabled]="loadingManage()">
+            <mat-icon>search</mat-icon> Load
+          </button>
+        </div>
+
+        @if (loadingManage()) {
+          <div class="loading-center"><mat-spinner diameter="36"></mat-spinner></div>
+        }
+
+        @if (!loadingManage() && manageOrgs().length === 0) {
+          <p class="empty-msg">No organizations found for this filter.</p>
+        }
+
+        @for (org of manageOrgs(); track org.id) {
+          <mat-card class="org-verify-card">
+            <mat-card-content>
+              <div class="org-header">
+                <div class="org-identity">
+                  @if (org.logoUrl) {
+                    <img [src]="org.logoUrl" class="org-logo" [alt]="org.name" />
+                  } @else {
+                    <div class="org-logo-placeholder"><mat-icon>domain</mat-icon></div>
+                  }
+                  <div>
+                    <h3>{{ org.name }}</h3>
+                    <span class="status-badge status-{{ statusClass(org.status) }}">
+                      {{ org.status }}
+                    </span>
+                  </div>
+                </div>
+                <button mat-icon-button (click)="viewPublicProfile(org.id)"
+                        matTooltip="View public profile">
+                  <mat-icon>open_in_new</mat-icon>
+                </button>
+              </div>
+
+              <div class="verify-actions">
+                @if (org.status === 'SUSPENDED') {
+                  <button mat-raised-button color="primary"
+                          [disabled]="reactivatingId() === org.id"
+                          (click)="reactivate(org.id)">
+                    @if (reactivatingId() === org.id) {
+                      <mat-spinner diameter="18"></mat-spinner>
+                    } @else {
+                      <span><mat-icon>restart_alt</mat-icon> Reactivate</span>
+                    }
+                  </button>
+                }
+                <button mat-stroked-button (click)="openBadgeDialog(org.id)">
+                  <mat-icon>emoji_events</mat-icon> Manage badges
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TAB 3 — Journal d'audit
+         FIXÉ : colonne 'createdAt' (était 'performedAt' — inexistant backend)
+    ══════════════════════════════════════════════════════════════════ -->
+    <mat-tab label="Audit Log">
+      <div class="tab-content">
+
+        <div class="audit-search">
+          <mat-form-field appearance="outline">
+            <mat-label>Organization ID</mat-label>
+            <input matInput
+                   [ngModel]="auditOrgId()"
+                   (ngModelChange)="auditOrgId.set($event)"
+                   placeholder="e.g. 550e8400-e29b-41d4…"
+                   (keyup.enter)="loadAudit()" />
+          </mat-form-field>
+          <button mat-raised-button color="primary"
+                  (click)="loadAudit()"
+                  [disabled]="loadingAudit() || !auditOrgId().trim()">
+            <mat-icon>search</mat-icon> Load
+          </button>
+        </div>
+
+        @if (loadingAudit()) {
+          <div class="loading-center"><mat-spinner diameter="36"></mat-spinner></div>
+        }
+
+        @if (!loadingAudit() && auditLogs().length > 0) {
+          <table mat-table [dataSource]="auditLogs()" class="audit-table">
+
+            <!-- FIXÉ : createdAt (était performedAt — inexistant côté backend) -->
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let row">
+                {{ row.createdAt | date:'dd/MM/yy HH:mm' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef>Action</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="action-badge">{{ row.action }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="performedByUserId">
+              <th mat-header-cell *matHeaderCellDef>User</th>
+              <td mat-cell *matCellDef="let row" class="mono">
+                {{ row.performedByUserId }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="details">
+              <th mat-header-cell *matHeaderCellDef>Details</th>
+              <td mat-cell *matCellDef="let row" class="details-cell mono">
+                {{ row.details }}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="auditCols"></tr>
+            <tr mat-row *matRowDef="let row; columns: auditCols"></tr>
+          </table>
+        }
+
+        @if (!loadingAudit() && auditLogs().length === 0 && auditOrgId().trim()) {
+          <p class="empty-msg">No log entries found for this ID.</p>
+        }
+
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+</div>
+
+<!-- Overlay de gestion des badges -->
+@if (badgeOrgId()) {
+  <div class="overlay" (click)="closeBadgeDialog()">
+    <mat-card class="dialog-card" (click)="$event.stopPropagation()">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon color="primary">emoji_events</mat-icon> Manage badges
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="note-field">
+          <mat-label>Badge</mat-label>
+          <mat-select [ngModel]="badgeValue()" (ngModelChange)="badgeValue.set($event)">
+            @for (b of badgeOptions; track b) {
+              <mat-option [value]="b">{{ b }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-button (click)="closeBadgeDialog()">Cancel</button>
+        <button mat-stroked-button color="warn"
+                [disabled]="badgeLoading()"
+                (click)="removeBadge()">
+          <mat-icon>remove_circle</mat-icon> Remove
+        </button>
+        <button mat-raised-button color="primary"
+                [disabled]="badgeLoading()"
+                (click)="assignBadge()">
+          @if (badgeLoading()) {
+            <mat-spinner diameter="18"></mat-spinner>
+          } @else {
+            <span><mat-icon>check</mat-icon> Assign</span>
+          }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+}
+
+<!-- Overlay de suspension -->
+@if (suspendOrgId()) {
+  <div class="overlay" (click)="closeSuspend()">
+    <mat-card class="dialog-card" (click)="$event.stopPropagation()">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon color="warn">block</mat-icon> Suspend organization
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="note-field">
+          <mat-label>Suspension reason *</mat-label>
+          <textarea matInput rows="3"
+                    [ngModel]="suspendReason()"
+                    (ngModelChange)="suspendReason.set($event)"></textarea>
+        </mat-form-field>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-button (click)="closeSuspend()">Cancel</button>
+        <button mat-raised-button color="warn"
+                [disabled]="suspendLoading() || !suspendReason().trim()"
+                (click)="confirmSuspend()">
+          @if (suspendLoading()) {
+            <mat-spinner diameter="18"></mat-spinner>
+          } @else {
+            Confirm suspension
+          }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+}

@@ -1,0 +1,167 @@
+// ── Design tokens ─────────────────────────────────────────────────────────────
+$primary:   #0EA5E9;
+$gray-50:   #F8FAFC;
+$gray-100:  #F1F5F9;
+$gray-200:  #E2E8F0;
+$gray-300:  #CBD5E1;
+$gray-400:  #94A3B8;
+$gray-500:  #64748B;
+$gray-700:  #334155;
+$gray-800:  #1E293B;
+$gray-900:  #0F172A;
+$success:   #10B981;
+$warning:   #F59E0B;
+$error:     #EF4444;
+$tr:        150ms ease;
+
+:host { display: block; }
+
+// ── States ────────────────────────────────────────────────────────────────────
+.cs-loading { display: flex; justify-content: center; padding: 16px; }
+
+.cs-error {
+  color: $error;
+  font-size: 13px;
+  text-align: center;
+}
+
+// ── Card ──────────────────────────────────────────────────────────────────────
+.cs-card {
+  border: 1px solid $gray-200;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  transition: box-shadow $tr;
+
+  &:hover { box-shadow: 0 4px 12px rgba(0,0,0,.07); }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.cs-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+// ── Gauge ─────────────────────────────────────────────────────────────────────
+.cs-gauge-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.cs-gauge { width: 100%; height: 100%; }
+
+.cs-gauge-track { stroke: $gray-200; }
+
+.cs-gauge-fill { transition: stroke-dashoffset 0.6s ease, stroke 0.4s ease; }
+
+.cs-gauge-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $gray-900;
+  line-height: 1;
+}
+
+// ── Meta ──────────────────────────────────────────────────────────────────────
+.cs-meta { flex: 1; min-width: 0; }
+
+.cs-title {
+  margin: 0 0 2px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: $gray-800;
+}
+
+.cs-sub {
+  font-size: 13px;
+  color: $gray-500;
+  margin-bottom: 6px;
+}
+
+// ── Visibility badge ──────────────────────────────────────────────────────────
+.cs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+
+  mat-icon { font-size: 13px; width: 13px; height: 13px; }
+
+  &--visible { background: #D1FAE5; color: #065F46; }
+  &--hidden  { background: #FEF2F2; color: #991B1B; cursor: help; }
+}
+
+.cs-toggle { flex-shrink: 0; color: $gray-400; }
+
+// ── Progress bar ──────────────────────────────────────────────────────────────
+.cs-bar { border-radius: 4px; height: 6px !important; margin-bottom: 0; }
+
+// ── Criteria list ─────────────────────────────────────────────────────────────
+.cs-criteria {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cs-criterion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: $gray-400;
+
+  .cs-icon { font-size: 18px; width: 18px; height: 18px; color: $gray-300; }
+  .cs-criterion-label { flex: 1; }
+  .cs-criterion-pts { font-weight: 600; font-size: 12px; color: $gray-300; }
+
+  &--done {
+    color: $gray-800;
+    .cs-icon  { color: $success; }
+    .cs-criterion-pts { color: $success; }
+  }
+}
+
+// ── Tips section ──────────────────────────────────────────────────────────────
+.cs-tips {
+  margin-top: 14px;
+  padding: 12px;
+  background: #FFFBEB;
+  border-radius: 8px;
+  border-left: 3px solid $warning;
+}
+
+.cs-tips-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #92400E;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+}
+
+.cs-tips-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: #78350F;
+  line-height: 1.7;
+}

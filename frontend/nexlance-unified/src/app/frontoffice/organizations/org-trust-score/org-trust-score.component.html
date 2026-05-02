@@ -1,0 +1,149 @@
+@if (isLoading()) {
+  <div class="ts-loading"><mat-spinner diameter="20"></mat-spinner></div>
+}
+
+@if (!isLoading() && score(); as ts) {
+  <div class="ts-widget">
+
+    <!-- ── Résumé compact (toujours visible) ──────────────────────────────── -->
+    <div class="ts-summary" (click)="toggleExpanded()">
+
+      <!-- Jauge circulaire CSS -->
+      <div class="ts-gauge" [style.--score]="ts.globalScore" [style.--color]="scoreColor(ts.globalScore)">
+        <svg viewBox="0 0 36 36" class="gauge-svg">
+          <path class="gauge-bg"
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+          <path class="gauge-fill"
+            [attr.stroke-dasharray]="ts.globalScore + ', 100'"
+            [style.stroke]="scoreColor(ts.globalScore)"
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+        </svg>
+        <div class="gauge-label">
+          <span class="gauge-value">{{ ts.globalScore | number:'1.0-0' }}</span>
+          <span class="gauge-max">/100</span>
+        </div>
+      </div>
+
+      <div class="ts-info">
+        <span class="ts-level" [class]="levelClass(ts.trustLevel)">
+          <mat-icon>verified</mat-icon>
+          Level {{ ts.trustLevel }} — {{ levelLabel(ts.trustLevel) }}
+        </span>
+        <div class="ts-badges">
+          @for (badge of ts.badges; track badge) {
+            <span class="badge-chip badge-chip--{{ badge.toLowerCase() }}"
+                  [matTooltip]="badge">
+              {{ badge | titlecase }}
+            </span>
+          }
+        </div>
+      </div>
+
+      <button class="ts-toggle" [matTooltip]="expanded() ? 'Collapse' : 'View details'">
+        <mat-icon>{{ expanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- ── Détail des signaux (dépliable) ─────────────────────────────────── -->
+    @if (expanded()) {
+      <div class="ts-detail">
+
+        <!-- Signal 1 : Note moyenne — poids 35 % -->
+        <div class="signal-row">
+          <div class="signal-head">
+            <mat-icon>star</mat-icon>
+            <span>Average rating</span>
+            <span class="signal-meta">{{ ts.breakdown.averageRating | number:'1.1-1' }}/5
+              ({{ ts.breakdown.reviewCount }} reviews)</span>
+          </div>
+          <div class="signal-bar-wrap">
+            <div class="signal-bar signal-bar--rating"
+                 [style.width.%]="barWidth(ts.breakdown.ratingScore, 35)"></div>
+          </div>
+          <span class="signal-pts">{{ ts.breakdown.ratingScore | number:'1.1-1' }}/35 pts</span>
+        </div>
+
+        <!-- Signal 2 : RFQ response rate — poids 20 % -->
+        <div class="signal-row">
+          <div class="signal-head">
+            <mat-icon>request_quote</mat-icon>
+            <span>RFQ response rate</span>
+            <span class="signal-meta">{{ ts.breakdown.rfqResponseRate | number:'1.0-0' }}%
+              ({{ ts.breakdown.rfqTotal }} received)</span>
+          </div>
+          <div class="signal-bar-wrap">
+            <div class="signal-bar signal-bar--rfq"
+                 [style.width.%]="barWidth(ts.breakdown.rfqScore, 20)"></div>
+          </div>
+          <span class="signal-pts">{{ ts.breakdown.rfqScore | number:'1.1-1' }}/20 pts</span>
+        </div>
+
+        <!-- Signal 3 : Taux réponse aux avis — poids 15 % -->
+        <div class="signal-row">
+          <div class="signal-head">
+            <mat-icon>reply</mat-icon>
+            <span>Review responses</span>
+            <span class="signal-meta">{{ ts.breakdown.reviewReplyRate | number:'1.0-0' }}%
+              ({{ ts.breakdown.reviewsWithReply }}/{{ ts.breakdown.reviewCount }})</span>
+          </div>
+          <div class="signal-bar-wrap">
+            <div class="signal-bar signal-bar--reply"
+                 [style.width.%]="barWidth(ts.breakdown.replyScore, 15)"></div>
+          </div>
+          <span class="signal-pts">{{ ts.breakdown.replyScore | number:'1.1-1' }}/15 pts</span>
+        </div>
+
+        <!-- Signal 4 : Maturité — poids 10 % -->
+        <div class="signal-row">
+          <div class="signal-head">
+            <mat-icon>schedule</mat-icon>
+            <span>Maturity</span>
+            <span class="signal-meta">{{ ts.breakdown.daysActive }} days</span>
+          </div>
+          <div class="signal-bar-wrap">
+            <div class="signal-bar signal-bar--maturity"
+                 [style.width.%]="barWidth(ts.breakdown.maturityScore, 10)"></div>
+          </div>
+          <span class="signal-pts">{{ ts.breakdown.maturityScore | number:'1.1-1' }}/10 pts</span>
+        </div>
+
+        <!-- Signal 5 : Invitations — poids 10 % -->
+        <div class="signal-row">
+          <div class="signal-head">
+            <mat-icon>mail</mat-icon>
+            <span>Invitation acceptance rate</span>
+            <span class="signal-meta">{{ ts.breakdown.invitationAcceptanceRate | number:'1.0-0' }}%
+              ({{ ts.breakdown.invitationDecided }} decided)</span>
+          </div>
+          <div class="signal-bar-wrap">
+            <div class="signal-bar signal-bar--invitation"
+                 [style.width.%]="barWidth(ts.breakdown.invitationScore, 10)"></div>
+          </div>
+          <span class="signal-pts">{{ ts.breakdown.invitationScore | number:'1.1-1' }}/10 pts</span>
+        </div>
+
+        <!-- Signal 6 : Completed projects — poids 10 % -->
+        <div class="signal-row">
+          <div class="signal-head">
+            <mat-icon>check_circle</mat-icon>
+            <span>Completed projects</span>
+            <span class="signal-meta">{{ ts.breakdown.completedProjectsCount }}</span>
+          </div>
+          <div class="signal-bar-wrap">
+            <div class="signal-bar signal-bar--projects"
+                 [style.width.%]="barWidth(ts.breakdown.projectScore, 10)"></div>
+          </div>
+          <span class="signal-pts">{{ ts.breakdown.projectScore | number:'1.1-1' }}/10 pts</span>
+        </div>
+
+      </div>
+    }
+
+  </div>
+}
+
+@if (!isLoading() && error()) {
+  <div class="ts-error">
+    <mat-icon>info_outline</mat-icon> {{ error() }}
+  </div>
+}

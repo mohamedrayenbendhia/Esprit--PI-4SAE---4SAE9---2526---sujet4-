@@ -1,0 +1,155 @@
+<div class="my-invitations-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>
+        <mat-icon>mail</mat-icon>
+        {{ 'invitations.title' | translate }}
+      </h1>
+      <p class="subtitle">{{ 'invitations.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group [(selectedIndex)]="activeTabIndex" (selectedIndexChange)="onTabChange($event)">
+    <mat-tab *ngFor="let tab of tabs" [label]="(tab.label | translate) + ' (' + getTabCount(tab.id) + ')'">
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>{{ 'invitations.loading' | translate }}</p>
+  </div>
+
+  <!-- Invitations List -->
+  <div *ngIf="!isLoading" class="invitations-list">
+    <!-- Empty State -->
+    <div *ngIf="filteredInvitations.length === 0" class="empty-state">
+      <mat-icon>inbox</mat-icon>
+      <h2>{{ 'invitations.noInvitations' | translate }}</h2>
+      <p>{{ 'invitations.noInvitationsDesc' | translate }}</p>
+      <button mat-raised-button color="primary" routerLink="/frontoffice/freelancer/browse-jobs">
+        <mat-icon>search</mat-icon>
+        {{ 'invitations.browseJobs' | translate }}
+      </button>
+    </div>
+
+    <!-- Invitation Cards -->
+    <mat-card *ngFor="let invitation of filteredInvitations" class="invitation-card" (click)="viewDetails(invitation.id)">
+      <!-- Status Badge -->
+      <div class="status-badge" [ngClass]="getStatusClass(invitation.status)">
+        {{ getStatusLabel(invitation.status) }}
+      </div>
+
+      <!-- Expired Warning -->
+      <div *ngIf="isExpired(invitation) && invitation.status === InvitationStatus.PENDING" class="expired-warning">
+        <mat-icon>warning</mat-icon>
+        <span>{{ 'invitations.expired' | translate }}</span>
+      </div>
+
+      <mat-card-header>
+        <div class="card-header-content">
+          <div class="client-info">
+            <div class="client-avatar">
+              <mat-icon>business</mat-icon>
+            </div>
+            <div class="client-details">
+              <h3>{{ invitation.client?.firstName }} {{ invitation.client?.lastName }}</h3>
+              <span class="client-company">{{ invitation.client?.company || 'Client' }}</span>
+            </div>
+          </div>
+          <div class="invitation-date">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ formatDate(invitation.createdAt) }}</span>
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Job Title -->
+        <div class="job-title">
+          <mat-icon>work</mat-icon>
+          <h2>{{ invitation.jobOffer?.title }}</h2>
+        </div>
+
+        <!-- Message -->
+        <div class="invitation-message">
+          <mat-icon>message</mat-icon>
+          <p>{{ invitation.message }}</p>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="details-grid">
+          <div class="detail-item" *ngIf="invitation.proposedBudget">
+            <mat-icon>attach_money</mat-icon>
+            <div class="detail-content">
+              <span class="label">{{ 'invitations.proposedBudget' | translate }}</span>
+              <span class="value">{{ invitation.proposedBudget }} DT</span>
+            </div>
+          </div>
+          
+          <div class="detail-item" *ngIf="invitation.deadlineResponse">
+            <mat-icon>event</mat-icon>
+            <div class="detail-content">
+              <span class="label">{{ 'invitations.deadline' | translate }}</span>
+              <span class="value">
+                {{ formatDate(invitation.deadlineResponse) }}
+                <span *ngIf="invitation.status === InvitationStatus.PENDING && !isExpired(invitation)" class="days-remaining">
+                  ({{ getDaysRemaining(invitation.deadlineResponse) }} {{ 'invitations.daysRemaining' | translate }})
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>location_on</mat-icon>
+            <div class="detail-content">
+              <span class="label">{{ 'invitations.location' | translate }}</span>
+              <span class="value">{{ invitation.jobOffer?.location }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>schedule</mat-icon>
+            <div class="detail-content">
+              <span class="label">{{ 'invitations.duration' | translate }}</span>
+              <span class="value">{{ invitation.jobOffer?.estimatedDuration }} {{ 'invitations.days' | translate }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="skills-section" *ngIf="invitation.jobOffer?.requiredSkills?.length > 0">
+          <mat-chip-listbox>
+            <mat-chip *ngFor="let skill of invitation.jobOffer.requiredSkills.slice(0, 5)">
+              {{ skill }}
+            </mat-chip>
+            <mat-chip *ngIf="invitation.jobOffer.requiredSkills.length > 5" class="more-chip">
+              +{{ invitation.jobOffer.requiredSkills.length - 5 }}
+            </mat-chip>
+          </mat-chip-listbox>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <div class="actions-left">
+          <button mat-button (click)="viewDetails(invitation.id); $event.stopPropagation()">
+            <mat-icon>visibility</mat-icon>
+            {{ 'invitations.viewDetails' | translate }}
+          </button>
+        </div>
+        <div class="actions-right" *ngIf="invitation.status === InvitationStatus.PENDING && !isExpired(invitation)">
+          <button mat-button color="warn" (click)="declineInvitation(invitation, $event)">
+            <mat-icon>close</mat-icon>
+            {{ 'invitations.decline' | translate }}
+          </button>
+          <button mat-raised-button color="primary" (click)="acceptInvitation(invitation, $event)">
+            <mat-icon>check</mat-icon>
+            {{ 'invitations.accept' | translate }}
+          </button>
+        </div>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

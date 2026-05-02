@@ -1,0 +1,164 @@
+<div class="milestone-analytics-container">
+  <div class="page-header">
+    <h1>{{ 'admin.projects.milestoneAnalytics.title' | translate }}</h1>
+    <p class="subtitle">{{ 'admin.projects.milestoneAnalytics.subtitle' | translate }}</p>
+  </div>
+
+  @if (loading) {
+    <div class="loading">
+      <mat-icon class="spin">autorenew</mat-icon>
+      {{ 'admin.projects.milestoneAnalytics.loading' | translate }}
+    </div>
+  } @else {
+    <!-- KPI Cards -->
+    <div class="stats-grid">
+      <mat-card class="stat-card">
+        <mat-icon>assignment</mat-icon>
+        <div class="stat-value">{{ stats.totalMilestones }}</div>
+        <div class="stat-label">{{ 'admin.projects.milestoneAnalytics.kpis.totalMilestones' | translate }}</div>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-icon>check_circle</mat-icon>
+        <div class="stat-value">{{ stats.approvalRate }}%</div>
+        <div class="stat-label">{{ 'admin.projects.milestoneAnalytics.kpis.approvalRate' | translate }}</div>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-icon>schedule</mat-icon>
+        <div class="stat-value">{{ stats.averageValidationDays }} {{ 'admin.projects.milestoneAnalytics.days' | translate }}</div>
+        <div class="stat-label">{{ 'admin.projects.milestoneAnalytics.kpis.avgValidationTime' | translate }}</div>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-icon>replay</mat-icon>
+        <div class="stat-value">{{ stats.averageRevisionsPerMilestone }}</div>
+        <div class="stat-label">{{ 'admin.projects.milestoneAnalytics.kpis.avgRevisionsPerMilestone' | translate }}</div>
+      </mat-card>
+    </div>
+
+    <!-- Status Distribution -->
+    @if (statusDistribution.length > 0) {
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>pie_chart</mat-icon>
+          <mat-card-title>{{ 'admin.projects.milestoneAnalytics.charts.statusDistribution' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="distribution-bars">
+            @for (item of statusDistribution; track item.status) {
+              <div class="distribution-item">
+                <div class="dist-header">
+                  <div class="dist-label">
+                    <mat-icon [class]="getStatusColor(item.status)">{{ getStatusIcon(item.status) }}</mat-icon>
+                    <span>{{ 'admin.projects.milestoneAnalytics.statuses.' + item.status | translate }}</span>
+                  </div>
+                  <span class="dist-count">{{ item.count }} ({{ item.percentage }}%)</span>
+                </div>
+                <mat-progress-bar
+                  mode="determinate"
+                  [value]="item.percentage"
+                  [class]="'bar-' + getStatusColor(item.status)">
+                </mat-progress-bar>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Overdue Milestones -->
+    @if (overdueMilestones.length > 0) {
+      <mat-card class="section-card overdue-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="overdue-icon">warning</mat-icon>
+          <mat-card-title>{{ 'admin.projects.milestoneAnalytics.overdueMilestones' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ overdueMilestones.length }} {{ 'admin.projects.milestoneAnalytics.overdueCount' | translate }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="overdue-list">
+            @for (m of overdueMilestones; track m.id) {
+              <div class="overdue-item">
+                <div class="overdue-info">
+                  <mat-icon class="overdue-milestone-icon">flag</mat-icon>
+                  <div>
+                    <div class="overdue-title">{{ m.title }}</div>
+                    <div class="overdue-due">{{ 'admin.projects.milestoneAnalytics.dueOn' | translate }} {{ m.dueDate | date:'mediumDate' }} — <strong class="overdue-days">{{ m.daysLate }} {{ 'admin.projects.milestoneAnalytics.daysLate' | translate }}</strong></div>
+                  </div>
+                </div>
+                <mat-chip [class]="getStatusColor(m.status)">
+                  {{ 'admin.projects.milestoneAnalytics.statuses.' + m.status | translate }}
+                </mat-chip>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- All Milestones Table -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>list_alt</mat-icon>
+        <mat-card-title>{{ 'admin.projects.milestoneAnalytics.allMilestones' | translate }}</mat-card-title>
+        <mat-card-subtitle>{{ totalMilestoneCount }} {{ 'admin.projects.milestoneAnalytics.total' | translate }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (dataSource.data.length > 0) {
+          <div class="table-container">
+            <table mat-table [dataSource]="dataSource" class="milestones-table">
+              <!-- Title Column -->
+              <ng-container matColumnDef="title">
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.projects.milestoneAnalytics.table.title' | translate }}</th>
+                <td mat-cell *matCellDef="let m">{{ m.title }}</td>
+              </ng-container>
+
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.projects.milestoneAnalytics.table.status' | translate }}</th>
+                <td mat-cell *matCellDef="let m">
+                  <mat-chip [class]="getStatusColor(m.status)" class="status-chip">
+                    <mat-icon class="chip-icon">{{ getStatusIcon(m.status) }}</mat-icon>
+                    {{ 'admin.projects.milestoneAnalytics.statuses.' + m.status | translate }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <!-- Due Date Column -->
+              <ng-container matColumnDef="dueDate">
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.projects.milestoneAnalytics.table.dueDate' | translate }}</th>
+                <td mat-cell *matCellDef="let m">{{ m.dueDate | date:'mediumDate' }}</td>
+              </ng-container>
+
+              <!-- Submitted At Column -->
+              <ng-container matColumnDef="submittedAt">
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.projects.milestoneAnalytics.table.submittedAt' | translate }}</th>
+                <td mat-cell *matCellDef="let m">{{ m.submittedAt ? (m.submittedAt | date:'mediumDate') : '—' }}</td>
+              </ng-container>
+
+              <!-- Approved At Column -->
+              <ng-container matColumnDef="approvedAt">
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.projects.milestoneAnalytics.table.approvedAt' | translate }}</th>
+                <td mat-cell *matCellDef="let m">{{ m.approvedAt ? (m.approvedAt | date:'mediumDate') : '—' }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+
+          <mat-paginator
+            [pageSizeOptions]="[5, 10, 25]"
+            [pageSize]="10"
+            showFirstLastButtons>
+          </mat-paginator>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>inbox</mat-icon>
+            <p>{{ 'admin.projects.milestoneAnalytics.noMilestones' | translate }}</p>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

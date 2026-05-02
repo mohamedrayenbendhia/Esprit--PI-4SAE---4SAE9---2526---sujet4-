@@ -1,0 +1,135 @@
+<div class="invite-modal">
+  <div class="modal-header">
+    <h2 mat-dialog-title>
+      <mat-icon>person_add</mat-icon>
+      {{ 'invite.title' | translate }}
+    </h2>
+    <button mat-icon-button (click)="onCancel()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <!-- Freelancer Info -->
+    <div class="freelancer-card">
+      <div class="freelancer-avatar">
+        <mat-icon>person</mat-icon>
+      </div>
+      <div class="freelancer-info">
+        <h3>{{ data.freelancer.name }}</h3>
+        <p class="title">{{ data.freelancer.title }}</p>
+        <div class="meta">
+          <span class="rating">
+            <mat-icon>star</mat-icon>
+            {{ data.freelancer.rating }}
+          </span>
+          <span class="location">
+            <mat-icon>location_on</mat-icon>
+            {{ data.freelancer.location }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invitation Form -->
+    <form [formGroup]="inviteForm" class="invite-form">
+      <!-- Job Offer Selection -->
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'invite.selectJob' | translate }}</mat-label>
+        <mat-select formControlName="jobOfferId" (selectionChange)="onJobSelected($event.value)">
+          @if (isLoading) {
+            <mat-option disabled>
+              {{ 'invite.loadingJobs' | translate }}
+            </mat-option>
+          }
+          @if (!isLoading && myJobOffers.length === 0) {
+            <mat-option disabled>
+              {{ 'invite.noJobsAvailable' | translate }}
+            </mat-option>
+          }
+          @for (job of myJobOffers; track job.id) {
+            <mat-option [value]="job.id">
+              {{ job.title }}
+              @if (job.budget) {
+                <span class="budget-hint">
+                  ({{ job.budget }} DT)
+                </span>
+              }
+            </mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>work_outline</mat-icon>
+        @if (inviteForm.get('jobOfferId')?.hasError('required') && inviteForm.get('jobOfferId')?.touched) {
+          <mat-error>{{ 'invite.jobRequired' | translate }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Proposed Budget -->
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'invite.proposedBudget' | translate }}</mat-label>
+        <input matInput type="number" formControlName="proposedBudget" min="0">
+        <span matSuffix>DT</span>
+        <mat-icon matPrefix>attach_money</mat-icon>
+        @if (inviteForm.get('proposedBudget')?.hasError('required') && inviteForm.get('proposedBudget')?.touched) {
+          <mat-error>{{ 'invite.budgetRequired' | translate }}</mat-error>
+        }
+        @if (inviteForm.get('proposedBudget')?.hasError('min')) {
+          <mat-error>{{ 'invite.budgetMin' | translate }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Response Deadline -->
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'invite.deadline' | translate }}</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="deadlineResponse" [min]="minDate">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-icon matPrefix>event</mat-icon>
+        @if (inviteForm.get('deadlineResponse')?.hasError('required') && inviteForm.get('deadlineResponse')?.touched) {
+          <mat-error>{{ 'invite.deadlineRequired' | translate }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Personal Message -->
+      <mat-form-field appearance="outline" class="message-field">
+        <mat-label>{{ 'invite.personalMessage' | translate }}</mat-label>
+        <textarea
+          matInput
+          formControlName="message"
+          rows="6"
+          placeholder="{{ 'invite.messagePlaceholder' | translate }}">
+        </textarea>
+        <mat-icon matPrefix>message</mat-icon>
+        <mat-hint align="end">
+          {{ inviteForm.get('message')?.value?.length || 0 }} / 500
+        </mat-hint>
+        @if (inviteForm.get('message')?.hasError('required') && inviteForm.get('message')?.touched) {
+          <mat-error>{{ 'invite.messageRequired' | translate }}</mat-error>
+        }
+        @if (inviteForm.get('message')?.hasError('minlength')) {
+          <mat-error>{{ 'invite.messageMinLength' | translate }}</mat-error>
+        }
+      </mat-form-field>
+    </form>
+
+    <!-- Help Text -->
+    <div class="help-text">
+      <mat-icon>info_outline</mat-icon>
+      <p>{{ 'invite.helpText' | translate }}</p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-stroked-button (click)="onCancel()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="inviteForm.invalid || isLoading">
+      <mat-icon>send</mat-icon>
+      {{ 'invite.sendInvitation' | translate }}
+    </button>
+  </mat-dialog-actions>
+</div>

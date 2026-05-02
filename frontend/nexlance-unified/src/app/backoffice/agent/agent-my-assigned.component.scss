@@ -1,0 +1,230 @@
+@use '../../../styles/nexlance-theme.scss' as *;
+
+.assigned-container {
+  padding: $space-8 $space-6;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+// ── Header ──────────────────────────────────────────────────
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $space-6;
+
+  h1 {
+    font-size: $text-3xl;
+    font-weight: $font-bold;
+    color: $nexlance-gray-900;
+    font-family: $font-family-heading;
+  }
+
+  .subtitle {
+    font-size: $text-sm;
+    color: $nexlance-gray-500;
+    margin-top: $space-1;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: $space-2;
+    align-items: center;
+  }
+}
+
+.btn-queue {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  padding: $space-2 $space-4;
+  background: white;
+  border: 1.5px solid $nexlance-gray-200;
+  border-radius: $radius-lg;
+  font-size: $text-sm;
+  font-weight: $font-medium;
+  color: $nexlance-gray-600;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  &:hover { border-color: $nexlance-primary; color: $nexlance-primary; }
+}
+
+.btn-refresh {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: white;
+  border: 1.5px solid $nexlance-gray-200;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: $nexlance-gray-500;
+  transition: all $transition-fast;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &:hover { border-color: $nexlance-primary; color: $nexlance-primary; }
+}
+
+// ── Stats ────────────────────────────────────────────────────
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $space-4;
+  margin-bottom: $space-6;
+
+  .stat-card {
+    background: white;
+    border-radius: $radius-xl;
+    border: 1px solid $nexlance-gray-100;
+    padding: $space-4 $space-5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+    .stat-value {
+      font-size: $text-2xl;
+      font-weight: $font-bold;
+      color: $nexlance-gray-900;
+
+      &.in-progress { color: #f57c00; }
+      &.pending     { color: #7b1fa2; }
+      &.resolved    { color: #388e3c; }
+    }
+
+    .stat-label {
+      font-size: $text-xs;
+      color: $nexlance-gray-400;
+      margin-top: 2px;
+    }
+  }
+}
+
+// ── States ──────────────────────────────────────────────────
+
+.state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $space-16;
+  color: $nexlance-gray-400;
+  text-align: center;
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid $nexlance-gray-200;
+    border-top-color: $nexlance-primary;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: $space-4;
+  }
+
+  .empty-icon {
+    font-size: 52px; width: 52px; height: 52px;
+    margin-bottom: $space-3;
+  }
+
+  h2 { font-size: $text-lg; color: $nexlance-gray-700; margin-bottom: $space-2; }
+  p  { font-size: $text-sm; margin-bottom: $space-4; }
+}
+
+// ── Liste ────────────────────────────────────────────────────
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.card {
+  display: flex;
+  background: white;
+  border-radius: $radius-xl;
+  border: 1px solid $nexlance-gray-100;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all $transition-fast;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    border-color: $nexlance-primary-light;
+  }
+
+  .priority-bar { width: 4px; flex-shrink: 0; }
+
+  .card-body {
+    flex: 1;
+    padding: $space-4 $space-5;
+  }
+
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $space-2;
+  }
+
+  .ticket {
+    font-size: $text-xs;
+    font-family: 'Courier New', Courier, monospace;
+    color: $nexlance-gray-400;
+  }
+
+  .status-badge {
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-size: $text-xs;
+    font-weight: $font-semibold;
+  }
+
+  h3 {
+    font-size: $text-base;
+    font-weight: $font-semibold;
+    color: $nexlance-gray-900;
+    margin-bottom: $space-1;
+  }
+
+  .desc {
+    font-size: $text-sm;
+    color: $nexlance-gray-500;
+    line-height: 1.5;
+    margin-bottom: $space-3;
+  }
+
+  .footer-row {
+    display: flex;
+    align-items: center;
+    gap: $space-4;
+    flex-wrap: wrap;
+
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: $text-xs;
+      color: $nexlance-gray-400;
+
+      mat-icon { font-size: 12px; width: 12px; height: 12px; }
+    }
+  }
+
+  .arrow {
+    display: flex;
+    align-items: center;
+    padding: 0 $space-4;
+    color: $nexlance-gray-300;
+    transition: all $transition-fast;
+  }
+
+  &:hover .arrow {
+    color: $nexlance-primary;
+    transform: translateX(3px);
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

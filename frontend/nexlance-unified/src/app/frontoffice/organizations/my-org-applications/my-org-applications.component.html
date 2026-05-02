@@ -1,0 +1,60 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2><mat-icon>send</mat-icon> My Applications</h2>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading"><div class="spinner"></div></div>
+  }
+
+  @if (!isLoading() && apps().length === 0) {
+    <div class="empty">
+      <mat-icon>send</mat-icon>
+      <h3>No applications sent</h3>
+      <p>Explore organizations and apply spontaneously.</p>
+      <button mat-raised-button color="primary" routerLink="/organizations">
+        <mat-icon>search</mat-icon> Browse organizations
+      </button>
+    </div>
+  }
+
+  <div class="apps-list">
+    @for (app of apps(); track app.id) {
+      <div class="app-card">
+        <div class="app-header">
+          <div class="org-info">
+            <mat-icon>business</mat-icon>
+            <button class="org-link" (click)="viewOrg(app.organizationId)">
+              Organisation {{ app.organizationId.slice(0, 8) }}...
+            </button>
+          </div>
+          <span class="status-chip"
+                [style.background]="getStatusColor(app.status) + '20'"
+                [style.color]="getStatusColor(app.status)">
+            {{ getStatusLabel(app.status) }}
+          </span>
+        </div>
+        <p class="message">{{ app.message }}</p>
+        <div class="meta">
+          <span><mat-icon>schedule</mat-icon>{{ app.createdAt | date:'dd/MM/yyyy' }}</span>
+          @if (app.respondedAt) {
+            <span><mat-icon>update</mat-icon>Response on {{ app.respondedAt | date:'MM/dd/yyyy' }}</span>
+          }
+        </div>
+        @if (app.rejectionReason) {
+          <div class="rejection"><mat-icon>info</mat-icon> {{ app.rejectionReason }}</div>
+        }
+        @if (app.status === ApplicationStatus.PENDING) {
+          <div class="app-actions">
+            <button mat-stroked-button color="warn"
+                    [disabled]="withdrawing() === app.id"
+                    (click)="withdraw(app)">
+              <mat-icon>undo</mat-icon>
+              {{ withdrawing() === app.id ? 'Withdrawing...' : 'Withdraw Application' }}
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

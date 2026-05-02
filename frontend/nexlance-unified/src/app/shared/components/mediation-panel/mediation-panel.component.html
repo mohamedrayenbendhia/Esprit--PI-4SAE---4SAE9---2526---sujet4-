@@ -1,0 +1,130 @@
+@if (isLoading()) {
+  <div style="display:flex;justify-content:center;padding:24px">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+}
+
+@if (!isLoading() && session()) {
+<mat-card class="mediation-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>gavel</mat-icon> Mediation
+      <span class="status-chip" [style.background]="statusColor(session()!.status)">
+        {{ statusLabel(session()!.status) }}
+      </span>
+    </mat-card-title>
+    @if (session()!.adminNote) {
+      <mat-card-subtitle>Note: {{ session()!.adminNote }}</mat-card-subtitle>
+    }
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (session()!.evidenceDeadline) {
+      <p class="deadline-notice">
+        <mat-icon>event</mat-icon>
+        Evidence submission deadline: {{ session()!.evidenceDeadline | date:'dd/MM/yyyy HH:mm' }}
+      </p>
+    }
+
+    <!-- Preuves soumises -->
+    @if (session()!.evidences.length > 0) {
+      <h4>Evidence submitted ({{ session()!.evidences.length }})</h4>
+      @for (ev of session()!.evidences; track ev.id) {
+        <div class="evidence-card" [class.complainant]="ev.partyType === 'COMPLAINANT'">
+          <div class="ev-header">
+            <mat-icon>{{ ev.partyType === 'COMPLAINANT' ? 'person' : 'person_outline' }}</mat-icon>
+            <strong>{{ ev.partyType === 'COMPLAINANT' ? 'Complainant' : 'Reported party' }}</strong>
+            <span class="ev-date">{{ ev.submittedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <p class="ev-desc">{{ ev.description }}</p>
+          @if (ev.fileUrls.length > 0) {
+            <div class="ev-files">
+              @for (url of ev.fileUrls; track url) {
+                <a [href]="url" target="_blank" class="file-link">
+                  <mat-icon>attach_file</mat-icon> Attachment
+                </a>
+              }
+            </div>
+          }
+        </div>
+      }
+      <mat-divider style="margin:16px 0"></mat-divider>
+    }
+
+    <!-- Formulaire dépôt de preuves (parties) -->
+    @if (canSubmitEvidence() && !isAdmin) {
+      <h4>Submit evidence</h4>
+      <mat-form-field appearance="outline" style="width:100%">
+        <mat-label>Evidence description *</mat-label>
+        <textarea matInput rows="3"
+                  [ngModel]="evidenceDesc()" (ngModelChange)="evidenceDesc.set($event)"
+                  placeholder="Describe your evidence..."></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="outline" style="width:100%">
+        <mat-label>File URLs (one per line)</mat-label>
+        <textarea matInput rows="2"
+                  [ngModel]="evidenceFiles()" (ngModelChange)="evidenceFiles.set($event)"
+                  placeholder="https://..."></textarea>
+      </mat-form-field>
+      <button mat-raised-button color="primary" [disabled]="submitting() || !evidenceDesc().trim()" (click)="submitEvidence()">
+        @if (submitting()) { <mat-spinner diameter="18"></mat-spinner> }
+        @else { <span class="btn-label"><mat-icon>upload</mat-icon> Submit</span> }
+      </button>
+    }
+
+    <!-- Décision admin -->
+    @if (isAdmin && session()!.status === 'DELIBERATION') {
+      <mat-divider style="margin:16px 0"></mat-divider>
+      <h4>Render a decision</h4>
+      <mat-form-field appearance="outline" style="width:100%">
+        <mat-label>Decision rationale *</mat-label>
+        <textarea matInput rows="4"
+                  [ngModel]="decisionOutcome()" (ngModelChange)="decisionOutcome.set($event)"></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Resolution type</mat-label>
+        <select matNativeControl [ngModel]="decisionType()" (ngModelChange)="decisionType.set($event)">
+          @for (rt of resolutionTypes; track rt) {
+            <option [value]="rt">{{ rt }}</option>
+          }
+        </select>
+      </mat-form-field>
+      <br>
+      <button mat-raised-button color="warn" [disabled]="deciding() || !decisionOutcome().trim()" (click)="decide()">
+        @if (deciding()) { <mat-spinner diameter="18"></mat-spinner> }
+        @else { <span class="btn-label"><mat-icon>gavel</mat-icon> Render decision</span> }
+      </button>
+    }
+
+    <!-- Résultat -->
+    @if (session()!.status === 'CLOSED' && session()!.outcome) {
+      <div class="outcome-banner">
+        <mat-icon>check_circle</mat-icon>
+        <div>
+          <strong>Decision rendered</strong>
+          <p>{{ session()!.outcome }}</p>
+        </div>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>
+}
+
+<style>
+.mediation-card { margin: 16px 0; }
+.mediation-card mat-card-title { display: flex; align-items: center; gap: 8px; }
+.status-chip { padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; color: white; margin-left: 8px; }
+.deadline-notice { display: flex; align-items: center; gap: 6px; color: #f57f17; font-size: 0.85rem; background: #fff8e1; padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; }
+.deadline-notice mat-icon { font-size: 16px; height: 16px; width: 16px; }
+h4 { color: #444; margin: 12px 0 8px; }
+.evidence-card { padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #f5f5f5; border-left: 4px solid #9e9e9e; }
+.evidence-card.complainant { border-left-color: #1976d2; background: #e3f2fd; }
+.ev-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.ev-date { font-size: 0.78rem; color: #888; margin-left: auto; }
+.ev-desc { margin: 0; color: #444; }
+.ev-files { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.file-link { display: flex; align-items: center; gap: 4px; color: #1976d2; font-size: 0.82rem; text-decoration: none; }
+.outcome-banner { display: flex; gap: 12px; background: #e8f5e9; border: 1px solid #a5d6a7; padding: 16px; border-radius: 8px; margin-top: 12px; color: #2e7d32; }
+.outcome-banner mat-icon { color: #43a047; font-size: 28px; height: 28px; width: 28px; flex-shrink: 0; }
+.outcome-banner p { margin: 4px 0 0; }
+</style>

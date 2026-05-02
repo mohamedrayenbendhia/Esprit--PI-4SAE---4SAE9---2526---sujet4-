@@ -1,0 +1,83 @@
+<div class="container">
+  <h2>{{ isEditMode ? 'Edit' : 'New' }} Badge</h2>
+
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+  <form *ngIf="!isLoading" (ngSubmit)="saveBadge()" #badgeForm="ngForm">
+    <div class="form-group">
+      <label>Badge Name *</label>
+      <input 
+        type="text" 
+        [(ngModel)]="badge.name" 
+        name="name"
+        required
+        class="form-control"
+        placeholder="Ex: Beginner, Expert..."
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Description *</label>
+      <textarea 
+        [(ngModel)]="badge.description" 
+        name="description"
+        required
+        class="form-control"
+        rows="3"
+        placeholder="Badge description..."
+      ></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Minimum Score *</label>
+        <input 
+          type="number" 
+          [(ngModel)]="badge.minScore" 
+          name="minScore"
+          required
+          min="0"
+          max="5"
+          step="0.1"
+          class="form-control"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Minimum Projects *</label>
+        <input 
+          type="number" 
+          [(ngModel)]="badge.minProjects" 
+          name="minProjects"
+          required
+          min="1"
+          class="form-control"
+        >
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Icon</label>
+      <select [(ngModel)]="badge.icon" name="icon" class="form-control">
+        <option value="🏆">🏆 Trophy</option>
+        <option value="🥇">🥇 Gold</option>
+        <option value="🥈">🥈 Silver</option>
+        <option value="🥉">🥉 Bronze</option>
+        <option value="⭐">⭐ Star</option>
+        <option value="🌱">🌱 Beginner</option>
+        <option value="⚡">⚡ Fast</option>
+        <option value="💬">💬 Communication</option>
+        <option value="✨">✨ Quality</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-save" [disabled]="!badgeForm.form.valid">
+        {{ isLoading ? 'Saving...' : 'Save' }}
+      </button>
+    </div>
+  </form>
+
+  <div *ngIf="isLoading" class="loading">Loading...</div>
+</div>

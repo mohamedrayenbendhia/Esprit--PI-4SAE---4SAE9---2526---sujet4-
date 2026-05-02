@@ -1,0 +1,138 @@
+<div class="client-projects-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>{{ 'clientProjects.title' | translate }}</h1>
+      <p class="subtitle">{{ 'clientProjects.subtitle' | translate }}</p>
+    </div>
+    <div class="header-actions">
+      <div class="stat-pill">
+        <mat-icon>folder_open</mat-icon>
+        <span>{{ projects.length }} project{{ projects.length !== 1 ? 's' : '' }}</span>
+      </div>
+      <button class="create-btn" routerLink="/frontoffice/client/projects/create">
+        <mat-icon>add</mat-icon>
+        {{ 'clientProjects.createProject' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>{{ 'clientProjects.loading' | translate }}</p>
+    </div>
+  } @else if (loadError) {
+    <div class="empty-state error-state">
+      <div class="empty-icon">
+        <mat-icon>cloud_off</mat-icon>
+      </div>
+      <h3>{{ 'clientProjects.loadErrorTitle' | translate }}</h3>
+      <p>{{ 'clientProjects.loadErrorMessage' | translate }}</p>
+      <button class="create-btn" type="button" (click)="loadProjects()">
+        <mat-icon>refresh</mat-icon>
+        {{ 'clientProjects.retry' | translate }}
+      </button>
+    </div>
+  } @else if (projects.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <mat-icon>folder_off</mat-icon>
+      </div>
+      <h3>{{ 'clientProjects.noProjects' | translate }}</h3>
+      <p>{{ 'clientProjects.noProjectsMessage' | translate }}</p>
+      <button class="create-btn" routerLink="/frontoffice/client/projects/create">
+        <mat-icon>add_circle</mat-icon>
+        {{ 'clientProjects.createFirstProject' | translate }}
+      </button>
+    </div>
+  } @else {
+    <div class="projects-grid">
+      @for (project of projects; track project.id) {
+        <div class="project-card" [routerLink]="['/frontoffice/client/projects', project.id, 'dashboard']">
+          <div class="card-accent" [attr.data-status]="project.status"></div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="project-title">
+                <mat-icon class="project-icon">work_outline</mat-icon>
+                <h3>{{ project.title || 'Project #' + project.id?.slice(0, 8) }}</h3>
+              </div>
+              <span class="status-badge" [attr.data-status]="project.status">
+                {{ getStatusLabel(project.status) }}
+              </span>
+            </div>
+
+            @if (getPendingMilestonesCount(project) > 0) {
+              <div class="pending-alert">
+                <mat-icon>notification_important</mat-icon>
+                <span>{{ getPendingMilestonesCount(project) }} {{ 'clientProjects.milestonesToValidate' | translate }}</span>
+              </div>
+            }
+
+            <div class="project-meta">
+              <div class="meta-item">
+                <mat-icon>calendar_today</mat-icon>
+                <div class="meta-text">
+                  <span class="meta-label">{{ 'clientProjects.startDate' | translate }}</span>
+                  <span class="meta-value">{{ project.startDate | date:'dd MMM yyyy' }}</span>
+                </div>
+              </div>
+              <div class="meta-item">
+                <mat-icon>event</mat-icon>
+                <div class="meta-text">
+                  <span class="meta-label">{{ 'clientProjects.endDate' | translate }}</span>
+                  <span class="meta-value">{{ project.endDate | date:'dd MMM yyyy' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="meta-row">
+              @if (getDaysRemaining(project.endDate) > 0) {
+                <div class="meta-chip time-ok">
+                  <mat-icon>schedule</mat-icon>
+                  {{ getDaysRemaining(project.endDate) }}d left
+                </div>
+              } @else if (getDaysRemaining(project.endDate) < 0 && project.status === ProjectStatus.ACTIVE) {
+                <div class="meta-chip time-late">
+                  <mat-icon>warning</mat-icon>
+                  {{ Math.abs(getDaysRemaining(project.endDate)) }}d late
+                </div>
+              }
+              <div class="meta-chip milestone-chip">
+                <mat-icon>flag</mat-icon>
+                {{ project.milestones?.length || 0 }} milestone{{ (project.milestones?.length || 0) !== 1 ? 's' : '' }}
+              </div>
+            </div>
+
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-label">Progress</span>
+                <span class="progress-value" [class.complete]="project.progress === 100">{{ project.progress || 0 }}%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" 
+                  [style.width.%]="project.progress || 0" 
+                  [class.complete]="project.progress === 100"
+                  [attr.data-status]="project.status">
+                </div>
+              </div>
+            </div>
+
+            @if (project.requirements) {
+              <div class="requirements-section">
+                <span class="req-label">Requirements</span>
+                <p class="req-text">{{ project.requirements }}</p>
+              </div>
+            }
+          </div>
+
+          <div class="card-footer">
+            <span class="view-link">
+              {{ 'clientProjects.viewProject' | translate }}
+              <mat-icon>arrow_forward</mat-icon>
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,332 @@
+@if (isLoading()) {
+  <div class="loading-container">
+    <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+  </div>
+}
+
+@if (!isLoading() && loadError()) {
+  <div class="error-container">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ loadError() }}</p>
+    <button mat-stroked-button routerLink="/frontoffice/organizations">
+      <mat-icon>arrow_back</mat-icon> Back to search
+    </button>
+  </div>
+}
+
+@if (!isLoading() && org(); as o) {
+  <div class="profile-page">
+
+    <!-- ── En-tête ─────────────────────────────────────────────────────── -->
+    <div class="profile-header">
+      <div class="header-content">
+
+        <div class="org-logo">
+          @if (o.logoUrl) {
+            <img [src]="o.logoUrl" [alt]="o.name" />
+          } @else {
+            <mat-icon>business</mat-icon>
+          }
+        </div>
+
+        <div class="org-main">
+          <div class="org-title-row">
+            <h1>{{ o.name }}</h1>
+            <span class="type-badge">{{ typeLabel(o.type) }}</span>
+            @if (o.status === 'ACTIVE') {
+              <span class="active-badge">
+                <mat-icon>verified</mat-icon> Verified
+              </span>
+            }
+          </div>
+
+          <app-org-badges [orgId]="orgId" />
+          <app-org-trust-score [orgId]="orgId" />
+
+          <div class="org-meta">
+            @if (o.location) {
+              <span><mat-icon>location_on</mat-icon>{{ o.location }}</span>
+            }
+            @if (o.website) {
+              <a [href]="o.website" target="_blank" rel="noopener noreferrer">
+                <mat-icon>language</mat-icon>Website
+              </a>
+            }
+            <span><mat-icon>group</mat-icon>{{ members().length }} member(s)</span>
+            <span>
+              <mat-icon>star</mat-icon>
+              {{ o.averageRating | number:'1.1-1' }}/5
+              ({{ o.reviewCount }} reviews)
+            </span>
+            <span><mat-icon>check_circle</mat-icon>{{ o.completedProjectsCount }} projects</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          @if (isMyOrg()) {
+            <button mat-raised-button color="primary" (click)="goToSettings()">
+              <mat-icon>settings</mat-icon> Manage
+            </button>
+          }
+          @if (isLoggedIn && !isMyOrg() && o.status === 'ACTIVE') {
+            @if (isFreelance) {
+            <app-apply-to-org [orgId]="orgId" />
+            }
+            @if (isClient) {
+              <app-submit-rfq [orgId]="orgId" />
+            }
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Onglets ─────────────────────────────────────────────────────── -->
+    <div class="tabs-container">
+      <mat-tab-group animationDuration="200ms">
+
+        <!-- Tab 1: About -->
+        <mat-tab label="About">
+          <div class="tab-content">
+
+            @if (o.description) {
+              <section class="about-section">
+                <h3>Description</h3>
+                <p>{{ o.description }}</p>
+              </section>
+            }
+
+            @if (o.specialties && o.specialties.length > 0) {
+              <section class="about-section">
+                <h3>Specialties</h3>
+                <mat-chip-set>
+                  @for (s of o.specialties; track s) {
+                    <mat-chip>{{ s }}</mat-chip>
+                  }
+                </mat-chip-set>
+              </section>
+            }
+
+            <section class="about-section">
+              <h3>Information</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span>Type</span><strong>{{ typeLabel(o.type) }}</strong>
+                </div>
+                <div class="info-item">
+                  <span>Size</span><strong>{{ sizeLabel(o.size) }}</strong>
+                </div>
+                @if (o.location) {
+                  <div class="info-item">
+                    <span>Location</span><strong>{{ o.location }}</strong>
+                  </div>
+                }
+                @if (o.siret) {
+                  <div class="info-item">
+                    <span>SIRET</span><strong>{{ o.siret }}</strong>
+                  </div>
+                }
+                <div class="info-item">
+                  <span>Member since</span>
+                  <strong>{{ o.createdAt | date:'MMMM yyyy' }}</strong>
+                </div>
+              </div>
+            </section>
+
+            <!-- ── Carte de localisation ──────────────────────────────── -->
+            <section class="about-section">
+              <h3>
+                <mat-icon class="section-icon">map</mat-icon>
+                Location
+              </h3>
+              <app-org-map
+                [orgId]="orgId"
+                [orgName]="o.name"
+                [canGeocode]="isMyOrg()" />
+            </section>
+
+          </div>
+        </mat-tab>
+
+        <!-- Onglet 2 : Portfolio -->
+        <mat-tab label="Portfolio">
+          <div class="tab-content">
+            <app-org-portfolio [orgId]="orgId" [canEdit]="isMyOrg()" />
+          </div>
+        </mat-tab>
+
+        <!-- Tab 3: Members -->
+        <mat-tab label="Members ({{ members().length }})">
+          <div class="tab-content">
+            @if (members().length === 0) {
+              <div class="empty-state">
+                <mat-icon>group_off</mat-icon>
+                <p>No visible members.</p>
+              </div>
+            }
+            <div class="members-list">
+              @for (m of members(); track m.id) {
+                @if (m.displayOnProfile) {
+                  <div class="member-item">
+                    <div class="member-avatar">
+                      <mat-icon>person</mat-icon>
+                    </div>
+                    <div class="member-info">
+                      <span class="member-role" [class]="'role-' + m.role.toLowerCase()">
+                        {{ roleLabel(m.role) }}
+                      </span>
+                      <span class="member-joined">
+                        Since {{ m.joinedAt | date:'MMM yyyy' }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Onglet 4 : Collaborations — visible uniquement pour les freelances et les membres de l'org -->
+        @if (isFreelance || isMyOrg()) {
+          <mat-tab label="Collaborations">
+            <div class="tab-content">
+              <app-org-collab-offers
+                [orgId]="orgId"
+                [isOwnerOrManager]="isMyOrg()" />
+            </div>
+          </mat-tab>
+        }
+
+        <!-- Tab 5: Reviews -->
+        <mat-tab label="Reviews ({{ reviews().length }})">
+          <div class="tab-content">
+
+            <!-- Review button / form -->
+            @if (!showReviewForm()) {
+              <button mat-stroked-button color="primary"
+                      (click)="showReviewForm.set(true)"
+                      style="margin-bottom:16px">
+                <mat-icon>rate_review</mat-icon> Leave a review
+              </button>
+            } @else {
+              <div class="review-form">
+                <h4>Your rating</h4>
+
+                <div class="rating-row">
+                  <label>Overall rating</label>
+                  <input type="range" min="1" max="5" step="1"
+                         [(ngModel)]="newReview.rating" />
+                  <span class="rating-stars">{{ stars(newReview.rating) }} {{ newReview.rating }}/5</span>
+                </div>
+
+                <mat-form-field appearance="outline" style="width:100%; margin-top:12px">
+                  <mat-label>Comment</mat-label>
+                  <textarea matInput rows="4" [(ngModel)]="newReview.comment"></textarea>
+                </mat-form-field>
+
+                @if (reviewError()) {
+                  <div class="error-msg">{{ reviewError() }}</div>
+                }
+
+                <div class="review-actions">
+                  <button mat-button (click)="showReviewForm.set(false)">Cancel</button>
+                  <button mat-raised-button color="primary"
+                          [disabled]="reviewSubmitting()"
+                          (click)="submitReview()">
+                    <mat-icon>send</mat-icon>
+                    {{ reviewSubmitting() ? 'Publishing...' : 'Publish' }}
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (reviewSuccess()) {
+              <div class="success-msg" style="margin-bottom:16px">
+                <mat-icon>check_circle</mat-icon> Your review has been published. Thank you!
+              </div>
+            }
+
+            @if (reviews().length === 0 && !showReviewForm() && !reviewSuccess()) {
+              <div class="empty-state">
+                <mat-icon>rate_review</mat-icon>
+                <p>No reviews yet. Be the first!</p>
+              </div>
+            }
+
+            <!-- Review list -->
+            @for (r of reviews(); track r.id) {
+              <div class="review-card">
+                <div class="review-header">
+                  <span class="stars">{{ stars(r.rating) }}</span>
+                  <span class="rating-value">{{ r.rating }}/5</span>
+                  <span class="review-date">{{ r.createdAt | date:'dd/MM/yyyy' }}</span>
+                  @if (!r.reported && isLoggedIn && !isMyOrg()) {
+                    <button mat-icon-button
+                            (click)="reportReview(r.id)"
+                            matTooltip="Report this review">
+                      <mat-icon>flag</mat-icon>
+                    </button>
+                  }
+                  @if (r.reported) {
+                    <span class="reported-badge">Reported</span>
+                  }
+                  @if (canDeleteReview(r)) {
+                    <button mat-icon-button color="warn"
+                            (click)="deleteReview(r.id)"
+                            matTooltip="Delete this review">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  }
+                </div>
+
+                @if (r.comment) {
+                  <p class="review-text">{{ r.comment }}</p>
+                }
+
+                @if (r.reply) {
+                  <div class="owner-reply">
+                    <mat-icon>reply</mat-icon>
+                    <div>
+                      <strong>Organization reply</strong>
+                      <p>{{ r.reply }}</p>
+                    </div>
+                  </div>
+                }
+
+                <!-- Reply form (owner only) -->
+                @if (isMyOrg() && !r.reply) {
+                  @if (replyingReviewId() !== r.id) {
+                    <button mat-stroked-button (click)="startReply(r.id)">
+                      <mat-icon>reply</mat-icon> Reply
+                    </button>
+                  } @else {
+                    <div class="reply-form">
+                      <mat-form-field appearance="outline" style="width:100%">
+                        <mat-label>Your reply</mat-label>
+                        <textarea matInput rows="3"
+                                  [ngModel]="replyText()"
+                                  (ngModelChange)="replyText.set($event)"></textarea>
+                      </mat-form-field>
+                      <div class="reply-actions">
+                        <button mat-button (click)="cancelReply()">Cancel</button>
+                        <button mat-raised-button color="primary"
+                                [disabled]="replySubmitting() || !replyText().trim()"
+                                (click)="submitReply(r.id)">
+                          <mat-icon>send</mat-icon>
+                          {{ replySubmitting() ? 'Publishing...' : 'Publish' }}
+                        </button>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            }
+
+          </div>
+        </mat-tab>
+
+      </mat-tab-group>
+    </div>
+
+  </div>
+}

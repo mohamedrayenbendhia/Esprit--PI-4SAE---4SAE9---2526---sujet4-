@@ -1,0 +1,333 @@
+<div class="page-wrapper">
+
+  <!-- ── Page header ──────────────────────────────────────────── -->
+  <div class="page-header">
+    <button class="btn-back" type="button" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to my organizations
+    </button>
+    <div class="header-title-row">
+      <div>
+        <h1>New Organization</h1>
+        <p class="subtitle">Create your professional space. It will be submitted for review before activation.</p>
+      </div>
+      <div class="step-indicator">
+        <span class="step" [class.active]="form.type">1</span>
+        <span class="step-line"></span>
+        <span class="step" [class.active]="(form.name?.length || 0) >= 2">2</span>
+        <span class="step-line"></span>
+        <span class="step" [class.active]="(form.description?.length || 0) >= 10">3</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Layout 2 colonnes ────────────────────────────────────── -->
+  <div class="page-body">
+
+    <!-- ── Colonne principale ──────────────────────────────────── -->
+    <div class="main-col">
+
+      <!-- Bandeau erreur -->
+      <div class="error-banner" *ngIf="error()">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ error() }}</span>
+      </div>
+
+      <!-- Bandeau succès -->
+      <div class="success-banner" *ngIf="success()">
+        <mat-icon>check_circle</mat-icon>
+        <span>Organization created! Redirecting to settings...</span>
+      </div>
+
+      <!-- ── Card 01 — Type d'organisation ──────────────────────── -->
+      <div class="card section-card">
+        <div class="card-header">
+          <div class="section-num">01</div>
+          <div>
+            <h3>Organization Type</h3>
+            <p class="card-subtitle">Choose the nature of your structure</p>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <div class="field-group">
+            <label class="field-label required">Type</label>
+            <div class="type-grid">
+              <button *ngFor="let t of orgTypes" type="button"
+                class="type-tile"
+                [class.selected]="form.type === t.value"
+                (click)="form.type = t.value">
+                <mat-icon class="type-icon">{{ t.icon }}</mat-icon>
+                <span class="type-label">{{ t.label }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Size</label>
+            <div class="size-row">
+              <button *ngFor="let s of orgSizes" type="button"
+                class="size-btn"
+                [class.selected]="form.size === s.value"
+                (click)="form.size = s.value">
+                <mat-icon>{{ s.icon }}</mat-icon>
+                {{ s.label }}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Card 02 — Identité ──────────────────────────────────── -->
+      <div class="card section-card">
+        <div class="card-header">
+          <div class="section-num">02</div>
+          <div>
+            <h3>Identity</h3>
+            <p class="card-subtitle">Name and description of your organization</p>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <div class="field-group">
+            <label class="field-label required" for="name">Organization Name</label>
+            <div class="input-wrap">
+              <input id="name" type="text" class="form-input"
+                placeholder="Ex : TechVision Studio"
+                [(ngModel)]="form.name" name="name"
+                maxlength="100">
+            </div>
+            <div class="field-footer">
+              <span></span>
+              <span class="char-count" [class.near]="(form.name?.length || 0) > 85" [class.max]="(form.name?.length || 0) >= 100">
+                {{ (form.name?.length || 0) }}/100
+              </span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="description">
+              Description
+              <span class="optional-tag">optional · max 2000 chars.</span>
+            </label>
+            <div class="input-wrap">
+              <textarea id="description" class="form-textarea"
+                placeholder="Describe your organization, its values, and area of expertise..."
+                [(ngModel)]="form.description" name="description"
+                maxlength="2000" rows="5">
+              </textarea>
+            </div>
+            <div class="field-footer">
+              <span></span>
+              <div class="desc-progress">
+                <div class="progress-track">
+                  <div class="progress-fill"
+                    [style.width.%]="descPct"
+                    [class.valid]="(form.description?.length || 0) >= 10">
+                  </div>
+                </div>
+                <span class="char-count">{{ form.description?.length || 0 }}/2000</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Specialties -->
+          <div class="field-group">
+            <label class="field-label">
+              Specialties
+              <span class="optional-tag">optional — press Enter or comma</span>
+            </label>
+            <div class="chip-input-wrap">
+              <div class="chips-list" *ngIf="form.specialties?.length">
+                <span *ngFor="let s of form.specialties" class="chip">
+                  {{ s }}
+                  <button type="button" class="chip-remove" (click)="removeSpecialty(s)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </span>
+              </div>
+              <input type="text" class="form-input chip-add-input"
+                placeholder="E.g.: React, UI/UX, DevOps..."
+                #specialtyInput
+                (keydown.enter)="addSpecialtyRaw(specialtyInput); $event.preventDefault()"
+                (keydown.comma)="addSpecialtyRaw(specialtyInput); $event.preventDefault()">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Card 03 — Coordonnées ───────────────────────────────── -->
+      <div class="card section-card">
+        <div class="card-header">
+          <div class="section-num">03</div>
+          <div>
+            <h3>Contact & Legal Identity</h3>
+            <p class="card-subtitle">Optional — strengthen the credibility of your profile</p>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <div class="two-col-fields">
+
+            <div class="field-group">
+              <label class="field-label" for="location">Location</label>
+              <div class="input-wrap input-icon-wrap">
+                <mat-icon class="input-icon">place</mat-icon>
+                <input id="location" type="text" class="form-input with-icon"
+                  placeholder="Paris, France"
+                  [(ngModel)]="form.location" name="location">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="website">Website</label>
+              <div class="input-wrap input-icon-wrap">
+                <mat-icon class="input-icon">language</mat-icon>
+                <input id="website" type="url" class="form-input with-icon"
+                  placeholder="https://..."
+                  [(ngModel)]="form.website" name="website">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="logoUrl">Logo URL</label>
+              <div class="input-wrap input-icon-wrap">
+                <mat-icon class="input-icon">image</mat-icon>
+                <input id="logoUrl" type="url" class="form-input with-icon"
+                  placeholder="https://..."
+                  [(ngModel)]="form.logoUrl" name="logoUrl">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="siret">SIRET</label>
+              <div class="input-wrap">
+                <input id="siret" type="text" class="form-input"
+                  placeholder="14 digits"
+                  [(ngModel)]="form.siret" name="siret"
+                  maxlength="14">
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="cancel()" [disabled]="isSubmitting() || success()">
+          Cancel
+        </button>
+        <button type="button" class="btn-primary"
+          (click)="submit()"
+          [disabled]="isSubmitting() || success() || !form.name || !form.type">
+          <div *ngIf="isSubmitting()" class="btn-spinner"></div>
+          <mat-icon *ngIf="!isSubmitting()">send</mat-icon>
+          {{ isSubmitting() ? 'Creating...' : 'Create Organization' }}
+        </button>
+      </div>
+
+    </div><!-- /main-col -->
+
+    <!-- ── Sidebar droite ──────────────────────────────────────── -->
+    <aside class="side-col">
+
+      <!-- Widget progression -->
+      <div class="card widget-card">
+        <div class="widget-title">
+          <mat-icon>task_alt</mat-icon>
+          Progress
+        </div>
+        <ul class="checklist">
+          <li class="check-item" [class.done]="!!form.type">
+            <span class="check-icon">
+              <mat-icon>{{ form.type ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </span>
+            <span>Type selected</span>
+          </li>
+          <li class="check-item" [class.done]="(form.name?.length || 0) >= 2">
+            <span class="check-icon">
+              <mat-icon>{{ ((form.name?.length || 0) >= 2) ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </span>
+            <span>Name provided</span>
+          </li>
+          <li class="check-item" [class.done]="(form.description?.length || 0) >= 10">
+            <span class="check-icon">
+              <mat-icon>{{ (form.description?.length || 0) >= 10 ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </span>
+            <span>Description (min 10 chars)</span>
+          </li>
+          <li class="check-item" [class.done]="(form.specialties?.length || 0) > 0">
+            <span class="check-icon">
+              <mat-icon>{{ (form.specialties?.length || 0) > 0 ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </span>
+            <span>At least one specialty</span>
+          </li>
+        </ul>
+        <div class="checklist-bar">
+          <div class="checklist-fill" [style.width.%]="checklistPct"></div>
+        </div>
+        <span class="checklist-pct">{{ checklistPct }}% complete</span>
+      </div>
+
+      <!-- Widget vérification -->
+      <div class="card widget-card">
+        <div class="widget-title">
+          <mat-icon>verified</mat-icon>
+          Verification Process
+        </div>
+        <ul class="steps-list">
+          <li class="step-item active">
+            <span class="step-dot"></span>
+            <div>
+              <strong>Submission</strong>
+              <p>You create your organization</p>
+            </div>
+          </li>
+          <li class="step-item">
+            <span class="step-dot"></span>
+            <div>
+              <strong>Admin review</strong>
+              <p>Our team reviews the application</p>
+            </div>
+          </li>
+          <li class="step-item">
+            <span class="step-dot"></span>
+            <div>
+              <strong>Activation</strong>
+              <p>Your page is published</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Widget conseils -->
+      <div class="card widget-card tips-card">
+        <div class="widget-title">
+          <mat-icon>lightbulb</mat-icon>
+          Tips
+        </div>
+        <ul class="tips-list">
+          <li>
+            <mat-icon>check</mat-icon>
+            <span>A clear and memorable name improves your visibility.</span>
+          </li>
+          <li>
+            <mat-icon>check</mat-icon>
+            <span>Add your specialties to appear in relevant searches.</span>
+          </li>
+          <li>
+            <mat-icon>check</mat-icon>
+            <span>A valid SIRET number speeds up verification by the admin.</span>
+          </li>
+        </ul>
+      </div>
+
+    </aside>
+
+  </div><!-- /page-body -->
+
+</div><!-- /page-wrapper -->

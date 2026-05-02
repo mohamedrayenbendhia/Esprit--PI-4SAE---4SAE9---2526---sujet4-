@@ -1,0 +1,154 @@
+<div class="page-wrapper">
+
+  <!-- ── En-tête ─────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Response Templates</h1>
+      <p>Pre-written replies that agents can use in complaint conversations.</p>
+    </div>
+    <div class="header-right">
+      <button class="btn-create" (click)="openCreate()" [disabled]="showForm()">
+        <mat-icon>add</mat-icon>
+        New template
+      </button>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- ── Formulaire création / édition ────────────────────────────────── -->
+    @if (showForm()) {
+      <div class="card form-section">
+        <div class="card-header">
+          <div class="section-num">
+            <mat-icon style="font-size:16px;width:16px;height:16px">{{ editingId() ? 'edit' : 'add' }}</mat-icon>
+          </div>
+          <div>
+            <h3>{{ editingId() ? 'Edit template' : 'New template' }}</h3>
+            <p>{{ editingId() ? 'Modify the title, category or content' : 'Create a reusable response template' }}</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid-2">
+            <div class="field-group flex-2">
+              <label class="field-label">Template title *</label>
+              <input class="form-input" type="text" [(ngModel)]="form.title"
+                     placeholder="E.g. PAYMENT_ISSUE acknowledgment">
+            </div>
+            <div class="field-group flex-1">
+              <label class="field-label">Category (optional)</label>
+              <div class="form-select-wrap">
+                <select class="form-select" [(ngModel)]="form.category">
+                  <option value="">All categories</option>
+                  @for (c of categories; track c) {
+                    <option [value]="c">{{ c }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Template content *</label>
+            <textarea class="form-textarea" rows="6" [(ngModel)]="form.content"
+                      placeholder="Hello, we have received your complaint (ticket [ticketNumber])…"></textarea>
+            <span class="field-hint">Supported variables: [ticketNumber], [name], [date] — they will be replaced automatically when sent.</span>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-secondary" (click)="cancel()">Cancel</button>
+            <button class="btn-primary"
+                    [disabled]="saving() || !form.title.trim() || !form.content.trim()"
+                    (click)="save()">
+              @if (saving()) {
+                <span class="inline-spinner"></span> Saving…
+              } @else {
+                <mat-icon>save</mat-icon> Save template
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── Barre de recherche ────────────────────────────────────────────── -->
+    @if (!isLoading() && templates().length > 0) {
+      <div class="search-bar-wrap">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input class="search-input" type="text"
+               [ngModel]="filter()" (ngModelChange)="filter.set($event)"
+               placeholder="Search by title or content…">
+        @if (filter()) {
+          <button class="search-clear" (click)="filter.set('')">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+    }
+
+    <!-- ── Loading ──────────────────────────────────────────────────────── -->
+    @if (isLoading()) {
+      <div class="loading-center">
+        <mat-icon style="font-size:40px;color:#94a3b8;animation:spin 1s linear infinite">autorenew</mat-icon>
+      </div>
+    }
+
+    <!-- ── Grille de templates ───────────────────────────────────────────── -->
+    @if (!isLoading()) {
+      <div class="templates-grid">
+        @for (t of filtered(); track t.id) {
+          <div class="card template-card">
+            <div class="template-header">
+              <div class="template-title-wrap">
+                <h3 class="template-title">{{ t.title }}</h3>
+                @if (t.category) {
+                  <span class="cat-badge">{{ t.category }}</span>
+                } @else {
+                  <span class="cat-badge universal">Universal</span>
+                }
+              </div>
+              <div class="template-actions">
+                <button class="btn-icon" (click)="openEdit(t)" title="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button class="btn-icon danger" (click)="delete(t.id)" title="Delete">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="template-body">
+              <p class="template-content">{{ t.content }}</p>
+            </div>
+
+            <div class="template-footer">
+              <mat-icon>calendar_today</mat-icon>
+              Created {{ t.createdAt | date:'MMM d, y' }}
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── Empty state ───────────────────────────────────────────────────── -->
+    @if (!isLoading() && filtered().length === 0) {
+      <div class="card">
+        <div class="empty-state">
+          <mat-icon class="empty-icon">{{ filter() ? 'search_off' : 'library_books' }}</mat-icon>
+          <h3>{{ filter() ? 'No matching templates' : 'No templates yet' }}</h3>
+          <p>{{ filter() ? 'Try a different search term.' : 'Create your first template to speed up agent responses.' }}</p>
+          @if (!filter()) {
+            <button class="btn-create" (click)="openCreate()">
+              <mat-icon>add</mat-icon> Create first template
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
