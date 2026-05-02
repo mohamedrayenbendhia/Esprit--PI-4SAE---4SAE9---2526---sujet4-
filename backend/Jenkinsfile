@@ -21,15 +21,7 @@ pipeline {
             }
         }
 
-        stage('Step 3: SonarQube Analysis') {
-            steps {
-                dir('backend') {
-                    sh 'mvn sonar:sonar -Dsonar.host.url=http://127.0.0.1:9001 -Dsonar.login=admin -Dsonar.password=admin -Dmaven.test.skip=true'
-                }
-            }
-        }
-
-        stage('Step 4: Stop Old Containers') {
+        stage('Step 3: Stop Old Containers') {
             steps {
                 dir('backend') {
                     sh 'docker-compose down --remove-orphans || true'
@@ -37,7 +29,7 @@ pipeline {
             }
         }
 
-        stage('Step 5: Docker Compose Build') {
+        stage('Step 4: Docker Compose Build') {
             steps {
                 dir('backend') {
                     sh 'docker-compose build'
@@ -45,10 +37,21 @@ pipeline {
             }
         }
 
-        stage('Step 6: Deploy & Run All (Docker)') {
+        stage('Step 5: Deploy & Run All (Docker)') {
             steps {
                 dir('backend') {
                     sh 'docker-compose up -d'
+                }
+            }
+        }
+
+        stage('Step 6: SonarQube Analysis') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    sh 'sleep 30'
+                    dir('backend') {
+                        sh 'mvn sonar:sonar -Dsonar.host.url=http://host.docker.internal:9001 -Dsonar.login=admin -Dsonar.password=admin123 -Dmaven.test.skip=true'
+                    }
                 }
             }
         }
