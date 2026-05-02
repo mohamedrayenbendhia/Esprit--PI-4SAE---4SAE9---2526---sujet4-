@@ -28,10 +28,9 @@ pipeline {
                         sh 'docker-compose down --remove-orphans || true'
                     }
                 }
-                sh 'docker ps -q --filter publish=9001 | xargs -r docker stop || true'
-                sh 'docker ps -q --filter publish=9001 | xargs -r docker rm -f || true'
-                sh 'docker ps -q --filter publish=4200 | xargs -r docker stop || true'
-                sh 'docker ps -q --filter publish=4200 | xargs -r docker rm -f || true'
+                sh 'docker ps --format "{{.ID}} {{.Ports}}" | grep ":9001->" | awk \'{print $1}\' | xargs -r docker rm -f || true'
+                sh 'docker ps --format "{{.ID}} {{.Ports}}" | grep ":4200->" | awk \'{print $1}\' | xargs -r docker rm -f || true'
+                sh 'docker ps -aq --filter "name=backend-" | xargs -r docker rm -f || true'
             }
         }
 
