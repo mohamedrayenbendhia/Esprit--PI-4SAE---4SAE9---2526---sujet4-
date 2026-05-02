@@ -58,12 +58,14 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                     sh '''
-                        echo "Waiting for SonarQube to be ready..."
-                        for i in $(seq 1 24); do
-                            STATUS=$(curl -s http://host.docker.internal:9001/api/system/status | grep -o '"status":"[A-Z]*"' | head -1)
+                        echo "Waiting for SonarQube to be ready (max 5 min)..."
+                        i=0
+                        while [ $i -lt 30 ]; do
+                            i=$((i+1))
+                            STATUS=$(curl -s -u admin:admin123 http://host.docker.internal:9001/api/system/status 2>/dev/null)
                             echo "Attempt $i: $STATUS"
-                            if echo "$STATUS" | grep -q "UP"; then
-                                echo "SonarQube is UP"
+                            if echo "$STATUS" | grep -q '"status":"UP"'; then
+                                echo "SonarQube is UP - starting analysis"
                                 break
                             fi
                             sleep 10
