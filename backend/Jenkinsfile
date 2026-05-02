@@ -23,14 +23,10 @@ pipeline {
 
         stage('Step 3: SonarQube Analysis') {
             steps {
-                dir('backend') {
-                    sh '''
-                        mvn sonar:sonar \
-                          -Dsonar.host.url=http://localhost:9001 \
-                          -Dsonar.login=admin \
-                          -Dsonar.password=admin \
-                          -DskipTests || echo "SonarQube not available, skipping"
-                    '''
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    dir('backend') {
+                        sh 'mvn sonar:sonar -Dsonar.host.url=http://localhost:9001 -Dsonar.login=admin -Dsonar.password=admin -DskipTests'
+                    }
                 }
             }
         }
