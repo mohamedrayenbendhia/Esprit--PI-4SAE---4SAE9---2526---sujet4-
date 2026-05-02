@@ -72,15 +72,25 @@ pipeline {
                         done
                     '''
                     script {
+                        // On fresh SonarQube the password is 'admin' — change it to admin123
+                        sh '''
+                            curl -s -u admin:admin -X POST "http://host.docker.internal:9001/api/users/change_password" \
+                              -d "login=admin&previousPassword=admin&password=admin123" 2>/dev/null || true
+                        '''
                         def sonarToken = sh(
                             script: '''
-                                curl -s -u admin:admin123 -X POST "http://host.docker.internal:9001/api/user_tokens/revoke" -d "name=jenkins-ci" 2>/dev/null || true
-                                curl -s -u admin:admin123 -X POST "http://host.docker.internal:9001/api/user_tokens/generate" -d "name=jenkins-ci" | grep -o '"token":"[^"]*"' | cut -d'"' -f4
+                                curl -s -u admin:admin123 -X POST "http://host.docker.internal:9001/api/user_tokens/revoke" \
+                                  -d "name=jenkins-ci" 2>/dev/null || true
+                                curl -s -u admin:admin123 -X POST "http://host.docker.internal:9001/api/user_tokens/generate" \
+                                  -d "name=jenkins-ci" | grep -o '"token":"[^"]*"' | cut -d'"' -f4
                             ''',
                             returnStdout: true
                         ).trim()
-                        dir('backend') {
-                            sh "mvn sonar:sonar -Dsonar.host.url=http://host.docker.internal:9001 -Dsonar.token=${sonarToken} -Dmaven.test.skip=true"
+                        echo "SonarQube token generated: ${sonarToken ? 'OK' : 'EMPTY - auth failed'}"
+                        if (sonarToken) {
+                            dir('backend') {
+                                sh "mvn sonar:sonar -Dsonar.host.url=http://host.docker.internal:9001 -Dsonar.token=${sonarToken} -Dmaven.test.skip=true"
+                            }
                         }
                     }
                 }

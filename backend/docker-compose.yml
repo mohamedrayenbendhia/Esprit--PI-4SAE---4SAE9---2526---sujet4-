@@ -221,6 +221,10 @@ services:
       - SONAR_JDBC_URL=jdbc:postgresql://sonar-db:5432/sonar
       - SONAR_JDBC_USERNAME=sonar
       - SONAR_JDBC_PASSWORD=sonar
+    volumes:
+      - sonar_data:/opt/sonarqube/data
+      - sonar_logs:/opt/sonarqube/logs
+      - sonar_extensions:/opt/sonarqube/extensions
     depends_on:
       - sonar-db
     networks:
@@ -232,6 +236,8 @@ services:
       - POSTGRES_USER=sonar
       - POSTGRES_PASSWORD=sonar
       - POSTGRES_DB=sonar
+    volumes:
+      - sonar_db_data:/var/lib/postgresql/data
     networks:
       - nexlance-net
 
@@ -240,3 +246,9 @@ networks:
     driver: bridge
     driver_opts:
       com.docker.network.driver.mtu: "1450"
+
+volumes:
+  sonar_data:
+  sonar_logs:
+  sonar_extensions:
+  sonar_db_data:
