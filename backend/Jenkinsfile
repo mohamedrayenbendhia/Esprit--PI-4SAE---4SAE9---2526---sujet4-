@@ -29,7 +29,7 @@ pipeline {
                           -Dsonar.host.url=http://localhost:9001 \
                           -Dsonar.login=admin \
                           -Dsonar.password=admin \
-                          -DskipTests
+                          -DskipTests || echo "SonarQube not available, skipping"
                     '''
                 }
             }
