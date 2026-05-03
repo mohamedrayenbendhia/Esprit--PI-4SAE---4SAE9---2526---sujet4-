@@ -1,3 +1,5 @@
+ version: '3.8'
+
 services:
   # --- INFRASTRUCTURE ---
   eureka-server:
@@ -7,6 +9,11 @@ services:
       - "8761:8761"
     networks:
       - nexlance-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   config-server:
     build: ./ConfigServer
@@ -15,6 +22,9 @@ services:
       - "8888:8888"
     networks:
       - nexlance-net
+    depends_on:
+      eureka-server:
+        condition: service_healthy
 
   api-gateway:
     build: ./api-gateway
@@ -25,13 +35,14 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
     depends_on:
-      - eureka-server
-      - config-server
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_started
     networks:
       - nexlance-net
 
-  # --- MICROSERVICES (11 Modules) ---
-
+  # --- MICROSERVICES ---
   user-service:
     build: ./microservices/service_user
     image: img-user
@@ -41,10 +52,15 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/smart_freelance_db
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    depends_on: [eureka-server, config-server]
-    networks: [nexlance-net]
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
   complaint-service:
     build: ./microservices/complaint-service
@@ -55,9 +71,15 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/smart_freelance_complaints
-    extra_hosts: ["host.docker.internal:host-gateway"]
-    depends_on: [eureka-server, config-server]
-    networks: [nexlance-net]
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
   contrat-service:
     build: ./microservices/contrat/Esprit--PI-4SAE---4SAE9---2526---sujet4--contrat
@@ -68,9 +90,15 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/Contrat_db
-    extra_hosts: ["host.docker.internal:host-gateway"]
-    depends_on: [eureka-server, config-server]
-    networks: [nexlance-net]
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
   evaluation-service:
     build: ./microservices/evaluation/Esprit--PI-4SAE---4SAE9---2526---sujet4--evaluation
@@ -80,9 +108,16 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-    extra_hosts: ["host.docker.internal:host-gateway"]
-    depends_on: [eureka-server, config-server]
-    networks: [nexlance-net]
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/evaluation_db
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
   joboffer-service:
     build: ./microservices/joboffer/service_joboffer/NexLance
@@ -92,9 +127,16 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-    extra_hosts: ["host.docker.internal:host-gateway"]
-    depends_on: [eureka-server, config-server]
-    networks: [nexlance-net]
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/joboffer_db
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
   certification-service:
     build: ./microservices/module_certification
@@ -104,9 +146,16 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-    extra_hosts: ["host.docker.internal:host-gateway"]
-    depends_on: [eureka-server, config-server]
-    networks: [nexlance-net]
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/certification_db
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
   portfolio-service:
     build: ./microservices/module_portfolio
@@ -116,9 +165,16 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-    extra_hosts: ["host.docker.internal:host-gateway"]
-    depends_on: [eureka-server, config-server]
-    networks: [nexlance-net]
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/portfolio_db
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
   competence-service:
     build: ./microservices/module_competence
@@ -128,9 +184,16 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-    extra_hosts: ["host.docker.internal:host-gateway"]
-    depends_on: [eureka-server, config-server]
-    networks: [nexlance-net]
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/competence_db
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
   notification-service:
     build: ./microservices/notification-service
@@ -140,9 +203,13 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-    extra_hosts: ["host.docker.internal:host-gateway"]
-    depends_on: [eureka-server, config-server]
-    networks: [nexlance-net]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
   organization-service:
     build: ./microservices/organization-service
@@ -152,9 +219,16 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-    extra_hosts: ["host.docker.internal:host-gateway"]
-    depends_on: [eureka-server, config-server]
-    networks: [nexlance-net]
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/organization_db
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
   projects-service:
     build: ./microservices/service_projects
@@ -164,11 +238,18 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-    extra_hosts: ["host.docker.internal:host-gateway"]
-    depends_on: [eureka-server, config-server]
-    networks: [nexlance-net]
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/projects_db
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
-  # --- RECOMMENDATION-AI ---
+  # --- RECOMMENDATION AI ---
   recommendation-ai:
     build: ./microservices/recommendation-ai
     image: img-recommendation
@@ -176,9 +257,13 @@ services:
       - "9000:9000"
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-    extra_hosts: ["host.docker.internal:host-gateway"]
-    depends_on: [eureka-server]
-    networks: [nexlance-net]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - nexlance-net
 
   # --- FRONTEND ---
   frontend:
