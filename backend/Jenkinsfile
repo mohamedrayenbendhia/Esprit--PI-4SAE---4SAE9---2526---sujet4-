@@ -21,7 +21,7 @@ pipeline {
         stage('Step 2: Maven Build All Microservices') {
             steps {
                 dir('backend') {
-                    sh 'export JAVA_HOME=/opt/java/openjdk && export PATH=$JAVA_HOME/bin:$PATH && mvn clean install -Dmaven.test.skip=true'
+                    sh '/opt/apache-maven-3.9.6/bin/mvn clean install -Dmaven.test.skip=true'
                 }
             }
         }
@@ -102,7 +102,7 @@ pipeline {
                         done
                     '''
                     dir('backend') {
-                        sh 'mvn sonar:sonar -Dsonar.host.url=http://host.docker.internal:9001 -Dmaven.test.skip=true'
+                        sh '/opt/apache-maven-3.9.6/bin/mvn sonar:sonar -Dsonar.host.url=http://host.docker.internal:9001 -Dmaven.test.skip=true'
                     }
                 }
             }
