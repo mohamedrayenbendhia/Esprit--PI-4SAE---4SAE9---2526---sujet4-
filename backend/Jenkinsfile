@@ -144,10 +144,10 @@
 
     post {
         success {
-            echo '✅ NexLance pipeline OK | Docker→4200/8080/8761 | K3s→30420/30080/30761 | SonarQube→9001 | Grafana→3000'
+            echo ' NexLance pipeline OK | Docker→4200/8080/8761 | K3s→30420/30080/30761 | SonarQube→9001 | Grafana→3000'
         }
         failure {
-            echo '❌ Build échoué. Vérifier le Console Output Jenkins.'
+            echo ' Build échoué. Vérifier le Console Output Jenkins.'
         }
         always {
             echo '--- Fin du pipeline NexLance ---'
