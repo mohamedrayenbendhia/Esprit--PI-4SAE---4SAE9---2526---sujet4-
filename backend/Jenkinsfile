@@ -5,6 +5,10 @@ pipeline {
         maven 'maven_3'
     }
 
+    environment {
+        K3S_IMAGES = 'img-eureka img-config-server img-gateway img-user img-complaint img-contrat img-evaluation img-joboffer img-certification img-portfolio img-competence img-notification img-organization img-projects img-recommendation img-nexlance-front img-prometheus'
+    }
+
     stages {
 
         stage('Step 1: Pull Code') {
@@ -44,7 +48,32 @@ pipeline {
             }
         }
 
-        stage('Step 5: Deploy & Run All (Docker)') {
+        stage('Step 5: Export Images to K3s Containerd') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    sh '''
+                        echo "Importing Docker images into K3s containerd..."
+                        mkdir -p /tmp/k3s-images
+                        for img in $K3S_IMAGES; do
+                            if docker image inspect "$img" > /dev/null 2>&1; then
+                                echo "  -> Saving $img to tar..."
+                                docker save "$img" -o /tmp/k3s-images/${img}.tar
+                                echo "  -> Importing $img into K3s..."
+                                sudo k3s ctr images import /tmp/k3s-images/${img}.tar
+                                rm -f /tmp/k3s-images/${img}.tar
+                            else
+                                echo "  !! Image $img not found, skipping"
+                            fi
+                        done
+                        rmdir /tmp/k3s-images 2>/dev/null || true
+                        echo "Image import complete."
+                        sudo k3s ctr images ls | grep "img-"
+                    '''
+                }
+            }
+        }
+
+        stage('Step 6: Deploy & Run All (Docker)') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                     dir('backend') {
@@ -54,7 +83,7 @@ pipeline {
             }
         }
 
-        stage('Step 6: SonarQube Analysis') {
+        stage('Step 7: SonarQube Analysis') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                     sh '''
@@ -78,25 +107,34 @@ pipeline {
             }
         }
 
-        stage('Step 7: Deploy to K3s / Kubernetes') {
+        stage('Step 8: Deploy to K3s / Kubernetes') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    sh 'kubectl apply -f k8s/namespace.yaml || true'
-                    sh 'kubectl apply -f k8s/infrastructure/ || true'
-                    sh 'kubectl apply -f k8s/microservices/ || true'
-                    sh 'kubectl apply -f k8s/ai/ || true'
-                    sh 'kubectl apply -f k8s/frontend/ || true'
-                    sh 'kubectl apply -f k8s/monitoring/ || true'
+                    sh 'kubectl apply -f k8s/namespace.yaml'
+                    sh 'kubectl apply -f k8s/infrastructure/'
+                    sh 'kubectl apply -f k8s/microservices/'
+                    sh 'kubectl apply -f k8s/ai/'
+                    sh 'kubectl apply -f k8s/frontend/'
+                    sh 'kubectl apply -f k8s/monitoring/'
+                    sh '''
+                        echo "Waiting for pods to be ready..."
+                        kubectl rollout status deployment/eureka-server   -n nexlance --timeout=120s || true
+                        kubectl rollout status deployment/api-gateway      -n nexlance --timeout=120s || true
+                        kubectl rollout status deployment/frontend         -n nexlance --timeout=120s || true
+                    '''
                 }
             }
         }
 
-        stage('Step 8: Health Check') {
+        stage('Step 9: Health Check') {
             steps {
-                sleep(time: 20, unit: 'SECONDS')
-                sh 'curl -f http://localhost:8761 || echo "Eureka not ready yet"'
-                sh 'curl -f http://localhost:4200 || echo "Frontend not ready yet"'
+                sh 'kubectl get pods -n nexlance'
+                sh 'kubectl get svc  -n nexlance'
+                sh 'curl -f http://localhost:8761 || echo "Eureka (Docker) not ready yet"'
+                sh 'curl -f http://localhost:4200 || echo "Frontend (Docker) not ready yet"'
                 sh 'curl -f http://localhost:9001 || echo "SonarQube not ready yet"'
+                sh 'curl -f http://localhost:30761 || echo "Eureka (K3s NodePort) not ready yet"'
+                sh 'curl -f http://localhost:30420 || echo "Frontend (K3s NodePort) not ready yet"'
             }
         }
 
@@ -104,7 +142,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ NexLance complet : Frontend→4200 | Gateway→8080 | Eureka→8761 | SonarQube→9001 | Grafana→3000 | Prometheus→9093'
+            echo '✅ NexLance pipeline OK | Docker→4200/8080/8761 | K3s NodePorts→30420/30080/30761 | SonarQube→9001 | Grafana→3000 | Prometheus→9093'
         }
         failure {
             echo '❌ Build échoué. Vérifier le Console Output Jenkins.'
