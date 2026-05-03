@@ -3,10 +3,11 @@ pipeline {
 
     tools {
         maven 'maven_3'
-        jdk 'jdk21'
     }
 
     environment {
+        JAVA_HOME = '/opt/java/openjdk'
+        PATH = "/opt/java/openjdk/bin:${env.PATH}"
         K3S_IMAGES = 'img-eureka img-config-server img-gateway img-user img-complaint img-contrat img-evaluation img-joboffer img-certification img-portfolio img-competence img-notification img-organization img-projects img-recommendation img-nexlance-front img-prometheus'
     }
 
