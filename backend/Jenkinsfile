@@ -1,4 +1,4 @@
-pipeline {
+ pipeline {
     agent any
 
     tools {
@@ -7,6 +7,8 @@ pipeline {
 
     environment {
         JAVA_HOME = '/opt/java/openjdk'
+        MVN = '/opt/apache-maven-3.9.6/bin/mvn'
+        SONAR_HOST = 'http://172.17.0.1:9001'
         K3S_IMAGES = 'img-eureka img-config-server img-gateway img-user img-complaint img-contrat img-evaluation img-joboffer img-certification img-portfolio img-competence img-notification img-organization img-projects img-recommendation img-nexlance-front img-prometheus'
     }
 
@@ -21,7 +23,7 @@ pipeline {
         stage('Step 2: Maven Build All Microservices') {
             steps {
                 dir('backend') {
-                    sh '/opt/apache-maven-3.9.6/bin/mvn clean install -Dmaven.test.skip=true'
+                    sh '${MVN} clean install -Dmaven.test.skip=true'
                 }
             }
         }
@@ -66,7 +68,7 @@ pipeline {
                                 echo "  !! Image $img not found, skipping"
                             fi
                         done
-                        rmdir /tmp/k3s-images 2>/dev/null || true
+                        rm -rf /tmp/k3s-images 2>/dev/null || true
                         echo "Image import complete."
                         sudo k3s ctr images ls | grep "img-"
                     '''
@@ -92,7 +94,7 @@ pipeline {
                         i=0
                         while [ $i -lt 30 ]; do
                             i=$((i+1))
-                            STATUS=$(curl -s http://host.docker.internal:9001/api/system/status 2>/dev/null)
+                            STATUS=$(curl -s ${SONAR_HOST}/api/system/status 2>/dev/null)
                             echo "Attempt $i: $STATUS"
                             if echo "$STATUS" | grep -q '"status":"UP"'; then
                                 echo "SonarQube is UP"
@@ -102,7 +104,7 @@ pipeline {
                         done
                     '''
                     dir('backend') {
-                        sh '/opt/apache-maven-3.9.6/bin/mvn sonar:sonar -Dsonar.host.url=http://host.docker.internal:9001 -Dmaven.test.skip=true'
+                        sh '${MVN} sonar:sonar -Dsonar.host.url=${SONAR_HOST} -Dmaven.test.skip=true'
                     }
                 }
             }
@@ -119,9 +121,9 @@ pipeline {
                     sh 'kubectl apply -f k8s/monitoring/'
                     sh '''
                         echo "Waiting for pods to be ready..."
-                        kubectl rollout status deployment/eureka-server   -n nexlance --timeout=120s || true
-                        kubectl rollout status deployment/api-gateway      -n nexlance --timeout=120s || true
-                        kubectl rollout status deployment/frontend         -n nexlance --timeout=120s || true
+                        kubectl rollout status deployment/eureka-server -n nexlance --timeout=120s || true
+                        kubectl rollout status deployment/api-gateway    -n nexlance --timeout=120s || true
+                        kubectl rollout status deployment/frontend        -n nexlance --timeout=120s || true
                     '''
                 }
             }
@@ -138,12 +140,11 @@ pipeline {
                 sh 'curl -f http://localhost:30420 || echo "Frontend (K3s NodePort) not ready yet"'
             }
         }
-
     }
 
     post {
         success {
-            echo '✅ NexLance pipeline OK | Docker→4200/8080/8761 | K3s NodePorts→30420/30080/30761 | SonarQube→9001 | Grafana→3000 | Prometheus→9093'
+            echo '✅ NexLance pipeline OK | Docker→4200/8080/8761 | K3s→30420/30080/30761 | SonarQube→9001 | Grafana→3000'
         }
         failure {
             echo '❌ Build échoué. Vérifier le Console Output Jenkins.'
