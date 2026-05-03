@@ -7,7 +7,6 @@ pipeline {
 
     environment {
         JAVA_HOME = '/opt/java/openjdk'
-        PATH = "/opt/java/openjdk/bin:${env.PATH}"
         K3S_IMAGES = 'img-eureka img-config-server img-gateway img-user img-complaint img-contrat img-evaluation img-joboffer img-certification img-portfolio img-competence img-notification img-organization img-projects img-recommendation img-nexlance-front img-prometheus'
     }
 
@@ -22,7 +21,7 @@ pipeline {
         stage('Step 2: Maven Build All Microservices') {
             steps {
                 dir('backend') {
-                    sh 'mvn clean install -Dmaven.test.skip=true'
+                    sh 'export JAVA_HOME=/opt/java/openjdk && export PATH=$JAVA_HOME/bin:$PATH && mvn clean install -Dmaven.test.skip=true'
                 }
             }
         }
