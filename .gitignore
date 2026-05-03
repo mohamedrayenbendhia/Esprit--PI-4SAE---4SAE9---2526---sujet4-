@@ -1,6 +1,3 @@
-# Claude Code local files
-.claude/
-
 # Maven build output
 **/target/
 **/target
