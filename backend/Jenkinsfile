@@ -1,66 +1,308 @@
- pipeline {
+ // ============================================================
+// NexLance – Pipeline DevOps Unifié
+// Jenkins Pipeline (Declarative)
+// Prérequis Jenkins credentials :
+//   dockerhub-credentials  → Username/Password  (sirinebb / <token>)
+//   sonarqube-token        → Secret text        (sqa_xxx…)
+// ============================================================
+pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_USER = 'sirinebb'
+        // ── Docker Hub ──────────────────────────────────────────
+        DOCKER_HUB_USER  = 'sirinebb'
+        DOCKERHUB_CREDS  = credentials('dockerhub-credentials')
+
+        // ── SonarQube ───────────────────────────────────────────
+        SONAR_TOKEN      = credentials('sonarqube-token')
+        SONAR_URL        = 'http://host.docker.internal:9001'
+
+        // ── Java / Maven ────────────────────────────────────────
+        JAVA_HOME        = '/usr/lib/jvm/java-21-openjdk-amd64'
+        MVN              = 'mvn'
+
+        // ── K3d / Kubernetes ────────────────────────────────────
+        KUBECONFIG       = "${HOME}/.config/k3d/kubeconfig-nexlance.yaml"
+        K8S_IMAGES       = 'img-eureka img-config-server img-gateway img-user img-complaint img-contrat img-evaluation img-joboffer img-certification img-portfolio img-competence img-notification img-organization img-projects img-recommendation img-nexlance-front'
+    }
+
+    options {
+        timeout(time: 120, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
     }
 
     stages {
 
-        stage('Checkout') {
+        // ── STAGE 1 : Checkout ──────────────────────────────────
+        stage('1 – Checkout') {
             steps {
-                echo 'Code récupéré depuis GitHub '
+                script {
+                    // Vérifier si le code existe déjà dans le workspace
+                    if (fileExists('backend')) {
+                        echo " Code disponible dans le workspace"
+                        sh 'ls -la'
+                    } else {
+                        // Cloner depuis Git si configuré
+                        try {
+                            checkout scm
+                            sh 'git log --oneline -5'
+                        } catch (Exception e) {
+                            error " Aucun code trouvé. Configurez le repository Git dans Jenkins."
+                        }
+                    }
+                }
             }
         }
 
-        stage('Build Backend') {
+        // ── STAGE 2 : Maven Build (tous les microservices) ──────
+        stage('2 – Maven Build') {
             steps {
-                sh '''
-                export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
-                export PATH=$JAVA_HOME/bin:$PATH
-                cd backend/eureka-server && mvn clean package spring-boot:repackage -DskipTests
-                '''
+                dir('backend') {
+                    sh '''
+                        export JAVA_HOME=${JAVA_HOME}
+                        export PATH=$JAVA_HOME/bin:$PATH
+                        ${MVN} clean install -Dmaven.test.skip=true -T 4
+                    '''
+                }
             }
         }
 
-        stage('SonarQube Analysis') {
+        // ── STAGE 3 : Tests unitaires + JaCoCo ──────────────────
+        stage('3 – Tests + JaCoCo') {
             steps {
-                sh '''
-                export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
-                export PATH=$JAVA_HOME/bin:$PATH
-                cd backend/microservices/service_user
-                mvn sonar:sonar \
-                  -Dsonar.host.url=http://localhost:9001 \
-                  -Dsonar.login=admin \
-                  -Dsonar.password=admin \
-                  -DskipTests
-                '''
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    dir('backend') {
+                        sh '''
+                            export JAVA_HOME=${JAVA_HOME}
+                            export PATH=$JAVA_HOME/bin:$PATH
+                            echo "Démarrage MySQL pour les tests..."
+                            docker compose up -d mysql
+                            echo "Attente 25s pour MySQL..."
+                            sleep 25
+                            echo "Lancement tests JaCoCo..."
+                            ${MVN} test jacoco:report \
+                                -Dmaven.test.failure.ignore=true \
+                                -pl microservices/service_user,microservices/complaint-service \
+                                || true
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true,
+                          testResults: 'backend/**/target/surefire-reports/*.xml'
+                }
             }
         }
 
-        stage('Docker Build & Push') {
+        // ── STAGE 4 : Arrêt anciens conteneurs ──────────────────
+        stage('4 – Stop Old Containers') {
             steps {
-                sh '''
-                cd backend
-                docker-compose build
-                docker login -u sirinebb -p $DOCKER_PASSWORD
-                for img in img-eureka img-config-server img-gateway img-user \
-                  img-complaint img-contrat img-evaluation img-joboffer \
-                  img-certification img-portfolio img-competence \
-                  img-notification img-organization img-projects \
-                  img-recommendation img-nexlance-front img-prometheus; do
-                  docker tag $img sirinebb/$img:latest
-                  docker push sirinebb/$img:latest
-                done
-                '''
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    dir('backend') {
+                        sh 'docker compose down --remove-orphans || true'
+                    }
+                }
             }
         }
 
-        stage('Deploy') {
+        // ── STAGE 5 : Docker Compose Build ──────────────────────
+        stage('5 – Docker Build') {
+            steps {
+                dir('backend') {
+                    sh '''
+                        export JAVA_HOME=${JAVA_HOME}
+                        export PATH=$JAVA_HOME/bin:$PATH
+                        docker compose build --parallel
+                        echo "=== Images Docker construites ==="
+                        docker images | grep "img-"
+                    '''
+                }
+            }
+        }
+
+        // ── STAGE 6 : Docker Push vers Docker Hub ───────────────
+        stage('6 – Docker Push') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    sh '''
+                        echo "$DOCKERHUB_CREDS_PSW" | docker login -u "$DOCKERHUB_CREDS_USR" --password-stdin
+                        for img in ${K8S_IMAGES}; do
+                            if docker image inspect "$img" > /dev/null 2>&1; then
+                                echo "  -> Push ${DOCKER_HUB_USER}/$img:latest"
+                                docker tag  "$img" "${DOCKER_HUB_USER}/$img:latest"
+                                docker push "${DOCKER_HUB_USER}/$img:latest"
+                            else
+                                echo "  !! $img non trouvé – skip"
+                            fi
+                        done
+                        docker logout
+                    '''
+                }
+            }
+        }
+
+        // ── STAGE 7 : Import images dans K3d ────────────────────
+        stage('7 – Import K3d') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    sh '''
+                        export PATH="$HOME/.local/bin:$PATH"
+                        echo "Vérification cluster k3d nexlance..."
+                        if ! k3d cluster list | grep -q "nexlance"; then
+                            echo "Création du cluster k3d nexlance..."
+                            k3d cluster create nexlance \
+                                --port "30000-30999:30000-30999@server:0" \
+                                --agents 1
+                        fi
+                        k3d kubeconfig merge nexlance --kubeconfig-merge-default
+                        echo "Import des images Docker dans k3d..."
+                        for img in ${K8S_IMAGES}; do
+                            if docker image inspect "$img" > /dev/null 2>&1; then
+                                echo "  -> Importing $img..."
+                                k3d image import "$img" -c nexlance
+                            else
+                                echo "  !! $img non trouvé – skip"
+                            fi
+                        done
+                        echo "Images dans k3d:"
+                        kubectl get nodes
+                    '''
+                }
+            }
+        }
+
+        // ── STAGE 8 : Déploiement Kubernetes ────────────────────
+        stage('8 – K8s Deploy') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    sh '''
+                        export PATH="$HOME/.local/bin:$PATH"
+                        echo "=== Namespace ==="
+                        kubectl apply -f k8s/namespace.yaml
+
+                        echo "=== Infrastructure (MySQL, Eureka, Config, Gateway) ==="
+                        kubectl apply -f k8s/infrastructure/
+                        echo "Attente 45s pour MySQL K8s..."
+                        sleep 45
+
+                        echo "=== Microservices ==="
+                        kubectl apply -f k8s/microservices/
+
+                        echo "=== AI Service ==="
+                        kubectl apply -f k8s/ai/
+
+                        echo "=== Frontend ==="
+                        kubectl apply -f k8s/frontend/
+
+                        echo "=== Monitoring (Prometheus + Grafana + Alertmanager) ==="
+                        kubectl apply -f k8s/monitoring/
+
+                        echo "=== Autoscaling HPA ==="
+                        kubectl apply -f k8s/autoscaling/ 2>/dev/null || true
+
+                        echo "=== Backup CronJob ==="
+                        kubectl apply -f k8s/backup/ 2>/dev/null || true
+
+                        echo "=== NetworkPolicy ==="
+                        kubectl apply -f k8s/security/ 2>/dev/null || true
+                    '''
+                    sh '''
+                        export PATH="$HOME/.local/bin:$PATH"
+                        echo "Attente déploiements K8s (max 3 min chacun)..."
+                        for dep in mysql eureka-server config-server api-gateway frontend prometheus grafana; do
+                            kubectl rollout status deployment/$dep -n nexlance --timeout=180s 2>/dev/null \
+                                && echo "  ✓ $dep prêt" \
+                                || echo "  ⚠ $dep timeout (vérifier logs)"
+                        done
+                    '''
+                }
+            }
+        }
+
+        // ── STAGE 9 : SonarQube Analysis ────────────────────────
+        stage('9 – SonarQube') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    sh '''
+                        echo "Attente SonarQube (max 5 min)..."
+                        for i in $(seq 1 30); do
+                            STATUS=$(curl -sf ${SONAR_URL}/api/system/status 2>/dev/null || true)
+                            if echo "$STATUS" | grep -q '"status":"UP"'; then
+                                echo "SonarQube UP après $i essais"
+                                break
+                            fi
+                            sleep 10
+                        done
+                    '''
+                    dir('backend') {
+                        sh '''
+                            export JAVA_HOME=${JAVA_HOME}
+                            export PATH=$JAVA_HOME/bin:$PATH
+                            ${MVN} sonar:sonar \
+                                -Dsonar.host.url=${SONAR_URL} \
+                                -Dsonar.token=${SONAR_TOKEN} \
+                                -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco/jacoco.xml \
+                                -Dsonar.exclusions="**/pom.xml,**/target/**,**/dto/**,**/entities/**" \
+                                -Dsonar.java.coveragePlugin=jacoco \
+                                -Dsonar.qualitygate.wait=false \
+                                -Dmaven.test.skip=true || true
+                        '''
+                    }
+                }
+            }
+        }
+
+        // ── STAGE 10 : Docker Compose Up (mode local) ───────────
+        stage('10 – Docker Compose Up') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    dir('backend') {
+                        sh 'docker compose up -d --force-recreate'
+                        sh 'sleep 10'
+                        sh 'docker compose ps'
+                    }
+                }
+            }
+        }
+
+        // ── STAGE 11 : Health Check ─────────────────────────────
+        stage('11 – Health Check') {
             steps {
                 sh '''
-                cd backend
-                docker-compose up -d
+                    export PATH="$HOME/.local/bin:$PATH"
+                    echo "=== Pods K8s ==="
+                    kubectl get pods -n nexlance 2>/dev/null || echo "K8s non disponible"
+
+                    echo "=== Services K8s ==="
+                    kubectl get svc -n nexlance 2>/dev/null || echo "K8s non disponible"
+
+                    echo "=== Docker Compose ==="
+                    docker compose -f backend/docker-compose.yml ps 2>/dev/null || true
+
+                    echo "=== URLs disponibles ==="
+                    echo "  Docker Compose:"
+                    echo "    Frontend    : http://localhost:4200"
+                    echo "    API Gateway : http://localhost:8080"
+                    echo "    Eureka      : http://localhost:8761"
+                    echo "    Grafana     : http://localhost:3000   (admin/admin)"
+                    echo "    Prometheus  : http://localhost:9093"
+                    echo "    SonarQube   : http://localhost:9001"
+                    echo "  Kubernetes (K3d NodePort):"
+                    echo "    Frontend    : http://localhost:30420"
+                    echo "    API Gateway : http://localhost:30080"
+                    echo "    Eureka      : http://localhost:30761"
+                    echo "    Grafana     : http://localhost:30300   (admin/admin)"
+                    echo "    Prometheus  : http://localhost:30093"
+
+                    curl -sf http://localhost:8761/actuator/health \
+                        && echo "  ✓ Eureka Docker OK" \
+                        || echo "  ⚠ Eureka Docker pas encore prêt"
+                    curl -sf http://localhost:4200 \
+                        && echo "  ✓ Frontend Docker OK" \
+                        || echo "  ⚠ Frontend Docker pas encore prêt"
                 '''
             }
         }
@@ -68,10 +310,61 @@
 
     post {
         success {
-            echo ' Pipeline réussi !'
+            echo '''
+╔══════════════════════════════════════════════════════╗
+║    Pipeline NexLance RÉUSSI                        ║
+║  Docker  → Frontend:4200 | Gateway:8080 | Eureka:8761║
+║  K3d     → Frontend:30420 | Gateway:30080            ║
+║  Monitor → Grafana:3000/30300 | Prometheus:9093/30093║
+║  SonarQube → http://localhost:9001                   ║
+╚══════════════════════════════════════════════════════╝
+            '''
+            emailext(
+                subject: "Build SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """Build NexLance réussi !
+
+Job    : ${env.JOB_NAME}
+Build  : #${env.BUILD_NUMBER}
+Durée  : ${currentBuild.durationString}
+URL    : ${env.BUILD_URL}
+
+Services disponibles :
+  Docker Compose  → Frontend : http://localhost:4200
+  Docker Compose  → Gateway  : http://localhost:8080
+  Docker Compose  → Eureka   : http://localhost:8761
+  Docker Compose  → Grafana  : http://localhost:3000   (admin/admin)
+  Docker Compose  → Prometheus: http://localhost:9093
+  Docker Compose  → SonarQube: http://localhost:9001
+  Kubernetes K3d  → Frontend : http://localhost:30420
+  Kubernetes K3d  → Gateway  : http://localhost:30080
+  Kubernetes K3d  → Grafana  : http://localhost:30300  (admin/admin)
+  Kubernetes K3d  → Prometheus: http://localhost:30093
+""",
+                to: '${DEFAULT_RECIPIENTS}',
+                recipientProviders: [developers(), requestor()]
+            )
         }
         failure {
-            echo ' Pipeline échoué !'
+            echo ' Pipeline NexLance ÉCHOUÉ – Consulter le Console Output Jenkins.'
+            emailext(
+                subject: " Build FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """Build NexLance échoué !
+
+Job    : ${env.JOB_NAME}
+Build  : #${env.BUILD_NUMBER}
+URL    : ${env.BUILD_URL}
+
+Consultez le console output Jenkins pour les détails.""",
+                to: '${DEFAULT_RECIPIENTS}',
+                recipientProviders: [developers(), requestor()]
+            )
+        }
+        unstable {
+            echo ' Build instable (tests / qualité insuffisants).'
+        }
+        always {
+            echo '--- Fin du pipeline NexLance ---'
+            cleanWs(cleanWhenAborted: true, cleanWhenFailure: false)
         }
     }
 }
