@@ -6,7 +6,6 @@ pipeline {
         JAVA_HOME       = '/usr/lib/jvm/java-21-openjdk-amd64'
         MAVEN_HOME      = '/opt/apache-maven-3.9.6'
         PATH            = '/opt/apache-maven-3.9.6/bin:/usr/lib/jvm/java-21-openjdk-amd64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-        PROJECT         = '/home/sirine_bechikh/Esprit--PI-4SAE---4SAE9---2526---sujet4-'
         SONAR_URL       = 'http://backend-sonarqube-1:9000'
         SONAR_TOKEN     = 'sqa_f0034fe1b237332688aaf63de633723232d72a7a'
     }
